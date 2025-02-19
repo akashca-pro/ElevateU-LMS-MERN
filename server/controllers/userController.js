@@ -84,7 +84,7 @@ export const loginUser = async (req,res) => {
             return res.status(401).json({message : "Incorrect password"});
         }
 
-        if(!user.isVerified)return res.status(403).json({message : "User is not verified"})
+        if(!user.isVerified)return res.status(401).json({message : "User is not verified"})
         
        const accessToken = generateAccessToken(user._id);
        const refreshToken = generateRefreshToken(user._id);

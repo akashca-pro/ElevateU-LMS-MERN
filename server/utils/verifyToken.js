@@ -8,7 +8,7 @@ export const verifyUserAccessToken = (req,res,next)=>{
     if(!userAccessToken) return res.status(403).json({ message: "Access Token Required" });
 
     jwt.verify(userAccessToken, process.env.JWT_SECRET, (error,decoded)=>{
-        if(error)res.status(403).json({message : "Invalid Token"})
+        if(error)return res.status(403).json({message : "Invalid Token"})
         req.user = decoded;
         next()
     })
@@ -19,7 +19,7 @@ export const verifyUserRefreshToken = (req,res,next)=>{
     if (!userRefreshToken) return res.status(403).json({ message: "Refresh Token Required" });
 
     jwt.verify(userRefreshToken, process.env.JWT_REFRESH, (error,decoded)=>{
-        if(error)res.status(403).json({message : "Invalid Refresh Token"})
+        if(error) return res.status(403).json({message : "Invalid Refresh Token"})
         req.user = decoded;
         next();
     })
@@ -32,7 +32,7 @@ export const verifyTutorAccessToken = (req,res,next)=>{
     if(!tutorAccessToken) return res.status(403).json({ message: "Access Token Required" });
 
     jwt.verify(tutorAccessToken, process.env.JWT_SECRET, (error,decoded)=>{
-        if(error)res.status(403).json({message : "Invalid Token"})
+        if(error) return res.status(403).json({message : "Invalid Token"})
         req.tutor = decoded;
         next()
     })
@@ -43,7 +43,7 @@ export const verifyTutorRefreshToken = (req,res,next)=>{
     if (!tutorRefreshToken) return res.status(403).json({ message: "Refresh Token Required" });
 
     jwt.verify(tutorRefreshToken, process.env.JWT_REFRESH, (error,decoded)=>{
-        if(error)res.status(403).json({message : "Invalid Refresh Token"})
+        if(error)return res.status(403).json({message : "Invalid Refresh Token"})
         req.tutor = decoded;
         next();
     })
@@ -56,7 +56,7 @@ export const verifyAdminAccessToken = (req,res,next)=>{
     if(!adminAccessToken) return res.status(403).json({ message: "Access Token Required" });
 
     jwt.verify(adminAccessToken, process.env.JWT_SECRET, (error,decoded)=>{
-        if(error)res.status(403).json({message : "Invalid Token"})
+        if(error)return res.status(403).json({message : "Invalid Token"})
         req.admin = decoded;
         next()
     })
@@ -67,7 +67,7 @@ export const verifyAdminRefreshToken = (req,res,next)=>{
     if (!adminRefreshToken) return res.status(403).json({ message: "Refresh Token Required" });
 
     jwt.verify(adminRefreshToken, process.env.JWT_REFRESH, (error,decoded)=>{
-        if(error)res.status(403).json({message : "Invalid Refresh Token"})
+        if(error)return res.status(403).json({message : "Invalid Refresh Token"})
         req.admin = decoded;
         next();
     })
