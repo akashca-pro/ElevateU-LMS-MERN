@@ -5,7 +5,7 @@ loadProfile,updateProfile
 
 import {verifyUserAccessToken,verifyUserRefreshToken} from '../utils/verifyToken.js'
 import {otpLimiter} from '../middleware/rateLimiting.js';
-import {retryVerifyUser} from '../middleware/retryVerify.js';
+import retryVerify from '../middleware/retryVerify.js';
 
 import { updateEmail, verifyEmail } from '../controllers/commonControllers.js';
 
@@ -17,7 +17,7 @@ router.post('/signup',registerUser)
 
 router.post('/verify-otp',otpLimiter,verifyOtp)
 
-router.post('/login',retryVerifyUser,loginUser)
+router.post('/login',retryVerify('user'),loginUser)
 
 router.post('/forgot-password',otpLimiter,forgotPassword)
 

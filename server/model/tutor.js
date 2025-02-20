@@ -71,6 +71,10 @@ const tutorSchema = mongoose.Schema({
     otpExpires :{
         type : Date
     },
+    verificationExpires : {
+        type : Date,
+        default : ()=> Date.now() + 10 * 60 * 1000 
+    },
     isBlocked : {
         type : Boolean,
     }

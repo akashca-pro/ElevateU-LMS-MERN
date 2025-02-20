@@ -2,9 +2,9 @@ import 'dotenv/config'
 import User from '../model/user.js'
 import bcrypt from 'bcryptjs'
 import {generateAccessToken,generateRefreshToken} from '../utils/generateToken.js'
-import generateOtp from '../utils/generateOtp.js'
+import { generateOtpCode, saveOtp } from '../utils/generateOtp.js'
 import {sendToken,clearToken} from '../utils/tokenManage.js'
-import {sendEmailResetPassword} from '../utils/sendEmail.js'
+import {sendEmailOTP, sendEmailResetPassword} from '../utils/sendEmail.js'
 import {randomInt} from 'node:crypto'
 
 
@@ -37,8 +37,12 @@ export const registerUser = async (req,res) => {
     
         await user.save();
 
-        await generateOtp('user',email);
-        
+        const {otp,otpExpires} = generateOtpCode();
+
+        await saveOtp('user',email,otp,otpExpires);
+
+        await sendEmailOTP(email,firstName,otp)
+
         return res.status(201).json({message : "otp sent to email"});
 
     } catch (error) {
@@ -54,17 +58,19 @@ export const registerUser = async (req,res) => {
 export const verifyOtp = async (req,res) => {
     
     try {
-        const {email,otp} = req.body;
+        const {otp} = req.body;
     
-        const user = await User.findOne({ email });
+        const user = await User.findOne({
+            otp , 
+            otpExpires : { $gt : Date.now() }
+        });
 
-         if(!user || user.otp !== otp || user.otpExpires < Date.now()){
-            return res.status(400).json({message : "Invalid otp or Expired otp"});
-        }
+        if(!user) return res.status(404).json({message : 'Invalid or expired OTP'})
 
         user.isVerified = true;
         user.otp = undefined;
         user.otpExpires = undefined;
+        user.verificationExpires = undefined;
         await user.save();
 
         return res.json({message : 'OTP verified successfully'});

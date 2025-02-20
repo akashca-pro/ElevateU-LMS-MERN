@@ -51,6 +51,10 @@ const userSchema  = new mongoose.Schema({
         type : String,
         expires : 600
     },
+    verificationExpires : {
+        type : Date,
+        default : ()=> Date.now() + 10 * 60 * 1000 
+    },
     otp : {
         type : String
     },

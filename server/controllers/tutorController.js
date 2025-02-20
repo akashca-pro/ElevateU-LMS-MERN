@@ -2,9 +2,9 @@ import 'dotenv/config'
 import Tutor from '../model/tutor.js'
 import bcrypt from 'bcryptjs'
 import {generateAccessToken,generateRefreshToken} from '../utils/generateToken.js'
-import generateOtp from '../utils/generateOtp.js'
+import { generateOtpCode, saveOtp } from '../utils/generateOtp.js'
 import {sendToken,clearToken} from '../utils/tokenManage.js'
-import {sendEmailResetPassword} from '../utils/sendEmail.js'
+import {sendEmailOTP, sendEmailResetPassword} from '../utils/sendEmail.js'
 import {randomInt} from 'node:crypto'
 
 // Tutor register with otp
@@ -31,9 +31,14 @@ export const registerTutor = async (req,res) => {
     
         await tutor.save();
 
-        await generateOtp('tutor',email);
+        // await generateOtp('tutor',email);
+        const {otp,otpExpires} = generateOtpCode();
+
+        await saveOtp('tutor',email,otp,otpExpires);
+
+        await sendEmailOTP(email,firstName,otp);
         
-        res.status(201).json({message : "otp sent to email"});
+        return res.status(201).json({message : "otp sent to email"});
 
     } catch (error) {
         console.log(error);
@@ -48,20 +53,22 @@ export const registerTutor = async (req,res) => {
 export const verifyOtp = async (req,res) => {
     
     try {
-        const {email,otp} = req.body;
+        const {otp} = req.body;
     
-        const tutor = await Tutor.findOne({ email });
+        const tutor = await Tutor.findOne({
+            otp , 
+            otpExpires : { $gt : Date.now() }
+        });
 
-         if(!tutor || tutor.otp !== otp || tutor.otpExpires < Date.now()){
-            return res.status(400).json({message : "Invalid otp or Expired otp"});
-        }
+         if(!tutor) return res.status(400).json({message : "Invalid or Expired OTP"});
 
         tutor.isVerified = true;
         tutor.otp = undefined;
         tutor.otpExpires = undefined;
+        tutor.verificationExpires = undefined;
         await tutor.save();
 
-        res.json({message : 'OTP verified successfully'});
+        return res.json({message : 'OTP verified successfully'});
 
     } catch (error) {
         console.log(error)
@@ -96,7 +103,7 @@ export const loginTutor = async (req,res) => {
         // Set refresh token as cookie (only if "Remember Me" is checked)
         if(rememberMe) sendToken(res,'tutorRefreshToken',refreshToken,7 * 24 * 60 * 60 * 1000);
     
-        res.status(200).json({message : "Login successfull"});
+        return res.status(200).json({message : "Login successfull"});
 
     } catch (error) {
         console.log(error)
@@ -126,7 +133,7 @@ export const forgotPassword = async (req,res) => {
 
         await sendEmailResetPassword(tutor.email,tutor.firstName,resetLink);
 
-        res.status(200).json({message : 'Password reset link sent to your email'})
+        return res.status(200).json({message : 'Password reset link sent to your email'})
         
     } catch (error) {
         console.log('from forgotpassword controller',error);
@@ -159,7 +166,7 @@ export const verifyResetLink = async (req,res) => {
 
         await tutor.save();
 
-        res.status(200).json({ message: 'Password reset successful Redirecting to login' });
+        return res.status(200).json({ message: 'Password reset successful Redirecting to login' });
 
     } catch (error) {
         console.log('from verifyResetLink',error);
@@ -178,7 +185,7 @@ export const refreshToken = async (req,res) => {
 
         sendToken(res,'tutorAccessToken',newAccessToken,1 * 24 * 60 * 60 * 1000)
     
-        res.status(200).json({message : "Refresh Token Issued"})
+        return res.status(200).json({message : "Refresh Token Issued"})
 
     } catch (error) {
         console.log(error);
@@ -194,7 +201,7 @@ export const logoutTutor = async (req,res) => {
     try {
 
         clearToken(res,'tutorAccessToken','tutorRefreshToken');
-        res.json({ message: "Logged out successfully" });
+        return res.json({ message: "Logged out successfully" });
 
     } catch (error) {
         
@@ -216,7 +223,7 @@ export const loadProfile = async (req,res) => {
 
         if(!tutorData)return res.status(404).json({message : 'user not found'})
 
-        res.status(200).json(tutorData);
+        return res.status(200).json(tutorData);
 
     } catch (error) {
         console.log('Error loading user profile');
