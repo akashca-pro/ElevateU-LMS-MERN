@@ -39,7 +39,7 @@ export const registerUser = async (req,res) => {
 
         await generateOtp('user',email);
         
-        res.status(201).json({message : "otp sent to email"});
+        return res.status(201).json({message : "otp sent to email"});
 
     } catch (error) {
         console.log(error);
@@ -67,7 +67,7 @@ export const verifyOtp = async (req,res) => {
         user.otpExpires = undefined;
         await user.save();
 
-        res.json({message : 'OTP verified successfully'});
+        return res.json({message : 'OTP verified successfully'});
 
     } catch (error) {
         console.log(error)
@@ -165,7 +165,7 @@ export const verifyResetLink = async (req,res) => {
 
         await user.save();
 
-        res.status(200).json({ message: 'Password reset successful Redirecting to login' });
+        return res.status(200).json({ message: 'Password reset successful Redirecting to login' });
 
     } catch (error) {
         console.log('from verifyResetLink',error);
@@ -184,7 +184,7 @@ export const refreshToken = async (req,res) => {
 
         sendToken(res,'userAccessToken',newAccessToken,1 * 24 * 60 * 60 * 1000)
     
-        res.status(200).json({message : "Refresh Token Issued"})
+        return res.status(200).json({message : "Refresh Token Issued"})
 
     } catch (error) {
         console.log(error);
@@ -200,7 +200,7 @@ export const logoutUser = async (req,res) => {
     try {
 
         clearToken(res,'userAccessToken','userRefreshToken');
-        res.json({ message: "Logged out successfully" });
+        return res.json({ message: "Logged out successfully" });
 
     } catch (error) {
         
@@ -217,23 +217,45 @@ export const loadProfile = async (req,res) => {
     
     try {
         const user_ID = req.params.id 
-        const userData = await User.findById(user_ID)
+        const userData = await User.findById(user_ID,'email firstName lastName profileImage bio socialLinks phone')
 
         if(!userData)return res.status(404).json({message : 'user not found'})
 
-        res.status(200).json({
-            email : userData.email,
-            firstName : userData.firstName,
-            lastName : userData.lastName,
-            phone : userData.phone,
-            profileImage : userData.profileImage,
-            bio : userData.bio,
-            socialLinks : userData.socialLinks
-        })
+        return res.status(200).json(userData)
 
     } catch (error) {
         console.log('Error loading user profile');
         res.status(500).json({ message: 'Error loading user profile', error: error.message });
+    }
+
+}
+
+// Update profile
+
+export const updateProfile = async (req,res) => {
+    
+    try {
+        const user_ID = req.params.id;
+        const user = await User.findById(user_ID)
+        if(!user) return res.status(404).json({message : 'user not found'});
+
+        const {firstName, lastName, profileImage, phone, bio, socialLinks } = req.body;
+
+        const updatedData = await User.findByIdAndUpdate(user_ID , {
+            firstName,
+            lastName,
+            profileImage,
+            phone,
+            bio,
+            socialLinks
+        } , {new : true })
+        .select('firstName lastName profileImage phone bio socialLinks')
+
+        return res.status(200).json(updatedData)
+
+    } catch (error) {
+        console.log('Error updating user profile');
+        res.status(500).json({ message: 'Error updating user profile', error: error.message });
     }
 
 }

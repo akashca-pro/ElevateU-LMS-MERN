@@ -14,51 +14,48 @@ const baseQuery = fetchBaseQuery({
 
 // Enhanced base query to handle token refresh
 const baseQueryWithReauth = async (args, api, extraOptions) => {
-    let result = await baseQuery(args, api, extraOptions); // Step 1: Make the original request
-  
-    // If 401 Unauthorized, attempt token refresh
-    if (result.error && result.error.status === 401) {
-      console.log('Token expired, attempting refresh...');
-  
-      // Detect user role from Redux state
-      const state = api.getState();
-      let refreshUrl = '';
-  
-      if (state.adminAuth?.isAuthenticated) {
-        refreshUrl = 'admin/refresh-token';
-      } else if (state.tutorAuth?.isAuthenticated) {
-        refreshUrl = 'tutor/refresh-token';
-      } else if (state.userAuth?.isAuthenticated) {
-        refreshUrl = 'user/refresh-token';
-      } else {
-        console.log('No authenticated user, logging out...');
-        api.dispatch(userLogout());
-        return result;
-      }
-  
-      console.log(`Calling refresh token endpoint: ${refreshUrl}`);
-      
-      // Attempt to refresh the token
-      const refreshResult = await baseQuery(`/${refreshUrl}`, api, extraOptions);
-  
-      if (refreshResult.data) {
-        console.log('Token refreshed, retrying original request...');
-        return await baseQuery(args, api, extraOptions); // Step 3: Retry the original request
-      } else {
-        console.log('Refresh failed, logging out...');
-        if (state.adminAuth?.isAuthenticated) {
-          api.dispatch(adminLogout());                 // here redux automatically finds the right slice ,each reducer is under one register and have unique keys for each reducer 
-        } else if (state.tutorAuth?.isAuthenticated) {
-          api.dispatch(tutorLogout());
-        } else {
-          api.dispatch(userLogout());
-        }
-      }
-    }
-  
-    return result; // Return the original response (either success or failure)
-  };
+  let result = await baseQuery(args, api, extraOptions);
 
+  if (result.error && result.error.status === 401) {
+      console.log(' Token expired, attempting refresh...');
+
+      const state = api.getState();
+      let refreshResults = {};
+
+      // Collect all active roles
+      const roles = [];
+      if (state.adminAuth?.isAuthenticated) roles.push({ role: "admin", url: "admin/refresh-token" });
+      if (state.tutorAuth?.isAuthenticated) roles.push({ role: "tutor", url: "tutor/refresh-token" });
+      if (state.userAuth?.isAuthenticated) roles.push({ role: "user", url: "user/refresh-token" });
+
+      if (roles.length === 0) {
+          console.log(' No authenticated user, logging out...');
+          api.dispatch(userLogout());
+          return result;
+      }
+
+      // Refresh tokens for all active roles
+      for (const { role, url } of roles) {
+          console.log(` Refreshing token for ${role}: ${url}`);
+          refreshResults[role] = await baseQuery(`/${url}`, api, extraOptions);
+      }
+
+      // Check if any refresh request succeeded
+      const successfulRefresh = Object.entries(refreshResults).some(([role, res]) => res.data);
+
+      if (successfulRefresh) {
+          console.log(' At least one token refreshed, retrying original request...');
+          return await baseQuery(args, api, extraOptions); // Retry the original request
+      } else {
+          console.log(' Refresh failed for all roles, logging out...');
+          if (state.adminAuth?.isAuthenticated) api.dispatch(adminLogout());
+          if (state.tutorAuth?.isAuthenticated) api.dispatch(tutorLogout());
+          if (state.userAuth?.isAuthenticated) api.dispatch(userLogout());
+      }
+  }
+
+  return result;
+};
 
 
 export const apiSlice = createApi({

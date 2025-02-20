@@ -1,11 +1,17 @@
 import express from 'express'
-import {registerTutor,verifyOtp,loginTutor,logoutTutor,refreshToken,forgotPassword,verifyResetLink} from '../controllers/tutorController.js'
+import {registerTutor,verifyOtp,loginTutor,logoutTutor,refreshToken,forgotPassword,verifyResetLink,
+loadProfile,updateProfile
+} from '../controllers/tutorController.js'
+
 import {verifyTutorAccessToken,verifyTutorRefreshToken} from '../utils/verifyToken.js'
 import {otpLimiter} from '../middleware/rateLimiting.js';
 import {retryVerifyTutor} from '../middleware/retryVerify.js';
 
+import { updateEmail, verifyEmail } from '../controllers/commonControllers.js';
+
 const router = express.Router()
 
+// Auth routes
 
 router.post('/signup',registerTutor)
 
@@ -21,6 +27,14 @@ router.post('/logout',logoutTutor)
 
 router.post('/refresh-token',verifyTutorRefreshToken,refreshToken)
 
+// CRUD routes
 
+router.get('/profile/:id',verifyTutorAccessToken,loadProfile)
+
+router.post('/update-email/:id',otpLimiter,verifyTutorAccessToken,updateEmail('tutor'))
+
+router.post('/verify-email',verifyTutorAccessToken,verifyEmail('tutor'))
+
+router.post('/update-profile/:id',verifyTutorAccessToken,updateProfile)
 
 export default router

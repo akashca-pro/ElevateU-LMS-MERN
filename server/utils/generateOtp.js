@@ -25,7 +25,7 @@ const generateOtp = async (role, email) => {
 
     if (!sendMail) {
       await db.findOneAndDelete({ email: record.email });
-      throw new Error("Invalid Email");
+      throw new Error("Invalid Email or Sending otp failed");
     }
 
   } catch (error) {
@@ -35,3 +35,28 @@ const generateOtp = async (role, email) => {
 };
 
 export default generateOtp;
+
+export const generateOtpCode = () => {
+
+  const otp = randomInt(100000, 999999).toString();
+  const otpExpires = Date.now() + 10 * 60 * 1000;
+
+  return {otp , otpExpires}
+}
+
+export const saveOtp = async (role,email,otp,otpExpires) => {
+
+      const db = role === 'user' ? User : Tutor;
+
+      const record = await db.findOneAndUpdate(
+        { email },
+        { otp, otpExpires },
+        { new: true } 
+      );
+
+      if (!record) {
+        throw new Error('User not found');
+      }
+
+    return true
+}

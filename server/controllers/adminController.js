@@ -25,7 +25,7 @@ export const registerAdmin = async (req,res) => {
 
         await admin.save();
 
-        res.status(200).json({message : 'Admin registration successfull'});
+        return res.status(200).json({message : 'Admin registration successfull'});
 
     } catch (error) {
         console.log(error);
@@ -56,7 +56,7 @@ export const loginAdmin = async (req,res) => {
 
         if(rememberMe) sendToken(res,'adminRefreshToken',refreshToken,7 * 24 * 60 * 60 * 1000);
 
-        res.status(200).json({message : 'admin login successfull'});
+        return res.status(200).json({message : 'admin login successfull'});
 
     } catch (error) {
         console.log(error)
@@ -74,7 +74,7 @@ export const refreshToken = async (req,res) => {
 
         sendToken(res,'adminAccessToken',newAccessToken,1 * 24 * 60 * 60 * 1000)
     
-        res.status(200).json({message : "Refresh Token Issued"})
+        return res.status(200).json({message : "Refresh Token Issued"})
 
     } catch (error) {
         console.log(error);
@@ -89,7 +89,7 @@ export const logoutAdmin = async (req,res) => {
     try {
 
         clearToken(res,'adminAccessToken','adminRefreshToken');
-        res.json({ message: "Logged out successfully" });
+        return res.json({ message: "Logged out successfully" });
 
     } catch (error) {
         
@@ -98,4 +98,56 @@ export const logoutAdmin = async (req,res) => {
 
     }
     
+}
+
+// view profile
+
+export const loadProfile = async (req,res) =>{
+
+    try {
+        const admin_ID = req.params.id;
+
+        const adminData = await Admin.findById(admin_ID);
+
+        if(!adminData) return res.status(404).json({message : 'admin data is not found'})
+
+        return res.status(200).json({
+            email : adminData.email,
+            firstName : adminData.firstName,
+            lastName : adminData.lastName,
+            profileImage : adminData.profileImage
+        })
+        
+    } catch (error) {
+        console.log('Error loading admin profile');
+        res.status(500).json({ message: 'Error loading admin profile', error: error.message });
+    }    
+
+}
+
+// update profile
+
+export const updateProfile = async (req,res) => {
+    
+    try {
+        const admin_ID = req.params.id
+        const admin = await Admin.findById(admin_ID)
+        if(!admin)return res.status(404).json({message : 'admin details not found'});
+
+        const {email, firstName, lastName, profileImage} = req.body
+
+        const updatedData = await Admin.findByIdAndUpdate(admin_ID,{
+            email,
+            firstName,
+            lastName,
+            profileImage
+        },{new : true}).select('email firstName lastName profileName')
+
+        return res.status(200).json(updatedData)
+
+    } catch (error) {
+        console.log('Error updating admin profile');
+        res.status(500).json({ message: 'Error updating admin profile', error: error.message });
+    }
+
 }

@@ -26,6 +26,9 @@ const tutorSchema = mongoose.Schema({
         type: String,
         trim: true,
     },
+    phone : {
+        type : String
+    },
     googleID : {
         type : String  
     },
@@ -36,6 +39,9 @@ const tutorSchema = mongoose.Schema({
     bio : {
         type : String,
         trim : true
+    },
+    socialLinks :{
+        type : [String] 
     },
     expertise: {
         type: [String], // Example: ["Web Development", "Machine Learning"]
@@ -54,6 +60,10 @@ const tutorSchema = mongoose.Schema({
     adminVerified : {
         type : Boolean,
         default : false
+    },
+    tempMail :{
+        type : String,
+        expires : 600
     },
     otp : {
         type : String
