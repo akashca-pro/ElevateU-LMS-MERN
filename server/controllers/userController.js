@@ -4,6 +4,8 @@ import bcrypt from 'bcryptjs'
 import {generateAccessToken,generateRefreshToken} from '../utils/generateToken.js'
 import generateOtp from '../utils/generateOtp.js'
 import {sendToken,clearToken} from '../utils/tokenManage.js'
+import {sendEmailResetPassword} from '../utils/sendEmail.js'
+import {randomInt} from 'node:crypto'
 
 
 // User Registration with OTP
@@ -12,8 +14,8 @@ export const registerUser = async (req,res) => {
     
     try {
 
-        const { email , password ,
-            firstName  } = req.body;
+        const { email, password ,
+            firstName, lastName, phone, profileImage, bio, socialLinks } = req.body;
     
         const userExists = await User.findOne({email : email});
     
@@ -26,6 +28,11 @@ export const registerUser = async (req,res) => {
             email,
             password : hashedPassword, 
             firstName,
+            lastName,
+            phone,
+            profileImage,
+            bio,
+            socialLinks
         });
     
         await user.save();
@@ -104,6 +111,69 @@ export const loginUser = async (req,res) => {
 
 }
 
+//reset link generating for password reset
+
+export const forgotPassword = async (req,res) => {
+    
+    try {
+        const {email} = req.body;
+        const emailExist = await User.findOne({email})
+
+        if(!emailExist)return res.status(404).json({message : 'user not found'});
+
+        const resetToken = randomInt(100000, 999999).toString();
+        const resetTokenExpires = Date.now() + 10 * 60 * 1000;
+
+        const user = await User.findOneAndUpdate({email}, 
+            {otp : resetToken,
+            otpExpires : resetTokenExpires} ,{new : true})
+
+        const resetLink = `http://localhost:9000/api/user/reset-password?token=${resetToken}`
+
+        await sendEmailResetPassword(user.email,user.firstName,resetLink);
+
+        res.status(200).json({message : 'Password reset link sent to your email'})
+        
+    } catch (error) {
+        console.log('from forgotpassword controller',error);
+        res.status(500).json({ message: 'Error sending email', error: error.message });
+    }
+
+}
+
+// verify the resetPassword token and create new password
+
+export const verifyResetLink = async (req,res) => {
+    
+    try {
+        const token = req.query.token;
+        const { newPassword } = req.body;
+
+        const user = await User.findOne({
+            otp : token , 
+            otpExpires : { $gt : Date.now() }
+        });
+
+        if(!user) return res.status(400).json({message : 'Invalid or expired token'})
+
+        const hashedPassword = await bcrypt.hash(newPassword,10);
+
+        if(!user.isVerified) user.isVerified = true
+        user.password = hashedPassword;
+        user.otp = undefined;
+        user.otpExpires = undefined;
+
+        await user.save();
+
+        res.status(200).json({ message: 'Password reset successful Redirecting to login' });
+
+    } catch (error) {
+        console.log('from verifyResetLink',error);
+        res.status(500).json({message : 'Reset link verification failed'});
+    }
+
+}
+
 // Refresh Token End point (Reissue Access Token)
 
 export const refreshToken = async (req,res) => {
@@ -139,4 +209,31 @@ export const logoutUser = async (req,res) => {
 
     }
     
+}
+
+// View Profile
+
+export const loadProfile = async (req,res) => {
+    
+    try {
+        const user_ID = req.params.id 
+        const userData = await User.findById(user_ID)
+
+        if(!userData)return res.status(404).json({message : 'user not found'})
+
+        res.status(200).json({
+            email : userData.email,
+            firstName : userData.firstName,
+            lastName : userData.lastName,
+            phone : userData.phone,
+            profileImage : userData.profileImage,
+            bio : userData.bio,
+            socialLinks : userData.socialLinks
+        })
+
+    } catch (error) {
+        console.log('Error loading user profile');
+        res.status(500).json({ message: 'Error loading user profile', error: error.message });
+    }
+
 }

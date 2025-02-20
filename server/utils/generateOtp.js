@@ -1,4 +1,4 @@
-import sendEmail from "./sendEmail.js";
+import {sendEmailOTP} from "./sendEmail.js";
 import User from "../model/user.js";
 import Tutor from "../model/tutor.js";
 import { randomInt } from 'node:crypto';
@@ -14,14 +14,15 @@ const generateOtp = async (role, email) => {
     const record = await db.findOneAndUpdate(
       { email },
       { otp, otpExpires },
-      { new: true }
+      { new: true } 
     );
 
     if (!record) {
       throw new Error('User not found');
     }
 
-    const sendMail = await sendEmail(record.email, record.firstName, otp);
+      const sendMail = await sendEmailOTP(record.email, record.firstName, otp);
+
     if (!sendMail) {
       await db.findOneAndDelete({ email: record.email });
       throw new Error("Invalid Email");

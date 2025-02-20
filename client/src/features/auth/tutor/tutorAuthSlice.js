@@ -16,6 +16,7 @@ const tutorAuthSlice = createSlice({
         tutorLogout : (state)=>{
             state.tutor = null;
             state.isAuthenticated = false;
+            window.location.href = '/tutor/login'
         }
     }
 })

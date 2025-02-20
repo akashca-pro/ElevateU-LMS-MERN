@@ -33,9 +33,15 @@ const userSchema  = new mongoose.Schema({
         type : String,
         default : ""
     },
+    phone : {
+        type : Number,
+    },
     bio : {
         type : String,
         trim : true
+    },
+    socialLinks : {
+        type : [String] // example ['http://instagram....','http://facebook...']
     },
     isVerified : {
         type : Boolean,

@@ -16,6 +16,7 @@ const userAuthSlice = createSlice({
         userLogout : (state)=>{
             state.user = null;
             state.isAuthenticated = false;
+            window.location.href = '/user/login'
         }
     }
 })

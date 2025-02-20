@@ -10,6 +10,7 @@ export const adminApi = apiSlice.injectEndpoints({
                 method : 'POST',
                 body : credentials,
             }),
+            invalidatesTags : ['Admin']
         }),
         adminLogin : builder.mutation({
             query : (credentials)=>({
@@ -17,20 +18,23 @@ export const adminApi = apiSlice.injectEndpoints({
                 method : 'POST',
                 body : credentials,
             }),
+            invalidatesTags : ['Admin']
         }),
         adminLogout : builder.mutation({
             query : ()=> ({
                 url : 'admin/logout',
                 method : 'POST',
             }),
+            invalidatesTags : ['Admin']
         }),
         adminRefreshToken : builder.mutation({
             query : (credentials)=>({
-                url : 'admin/refreshtoken',
+                url : 'admin/refresh-token',
                 method : 'POST',
                 body : credentials
-            })
-        })
+            }),
+            invalidatesTags : ['Admin']
+        }),
     })
 })
 

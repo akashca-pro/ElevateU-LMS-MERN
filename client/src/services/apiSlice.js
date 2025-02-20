@@ -17,7 +17,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
     let result = await baseQuery(args, api, extraOptions); // Step 1: Make the original request
   
     // If 401 Unauthorized, attempt token refresh
-    if (result.error && result.error.status === 403) {
+    if (result.error && result.error.status === 401) {
       console.log('Token expired, attempting refresh...');
   
       // Detect user role from Redux state
@@ -25,11 +25,11 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       let refreshUrl = '';
   
       if (state.adminAuth?.isAuthenticated) {
-        refreshUrl = 'admin/refreshtoken';
+        refreshUrl = 'admin/refresh-token';
       } else if (state.tutorAuth?.isAuthenticated) {
-        refreshUrl = 'tutor/refreshtoken';
+        refreshUrl = 'tutor/refresh-token';
       } else if (state.userAuth?.isAuthenticated) {
-        refreshUrl = 'user/refreshtoken';
+        refreshUrl = 'user/refresh-token';
       } else {
         console.log('No authenticated user, logging out...');
         api.dispatch(userLogout());
@@ -47,7 +47,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       } else {
         console.log('Refresh failed, logging out...');
         if (state.adminAuth?.isAuthenticated) {
-          api.dispatch(adminLogout());                 // here redux automatically finds the right slice ,each reducer is under one register this unique keys 
+          api.dispatch(adminLogout());                 // here redux automatically finds the right slice ,each reducer is under one register and have unique keys for each reducer 
         } else if (state.tutorAuth?.isAuthenticated) {
           api.dispatch(tutorLogout());
         } else {

@@ -11,7 +11,7 @@ export const retryVerifyUser = async (req, res, next) => {
         return next(); // Pass control to the next middleware or route handler
       }
   
-      generateOtp(email);
+      await generateOtp(email);
       // Call verifyOtp as a promise
       res.status(201).json({message : "otp sent to email"});
   
@@ -31,7 +31,7 @@ export const retryVerifyUser = async (req, res, next) => {
          return next(); // Pass control to the next middleware or route handler
       }
   
-      generateOtp('tutor',email);
+      await generateOtp('tutor',email);
       // Call verifyOtp as a promise
       res.status(201).json({message : "otp sent to email"});
   

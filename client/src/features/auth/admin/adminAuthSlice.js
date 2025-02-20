@@ -16,6 +16,7 @@ const adminAuthSlice = createSlice({
         adminLogout : (state)=>{
             state.admin = null;
             state.isAuthenticated = false;
+            window.location.href = '/admin/login'
         }
     }
 })

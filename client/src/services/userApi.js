@@ -9,33 +9,38 @@ const userApi = apiSlice.injectEndpoints({
                 url : 'user/signup',
                 method : 'POST',
                 body : credentials
-            }) 
+            }),
+            invalidatesTags : ['User']
         }),
         userVerifyOtp : builder.mutation({
             query : (credentials)=>({
                 url : 'user/verifyotp',
                 method : 'POST',
                 body : credentials
-            })
+            }),
+            invalidatesTags : ['User']
         }),
         userLogin : builder.mutation({
             query : (credentials)=>({
                 url : 'user/login',
                 method : 'POST',
                 body : credentials
-            })
+            }),
+            invalidatesTags : ['User']
         }),
         userLogout : builder.mutation({
             query : ()=>({
-                url : 'user/verifyotp',
+                url : 'user/logout',
                 method : 'POST',
-            })
+            }),
+            invalidatesTags : ['User']
         }),
         userRefreshToken : builder.mutation({
             query : ()=>({
-                url : 'user/refreshToken',
+                url : 'user/refresh-token',
                 method : 'POST',
-            })
+            }),
+            invalidatesTags : ['User']
         }),
     })
 })

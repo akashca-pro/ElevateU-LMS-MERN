@@ -4,6 +4,8 @@ import bcrypt from 'bcryptjs'
 import {generateAccessToken,generateRefreshToken} from '../utils/generateToken.js'
 import generateOtp from '../utils/generateOtp.js'
 import {sendToken,clearToken} from '../utils/tokenManage.js'
+import {sendEmailResetPassword} from '../utils/sendEmail.js'
+import {randomInt} from 'node:crypto'
 
 // Tutor register with otp
 
@@ -99,6 +101,69 @@ export const loginTutor = async (req,res) => {
     } catch (error) {
         console.log(error)
         res.status(500).json({message : "Error generating Token"})
+    }
+
+}
+
+//reset link generating for password reset
+
+export const forgotPassword = async (req,res) => {
+    
+    try {
+        const {email} = req.body;
+        const emailExist = await Tutor.findOne({email})
+
+        if(!emailExist)return res.status(404).json({message : 'user not found'});
+
+        const resetToken = randomInt(100000, 999999).toString();
+        const resetTokenExpires = Date.now() + 10 * 60 * 1000;
+
+        const tutor = await Tutor.findOneAndUpdate({email}, 
+            {otp : resetToken,
+            otpExpires : resetTokenExpires} ,{new : true})
+
+        const resetLink = `http://localhost:9000/api/tutor/reset-password?token=${resetToken}`
+
+        await sendEmailResetPassword(tutor.email,tutor.firstName,resetLink);
+
+        res.status(200).json({message : 'Password reset link sent to your email'})
+        
+    } catch (error) {
+        console.log('from forgotpassword controller',error);
+        res.status(500).json({ message: 'Error sending email', error: error.message });
+    }
+
+}
+
+// verify the resetPassword token and create new password
+
+export const verifyResetLink = async (req,res) => {
+    
+    try {
+        const token = req.query.token;
+        const { newPassword } = req.body;
+
+        const tutor = await Tutor.findOne({
+            otp : token , 
+            otpExpires : { $gt : Date.now() }
+        });
+
+        if(!tutor) return res.status(400).json({message : 'Invalid or expired token'})
+
+        const hashedPassword = await bcrypt.hash(newPassword,10);
+
+        if(!tutor.isVerified) tutor.isVerified = true
+        tutor.password = hashedPassword;
+        tutor.otp = undefined;
+        tutor.otpExpires = undefined;
+
+        await tutor.save();
+
+        res.status(200).json({ message: 'Password reset successful Redirecting to login' });
+
+    } catch (error) {
+        console.log('from verifyResetLink',error);
+        res.status(500).json({message : 'Reset link verification failed'});
     }
 
 }

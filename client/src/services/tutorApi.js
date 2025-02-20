@@ -9,33 +9,38 @@ const tutorApi = apiSlice.injectEndpoints({
                 url : 'tutor/signup',
                 method : 'POST',
                 body : credentials
-            })
+            }),
+            invalidatesTags : ['Tutor']
         }),
         tutorVerifyOtp : builder.mutation({
             query : (credentials)=> ({
-                url : 'tutor/verifyotp',
+                url : 'tutor/verify-otp',
                 method : 'POST',
                 body : credentials
-            })
+            }),
+            invalidatesTags : ['Tutor']
         }),
         tutorLogin : builder.mutation({
             query : (credentials)=> ({
                 url : 'tutor/login',
                 method : 'POST',
                 body : credentials
-            })
+            }),
+            invalidatesTags : ['Tutor']
         }),
         tutorLogout : builder.mutation({
             query : ()=> ({
                 url : 'tutor/logout',
                 method : 'POST',
-            })
+            }),
+            invalidatesTags : ['Tutor']
         }),
         tutorRefreshToken : builder.mutation({
             query : ()=> ({
-                url : 'tutor/refreshtoken',
+                url : 'tutor/refresh-token',
                 method : 'POST',
-            })
+            }),
+            invalidatesTags : ['Tutor']
         }),
     })
 })

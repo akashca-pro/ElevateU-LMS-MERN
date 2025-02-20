@@ -10,7 +10,7 @@ router.post('/login',loginAdmin);
 
 router.post('/logout',logoutAdmin)
 
-router.post('/refreshtoken',verifyAdminRefreshToken,refreshToken)
+router.post('/refresh-token',verifyAdminRefreshToken,refreshToken)
 
 
 
