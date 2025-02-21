@@ -1,6 +1,6 @@
 import express from 'express'
 import {registerTutor,verifyOtp,loginTutor,logoutTutor,refreshToken,forgotPassword,verifyResetLink,
-loadProfile,updateProfile
+loadProfile,updateProfile,deleteAccount
 } from '../controllers/tutorController.js'
 
 import {verifyTutorAccessToken,verifyTutorRefreshToken} from '../utils/verifyToken.js'
@@ -36,5 +36,7 @@ router.post('/update-email/:id',otpLimiter,verifyTutorAccessToken,updateEmail('t
 router.post('/verify-email',verifyTutorAccessToken,verifyEmail('tutor'))
 
 router.post('/update-profile/:id',verifyTutorAccessToken,updateProfile)
+
+router.delete('/delete-account/:id',verifyTutorAccessToken,deleteAccount)
 
 export default router

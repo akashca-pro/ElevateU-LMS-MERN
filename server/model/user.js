@@ -36,14 +36,24 @@ const userSchema  = new mongoose.Schema({
     phone : {
         type : Number,
     },
+    enrolledCourses : {
+        type : [String],
+        default : []
+    },
     bio : {
         type : String,
-        trim : true
+        trim : true,
+        default : []
     },
     socialLinks : {
-        type : [String] // example ['http://instagram....','http://facebook...']
+        type : [String], // example ['http://instagram....','http://facebook...']
+        default : []
     },
     isVerified : {
+        type : Boolean,
+        default : false
+    },
+    isActive : {
         type : Boolean,
         default : false
     },
@@ -63,6 +73,7 @@ const userSchema  = new mongoose.Schema({
     },
     isBlocked : {
         type : Boolean,
+        default : false
     }
 },{timestamps : true});
 

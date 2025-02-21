@@ -1,6 +1,6 @@
 import express from 'express'
 import {registerUser,verifyOtp,loginUser,refreshToken,logoutUser,forgotPassword,verifyResetLink,
-loadProfile,updateProfile
+loadProfile,updateProfile,deleteAccount
 } from '../controllers/userController.js'
 
 import {verifyUserAccessToken,verifyUserRefreshToken} from '../utils/verifyToken.js'
@@ -36,5 +36,7 @@ router.post('/update-email/:id',otpLimiter,verifyUserAccessToken,updateEmail('us
 router.post('/verify-email',verifyUserAccessToken,verifyEmail('user'))
 
 router.post('/update-profile/:id',verifyUserAccessToken,updateProfile)
+
+router.delete('/delete-account/:id',verifyUserAccessToken,deleteAccount)
 
 export default router

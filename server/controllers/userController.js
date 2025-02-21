@@ -15,7 +15,7 @@ export const registerUser = async (req,res) => {
     try {
 
         const { email, password ,
-            firstName, lastName, phone, profileImage, bio, socialLinks } = req.body;
+            firstName , lastName } = req.body;
     
         const userExists = await User.findOne({email : email});
     
@@ -223,7 +223,7 @@ export const loadProfile = async (req,res) => {
     
     try {
         const user_ID = req.params.id 
-        const userData = await User.findById(user_ID,'email firstName lastName profileImage bio socialLinks phone')
+        const userData = await User.findById(user_ID,'email firstName lastName profileImage bio socialLinks phone enrolledCourses')
 
         if(!userData)return res.status(404).json({message : 'user not found'})
 
@@ -262,6 +262,26 @@ export const updateProfile = async (req,res) => {
     } catch (error) {
         console.log('Error updating user profile');
         res.status(500).json({ message: 'Error updating user profile', error: error.message });
+    }
+
+}
+
+// delete account
+
+export const deleteAccount = async (req,res) =>{
+
+    try {
+        const user_ID = req.params.id
+        const user = await User.findById(user_ID)
+        if(!user) return res.status(404).json({message : 'user not found'})
+
+        await User.findByIdAndDelete(user_ID)
+
+        return res.status(200).json({message : 'user deleted successfully'})
+
+    } catch (error) {
+        console.log('Error deleting user profile');
+        return res.status(500).json({ message: 'Error deleting user profile', error: error.message });
     }
 
 }

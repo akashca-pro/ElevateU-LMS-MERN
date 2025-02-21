@@ -41,13 +41,16 @@ const tutorSchema = mongoose.Schema({
         trim : true
     },
     socialLinks :{
-        type : [String] 
+        type : [String],
+        default : [] 
     },
     expertise: {
         type: [String], // Example: ["Web Development", "Machine Learning"]
+        default : []
     },
     experience: {
         type: Number, 
+        default : 0
     },
     earnings: {
         type: Number,
@@ -57,7 +60,11 @@ const tutorSchema = mongoose.Schema({
         type : Boolean,
         default : false
     },
-    adminVerified : {
+    isActive : {
+        type : Boolean,
+        default : false
+    },
+    isAdminVerified : {
         type : Boolean,
         default : false
     },

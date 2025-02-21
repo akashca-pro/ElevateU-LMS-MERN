@@ -219,15 +219,15 @@ export const loadProfile = async (req,res) => {
     try {
         const tutor_ID = req.params.id 
         const tutorData = await Tutor.findById(tutor_ID)
-        .select('email firstName lastName phone profileImage bio socialLinks expertise experience earnings verified')
+        .select('email firstName lastName phone profileImage bio socialLinks expertise experience earnings isAdminVerified')
 
-        if(!tutorData)return res.status(404).json({message : 'user not found'})
+        if(!tutorData)return res.status(404).json({message : 'tutor not found'})
 
         return res.status(200).json(tutorData);
 
     } catch (error) {
-        console.log('Error loading user profile');
-        res.status(500).json({ message: 'Error loading user profile', error: error.message });
+        console.log('Error loading tutor profile');
+        res.status(500).json({ message: 'Error loading tutor profile', error: error.message });
     }
 
 }
@@ -239,7 +239,7 @@ export const updateProfile = async (req,res) => {
     try {
         const tutor_ID = req.params.id;
         const tutor = await Tutor.findById(tutor_ID)
-        if(!tutor) return res.status(404).json({message : 'user not found'});
+        if(!tutor) return res.status(404).json({message : 'tutor not found'});
 
         const {firstName, lastName, profileImage, phone, bio, socialLinks,
              expertise, experience, earnings} = req.body;
@@ -262,6 +262,26 @@ export const updateProfile = async (req,res) => {
     } catch (error) {
         console.log('Error updating tutor profile');
         res.status(500).json({ message: 'Error updating tutor profile', error: error.message });
+    }
+
+}
+
+// delete account
+
+export const deleteAccount = async (req,res) =>{
+
+    try {
+        const tutor_ID = req.params.id
+        const tutor = await Tutor.findById(tutor_ID)
+        if(!tutor) return res.status(404).json({message : 'user not found'})
+
+        await Tutor.findByIdAndDelete(tutor_ID)
+
+        return res.status(200).json({message : 'tutor deleted successfully'})
+
+    } catch (error) {
+        console.log('Error deleting tutor profile');
+        return res.status(500).json({ message: 'Error deleting tutor profile', error: error.message });
     }
 
 }
