@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 export const sendToken = async(res,name,value,age)=>{
     res.cookie(name,value,{
         httpOnly: true,

@@ -38,16 +38,13 @@ const userSchema  = new mongoose.Schema({
     },
     enrolledCourses : {
         type : [String],
-        default : []
     },
     bio : {
         type : String,
         trim : true,
-        default : []
     },
     socialLinks : {
         type : [String], // example ['http://instagram....','http://facebook...']
-        default : []
     },
     isVerified : {
         type : Boolean,

@@ -1,7 +1,10 @@
 import express from 'express'
-import {registerUser,verifyOtp,loginUser,refreshToken,logoutUser,forgotPassword,verifyResetLink,
-loadProfile,updateProfile,deleteAccount
-} from '../controllers/userController.js'
+
+import {registerUser,verifyOtp,loginUser,refreshToken,logoutUser,forgotPassword,verifyResetLink
+} from '../controllers/user/userAuth.js'
+
+import {loadProfile,updateProfile,deleteAccount
+} from '../controllers/user/userOps.js'
 
 import {verifyUserAccessToken,verifyUserRefreshToken} from '../utils/verifyToken.js'
 import {otpLimiter} from '../middleware/rateLimiting.js';
