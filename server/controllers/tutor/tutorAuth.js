@@ -42,7 +42,7 @@ export const registerTutor = async (req,res) => {
     } catch (error) {
         console.log(error);
         if(error.message='Invalid Email') return res.status(400).json(error.message)
-        res.status(400).json(error.message);
+        return res.status(400).json(error.message);
     }
 
 }

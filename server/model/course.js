@@ -17,7 +17,7 @@ const courseSchema = mongoose.Schema({
     category : {
         type : String,
         ref : 'Category',
-        required : true
+        default : null
     },
     tutor : {
         type : String,
@@ -43,8 +43,11 @@ const courseSchema = mongoose.Schema({
     },
     isApproved :  {
         type : String,
-        enum : ['pending','approved','rejected'],
-        default : 'pending'
+        enum : ['pending','approved','rejected','none'],
+        default : 'none'
+    },
+    rejectReason : {
+        type : String
     },
     rating : {
         type : Number,

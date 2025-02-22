@@ -1,9 +1,10 @@
-// Admin API calls
+// Admin Auth api endpoints
 
-import apiSlice from "./apiSlice";
+import apiSlice from "../apiSlice";
 
-export const adminApi = apiSlice.injectEndpoints({
+export const adminAuthApi = apiSlice.injectEndpoints({
     endpoints : (builder)=> ({
+        
         adminSignup : builder.mutation({
             query : (credentials)=> ({
                 url : 'admin/signup',
@@ -39,10 +40,10 @@ export const adminApi = apiSlice.injectEndpoints({
 })
 
 export const {
-    
+
     useAdminSignupMutation,
     useAdminLoginMutation,
     useAdminLogoutMutation,
     useAdminRefreshTokenMutation
 
-} = adminApi
+} = adminAuthApi

@@ -97,3 +97,6 @@ export const deleteCategory = async (req,res) => {
     }
 
 }
+
+// Add course to category
+
