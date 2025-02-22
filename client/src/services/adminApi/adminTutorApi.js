@@ -14,8 +14,8 @@ const adminTutorApi = apiSlice.injectEndpoints({
             invalidatesTags : ['Admin']
         }),
         adminLoadTutorsDetails : builder.query({
-            query : (page,limit,search) => ({
-                url : `admin/tutors-details?${page}&${limit}&${search}`,
+            query : ({page,limit,search}) => ({
+                url : `admin/tutors-details?page=${page}&limit=${limit}&search=${search}`,
                 method : 'GET'
             }),
             providesTags : ['Admin']
@@ -28,7 +28,7 @@ const adminTutorApi = apiSlice.injectEndpoints({
             providesTags : ['Admin']
         }),
         adminUpdateTutor : builder.mutation({
-            query : (id,credentials) => ({
+            query : ({id,credentials}) => ({
                 url : `admin/update-tutor-details/${id}`,
                 method : 'POST',
                 body : credentials
@@ -57,7 +57,7 @@ const adminTutorApi = apiSlice.injectEndpoints({
             invalidatesTags : ['Admin']
         }),
         adminRejectVerification : builder.mutation({
-            query : (id,credentials) => ({
+            query : ({id,credentials}) => ({
                 url : `admin/reject-verification/${id}`,
                 method : 'POST',
                 body : credentials

@@ -14,8 +14,8 @@ const adminUserApi = apiSlice.injectEndpoints({
             invalidatesTags : ['Admin']
         }),
         adminLoadUsers : builder.query({
-            query : (page,limit,search)=>({
-                url : `admin/users-details?${page}&${limit}&${search}`,
+            query : ({page,limit,search})=>({
+                url : `admin/users-details?page=${page}&limit=${limit}&search=${search}`,
                 method : 'GET',
             }),
             providesTags : ['Admin']
@@ -28,7 +28,7 @@ const adminUserApi = apiSlice.injectEndpoints({
             providesTags : ['Admin']
         }),
         adminUpdateUserDetails : builder.mutation({
-            query : (id,credentials) => ({
+            query : ({id,credentials}) => ({
                 url : `admin/update-user-details/${id}`,
                 method : 'POST',
                 body : credentials

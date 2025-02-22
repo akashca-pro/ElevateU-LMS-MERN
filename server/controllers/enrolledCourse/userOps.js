@@ -35,7 +35,7 @@ export const enrollInCourse = async (req,res) => {
 export const loadEnrolledCourses = async (req,res) => {
     
     try {
-        const { userId } = req.body
+        const userId = req.params.id
         const course = await EnrolledCourse.find({user : userId})
         if(course.length === 0 || !course) return res.status(404).json({message : 'course not found'})
             

@@ -1,9 +1,9 @@
-// Tutor API calls
+// tutor Auth Api endpoints
 
-import apiSlice from "./apiSlice";
+import apiSlice from "../apiSlice";
 
-const tutorApi = apiSlice.injectEndpoints({
-    endpoints : (builder) => ({
+const tutorAuthApi = apiSlice.injectEndpoints({
+    endpoints : (builder) =>({
         tutorSignup : builder.mutation({
             query : (credentials) => ({
                 url : 'tutor/signup',
@@ -31,19 +31,20 @@ const tutorApi = apiSlice.injectEndpoints({
         tutorLogout : builder.mutation({
             query : ()=> ({
                 url : 'tutor/logout',
-                method : 'POST',
+                method : 'PATCH',
             }),
             invalidatesTags : ['Tutor']
         }),
         tutorRefreshToken : builder.mutation({
             query : ()=> ({
                 url : 'tutor/refresh-token',
-                method : 'POST',
+                method : 'PATCH',
             }),
             invalidatesTags : ['Tutor']
         }),
     })
 })
+
 
 export const {
 
@@ -52,5 +53,5 @@ export const {
     useTutorLoginMutation,
     useTutorLogoutMutation,
     useTutorRefreshTokenMutation
-    
-} = tutorApi
+
+} = tutorAuthApi

@@ -24,14 +24,14 @@ export const adminAuthApi = apiSlice.injectEndpoints({
         adminLogout : builder.mutation({
             query : ()=> ({
                 url : 'admin/logout',
-                method : 'POST',
+                method : 'PATCH',
             }),
             invalidatesTags : ['Admin']
         }),
         adminRefreshToken : builder.mutation({
             query : (credentials)=>({
                 url : 'admin/refresh-token',
-                method : 'POST',
+                method : 'PATCH',
                 body : credentials
             }),
             invalidatesTags : ['Admin']

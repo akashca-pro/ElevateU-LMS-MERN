@@ -23,8 +23,8 @@ router.post('/verify-otp',otpLimiter,verifyOtp)
 router.post('/login',retryVerify('user'),loginUser)
 router.post('/forgot-password',otpLimiter,forgotPassword)
 router.post('/reset-password',verifyResetLink)
-router.post('/logout',logoutUser)
-router.post('/refresh-token',verifyUserRefreshToken,refreshToken)
+router.patch('/logout',logoutUser)
+router.patch('/refresh-token',verifyUserRefreshToken,refreshToken)
 
 // CRUD routes
 
@@ -37,7 +37,7 @@ router.delete('/delete-account/:id',verifyUserAccessToken,deleteAccount)
 // course enrollment
 
 router.post('/enroll-course',verifyUserAccessToken,enrollInCourse)
-router.get('/enrolled-courses',verifyUserAccessToken,loadEnrolledCourses)
+router.get('/enrolled-courses/:id',verifyUserAccessToken,loadEnrolledCourses)
 
 
 export default router

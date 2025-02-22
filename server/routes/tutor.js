@@ -25,8 +25,8 @@ router.post('/verify-otp',otpLimiter,verifyOtp)
 router.post('/login',retryVerify('tutor'),loginTutor)
 router.post('/forgot-password',otpLimiter,forgotPassword)
 router.post('/reset-password',verifyResetLink)
-router.post('/logout',logoutTutor)
-router.post('/refresh-token',verifyTutorRefreshToken,refreshToken)
+router.patch('/logout',logoutTutor)
+router.patch('/refresh-token',verifyTutorRefreshToken,refreshToken)
 
 // CRUD routes
 
@@ -38,7 +38,7 @@ router.delete('/delete-account/:id',verifyTutorAccessToken,deleteAccount)
 
 // request verification from admin
 
-router.post('/request-verification/:id',verifyTutorAccessToken,requestVerification)
+router.patch('/request-verification/:id',verifyTutorAccessToken,requestVerification)
 
 // course manage
 

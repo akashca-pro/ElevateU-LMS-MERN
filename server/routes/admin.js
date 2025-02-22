@@ -24,8 +24,8 @@ const router = express.Router()
 
 router.post('/signup',registerAdmin);
 router.post('/login',loginAdmin);
-router.post('/logout',logoutAdmin)
-router.post('/refresh-token',verifyAdminRefreshToken,refreshToken)
+router.patch('/logout',logoutAdmin)
+router.patch('/refresh-token',verifyAdminRefreshToken,refreshToken)
 
 // Admin profile CRUD
 

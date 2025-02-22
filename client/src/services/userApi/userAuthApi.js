@@ -1,9 +1,9 @@
-// User API calls
+// user Auth Api endpoints
 
-import apiSlice from "./apiSlice";
+import apiSlice from "../apiSlice";
 
-const userApi = apiSlice.injectEndpoints({
-    endpoints : (builder) => ({
+const userAuthApi = apiSlice.injectEndpoints({
+    endpoints : (builder) =>({
         userSignup : builder.mutation({
             query : (credentials)=>({
                 url : 'user/signup',
@@ -31,14 +31,14 @@ const userApi = apiSlice.injectEndpoints({
         userLogout : builder.mutation({
             query : ()=>({
                 url : 'user/logout',
-                method : 'POST',
+                method : 'PATCH',
             }),
             invalidatesTags : ['User']
         }),
         userRefreshToken : builder.mutation({
             query : ()=>({
                 url : 'user/refresh-token',
-                method : 'POST',
+                method : 'PATCH',
             }),
             invalidatesTags : ['User']
         }),
@@ -51,6 +51,6 @@ export const {
     useUserVerifyOtpMutation,
     useUserLoginMutation,
     useUserLogoutMutation,
-    useUserRefreshTokenMutation,
-    
-} = userApi
+    useUserRefreshTokenMutation
+
+} = userAuthApi
