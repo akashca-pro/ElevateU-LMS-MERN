@@ -1,13 +1,42 @@
-import { useState } from "react"
+import useForm from "@/hooks/useForm"
+import { Eye, EyeOff } from "lucide-react";
+import { toast } from "react-toastify";
+import {useUserLoginMutation} from '../../../services/userApi/userAuthApi.js'
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import {setUserCredentials} from '../../../features/auth/user/userAuthSlice.js'
 
 function Login() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const [userLogin] = useUserLoginMutation()
+  const {formData,handleChange,errors,togglePasswordVisibility,showPassword} = useForm()
 
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async(e) => {
     e.preventDefault()
-    // Handle login logic here
+   
+    if(Object.values(errors).some((err)=> err)) return
+
+    const toastId = toast.loading("Loading");
+
+    try {
+
+      const response = await userLogin(formData).unwrap();
+
+      toast.update(toastId, { render: response.message, type: "success", isLoading: false, autoClose: 3000 });
+    
+      dispatch(setUserCredentials(response.user))
+
+      navigate('/')
+      
+    } catch (error) {
+      console.log(error)
+      toast.update(toastId, { render: error?.data?.message || error?.error || "Login Failed. Please try again.",type : 'error', isLoading: false, autoClose: 3000 });
+    }
+
   }
+
 
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-gray-100">
@@ -19,34 +48,47 @@ function Login() {
               <p className="text-gray-500">Enter your details to access your account</p>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
+            <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium block">
-                  Your email
+                  Your Email
                 </label>
                 <input
                   id="email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 p-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-purple-500/20"
-                  placeholder="m@example.com"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={`w-full rounded-lg border p-2 focus:ring-2 ${
+                    errors.email ? "border-red-500" : "border-gray-300 focus:border-purple-500/20"
+                  }`}
+                  placeholder="name@example.com"
                   required
                 />
+                {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 relative">
                 <label htmlFor="password" className="text-sm font-medium block">
                   Password
                 </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 p-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-purple-500/20"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className={`w-full rounded-lg border p-2 focus:ring-2 ${
+                      errors.password ? "border-red-500" : "border-gray-300 focus:border-purple-500/20"
+                    }`}
+                    required
+                  />
+                  <button type="button" onClick={togglePasswordVisibility} className="absolute right-2 top-2">
+                    {showPassword ? <EyeOff className="h-5 w-5 text-gray-500" /> : <Eye className="h-5 w-5 text-gray-500" />}
+                  </button>
+                </div>
+                {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
               </div>
-              <a href="/forgot-password" className="block text-right text-sm text-primary hover:underline">
+              <a href="/user/forgot-password" className="block text-right text-sm text-primary hover:underline">
                 Forgot password?
               </a>
               <button
@@ -82,7 +124,7 @@ function Login() {
             </div>
             <p className="text-center text-sm text-gray-500">
               Don't have an account?{" "}
-              <a href="/signup" className="text-primary hover:underline">
+              <a href="/user/sign-up" className="text-primary hover:underline">
                 Sign up
               </a>
             </p>
@@ -95,6 +137,7 @@ function Login() {
               <span className="text-purple-400">learn</span>.
             </p>
             <p className="text-sm">- Eleanor Roosevelt</p>
+            <img src="/Login.svg" alt="" className="w-[710px] h-[595px]" />
           </div>
         </div>
       </div>

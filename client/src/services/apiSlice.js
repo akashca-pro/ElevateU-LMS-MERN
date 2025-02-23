@@ -5,7 +5,7 @@ import {createApi,fetchBaseQuery} from '@reduxjs/toolkit/query/react';
 // use this if refreshtoken is invalid or anything error happens so the user will be logged out to log in page
 import { adminLogout } from '../features/auth/admin/adminAuthSlice';
 import { tutorLogout } from '../features/auth/tutor/tutorAuthSlice';
-import { userLogout } from '../features/auth/user/userAuthSlice';
+import { removeUserCredentials } from '../features/auth/user/userAuthSlice';
 
 const baseQuery = fetchBaseQuery({
     baseUrl : "http://localhost:9000/api/",
@@ -30,7 +30,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 
       if (roles.length === 0) {
           console.log(' No authenticated user, logging out...');
-          api.dispatch(userLogout());
+          api.dispatch(removeUserCredentials());
           return result;
       }
 
@@ -50,7 +50,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
           console.log(' Refresh failed for all roles, logging out...');
           if (state.adminAuth?.isAuthenticated) api.dispatch(adminLogout());
           if (state.tutorAuth?.isAuthenticated) api.dispatch(tutorLogout());
-          if (state.userAuth?.isAuthenticated) api.dispatch(userLogout());
+          if (state.userAuth?.isAuthenticated) api.dispatch(removeUserCredentials());
       }
   }
 

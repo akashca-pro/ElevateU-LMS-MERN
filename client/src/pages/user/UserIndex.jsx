@@ -18,10 +18,10 @@ const UserRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<UserIndex />}>
-        <Route path="signup" element={<UserSignUp />} />
-        <Route path="verifyotp" element={<UserOTPVerification />} />
+        <Route path="sign-up" element={<UserSignUp />} />
+        <Route path="verify-otp" element={<UserOTPVerification />} />
         <Route path="login" element={<UserLogin />} />
-        <Route path="forgotpassword" element={<UserForgotPassword />} />
+        <Route path="forgot-password" element={<UserForgotPassword />} />
       </Route>
     </Routes>
   );

@@ -20,10 +20,10 @@ return (
   <Routes>
     <Route path='/' element={<TutorIndex/>}>
   
-        <Route path="signup" element={<TutorSignUp />} />
-        <Route path="verifyotp" element={<TutorOTPVerification />} />
+        <Route path="sign-up" element={<TutorSignUp />} />
+        <Route path="verify-otp" element={<TutorOTPVerification />} />
         <Route path="login" element={<TutorLogin />} />
-        <Route path="forgotpassword" element={<TutorForgotPassword />} />
+        <Route path="forgot-password" element={<TutorForgotPassword />} />
   
     </Route>
   </Routes>

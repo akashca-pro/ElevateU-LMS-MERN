@@ -16,7 +16,7 @@ const AdminRoutes = ()=>{
   return (
     <Routes>
       <Route path='/' element={<AdminIndex/>}>
-        <Route path='signup' element={<AdminSignup/>}/>
+        <Route path='sign-up' element={<AdminSignup/>}/>
         <Route path='login' element={<AdminLogin/>}/>
       </Route>
     </Routes>

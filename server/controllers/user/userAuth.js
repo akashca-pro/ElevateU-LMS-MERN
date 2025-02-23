@@ -13,7 +13,7 @@ export const registerUser = async (req,res) => {
     try {
 
         const { email, password ,
-            firstName , lastName } = req.body;
+            firstName  } = req.body;
     
         const userExists = await User.findOne({email : email});
     
@@ -26,7 +26,6 @@ export const registerUser = async (req,res) => {
             email,
             password : hashedPassword, 
             firstName,
-            lastName,
         });
     
         await user.save();
@@ -47,34 +46,30 @@ export const registerUser = async (req,res) => {
 
 }
 
-// verify otp
-
-export const verifyOtp = async (req,res) => {
-    
+export const verifyOtp = async (req, res) => {
     try {
-        const {otp} = req.body;
-    
-        const user = await User.findOne({
-            otp , 
-            otpExpires : { $gt : Date.now() }
-        });
+      const { otp } = req.body;
+  
+      const user = await User.findOne({ otp, otpExpires: { $gt: Date.now() } }).select('-password')
+  
+      if (!user) {
+        return res.status(404).json({ message: "Invalid or expired OTP" });
+      }
+  
+      user.isVerified = true
+      user.otp = undefined
+      user.otpExpires = undefined
+      user.verificationExpires = undefined
 
-        if(!user) return res.status(404).json({message : 'Invalid or expired OTP'})
+      await user.save()
 
-        user.isVerified = true;
-        user.otp = undefined;
-        user.otpExpires = undefined;
-        user.verificationExpires = undefined;
-        await user.save();
-
-        return res.json({message : 'OTP verified successfully'});
-
+      return res.status(200).json({ message: "OTP verified successfully",user});
     } catch (error) {
-        console.log(error)
-        res.status(500).json({message : "Internal Server error"})
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
     }
-
-}
+  };
+  
 
 //Login with JWT
 
@@ -83,15 +78,15 @@ export const loginUser = async (req,res) => {
     try {
         const {email,password,rememberMe} = req.body;
 
-        const user = await User.findOne({email});
+        const user = await User.findOne({email})
     
-        if(!user)return res.status(401).json({message : "Invalid credentials"});
+        if(!user)return res.status(404).json({message : "Invalid credentials"});
     
         if(!(await bcrypt.compare(password,user.password))){
-            return res.status(401).json({message : "Incorrect password"});
+            return res.status(404).json({message : "Incorrect password"});
         }
 
-        if(!user.isVerified)return res.status(401).json({message : "User is not verified"})
+        if(!user.isVerified)return res.status(402).json({message : "User is not verified"})
         
        const accessToken = generateAccessToken(user._id);
        const refreshToken = generateRefreshToken(user._id);
@@ -102,7 +97,7 @@ export const loginUser = async (req,res) => {
         // Set refresh token as cookie (only if "Remember Me" is checked)
         if(rememberMe) sendToken(res,'userRefreshToken',refreshToken,7 * 24 * 60 * 60 * 1000);
     
-        res.status(200).json({message : "Login successfull"});
+        res.status(200).json({message : "Login successfull",user});
 
     } catch (error) {
         console.log(error)

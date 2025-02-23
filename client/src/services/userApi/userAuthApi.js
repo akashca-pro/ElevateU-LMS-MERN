@@ -14,7 +14,7 @@ const userAuthApi = apiSlice.injectEndpoints({
         }),
         userVerifyOtp : builder.mutation({
             query : (credentials)=>({
-                url : 'user/verifyotp',
+                url : 'user/verify-otp',
                 method : 'POST',
                 body : credentials
             }),

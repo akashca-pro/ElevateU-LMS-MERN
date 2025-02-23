@@ -6,7 +6,11 @@ const Navbar = () => {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-purple-600" />
+          <img
+                src="/logo.svg"
+                alt="ElevateU Logo"
+                className="h-8 w-8"
+              />
             <span className="text-xl font-bold">ElevateU</span>
           </Link>
           <Link to="/courses" className="text-gray-600 hover:text-purple-600">
@@ -74,11 +78,11 @@ const Navbar = () => {
             </svg>
           </Link>
           <div className="flex gap-4">
-            <Link to="/login" className="rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">
+            <Link to="user/login" className="rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">
               Log in
             </Link>
             <Link
-              to="/signup"
+              to="user/sign-up"
               className="rounded-full bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
             >
               Sign Up
