@@ -123,15 +123,13 @@ export const forgotPassword = async (req,res) => {
             {otp : resetToken,
             otpExpires : resetTokenExpires} ,{new : true})
 
-        const resetLink = `http://localhost:9000/api/user/reset-password?token=${resetToken}`
+        await sendEmailResetPassword(user.email,user.firstName,resetToken);
 
-        await sendEmailResetPassword(user.email,user.firstName,resetLink);
-
-        res.status(200).json({message : 'Password reset link sent to your email'})
+        return res.status(200).json({message : 'Password reset otp sent to your email'})
         
     } catch (error) {
         console.log('from forgotpassword controller',error);
-        res.status(500).json({ message: 'Error sending email', error: error.message });
+        return res.status(500).json({ message: 'Error sending password reset code', error: error.message });
     }
 
 }
@@ -141,8 +139,9 @@ export const forgotPassword = async (req,res) => {
 export const verifyResetLink = async (req,res) => {
     
     try {
-        const token = req.query.token;
-        const { newPassword } = req.body;
+        const { password ,token } = req.body;
+
+        console.log(req.body)
 
         const user = await User.findOne({
             otp : token , 
@@ -151,7 +150,7 @@ export const verifyResetLink = async (req,res) => {
 
         if(!user) return res.status(400).json({message : 'Invalid or expired token'})
 
-        const hashedPassword = await bcrypt.hash(newPassword,10);
+        const hashedPassword = await bcrypt.hash(password,10);
 
         if(!user.isVerified) user.isVerified = true
         user.password = hashedPassword;
@@ -160,7 +159,7 @@ export const verifyResetLink = async (req,res) => {
 
         await user.save();
 
-        return res.status(200).json({ message: 'Password reset successful Redirecting to login' });
+        return res.status(200).json({ message: 'Password reset successful' });
 
     } catch (error) {
         console.log('from verifyResetLink',error);

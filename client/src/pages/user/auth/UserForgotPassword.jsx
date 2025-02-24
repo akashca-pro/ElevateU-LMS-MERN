@@ -1,21 +1,40 @@
-"use client"
+import useForm from "@/hooks/useForm"
+import { Link, useNavigate } from "react-router-dom"
+import {useUserForgotPasswordMutation} from '@/services/userApi/userAuthApi.js'
+import { toast } from "react-toastify"
 
-import { useState } from "react"
-import { Link } from "react-router-dom"
 
 const ForgotPassword = () => {
-  const [email, setEmail] = useState("")
+  const navigate = useNavigate()
+  const [userForgotPassword,{isLoading}] = useUserForgotPasswordMutation()
+  const {formData,handleChange,errors} = useForm()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault()
-    // Handle password reset logic here
+    
+    if(Object.values(errors).some((err)=> err)) return
+
+    const toastId = toast.loading('Loading')
+
+    try {
+      const response = await userForgotPassword({email : formData.email}).unwrap()
+
+      toast.update(toastId, { render: response?.message, type: "success", isLoading: false, autoClose: 3000 });
+
+      navigate('/user/reset-password')
+
+    } catch (error) {
+      console.log(error)
+      toast.update(toastId, { render: error?.data?.message || error?.error || "Reset password Failed try again later",type : 'error', isLoading: false, autoClose: 3000 });
+    }
+
   }
 
   return (
     <div className="grid min-h-screen md:grid-cols-2">
       <div className="hidden md:block">
         <img
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/forgot_password-zdrKz0lcq6fR1CWw8DxcLsR34rU4d0.png"
+          src="/forgotPassword.svg"
           alt="Workspace"
           className="h-screen w-full object-cover"
         />
@@ -29,20 +48,24 @@ const ForgotPassword = () => {
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 p-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-purple-500/20"
-                placeholder="elementary221b@gmail.com"
-                required
-              />
-            </div>
+          <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium block">
+                  Your Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={`w-full rounded-lg border p-2 focus:ring-2 ${
+                    errors.email ? "border-red-500" : "border-gray-300 focus:border-purple-500/20"
+                  }`}
+                  placeholder="name@example.com"
+                  required
+                />
+                {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
+              </div>
             <button
               type="submit"
               className="w-full rounded-lg bg-primary px-4 py-2 text-white hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-purple-500/20"
@@ -51,19 +74,6 @@ const ForgotPassword = () => {
             </button>
           </form>
           <Link to="/login" className="flex items-center justify-center gap-2 text-sm text-primary hover:underline">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m15 18-6-6 6-6" />
-            </svg>
             Back to login screen
           </Link>
         </div>

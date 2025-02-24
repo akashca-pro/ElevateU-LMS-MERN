@@ -1,3 +1,5 @@
+import Footer from "@/components/Footer"
+
 const NotFound = () => {
     const styles = {
       container: {
@@ -5,25 +7,34 @@ const NotFound = () => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        height: "100vh",
+        minHeight: "66vh", // Reduced height so footer fits
         fontFamily: "Arial, sans-serif",
         backgroundColor: "#f0f0f0",
         color: "#1A064F",
+        padding: "20px",
+      },
+      content: {
+        textAlign: "center",
+        padding: "40px",
+        backgroundColor: "white",
+        borderRadius: "12px",
+        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+        maxWidth: "500px",
       },
       header: {
-        fontSize: "8rem",
+        fontSize: "6rem", // Decreased size
         fontWeight: "bold",
         color: "#7454FD",
         margin: "0",
         textShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
       },
       message: {
-        fontSize: "1.5rem",
+        fontSize: "1.2rem", // Slightly reduced
         marginTop: "1rem",
-        marginBottom: "2rem",
+        marginBottom: "1.5rem",
       },
       button: {
-        padding: "10px 20px",
+        padding: "8px 16px",
         fontSize: "1rem",
         backgroundColor: "#7454FD",
         color: "white",
@@ -32,55 +43,31 @@ const NotFound = () => {
         cursor: "pointer",
         transition: "background-color 0.3s",
       },
-      decorativeCircle: {
-        position: "absolute",
-        borderRadius: "50%",
-        opacity: "0.1",
-      },
     }
   
     const handleGoHome = () => {
-      // In a real application, you would use your routing library here
-      // For example, with react-router: history.push('/')
       window.location.href = "/"
     }
   
     return (
-      <div style={styles.container}>
-        <div
-          style={{
-            ...styles.decorativeCircle,
-            top: "10%",
-            left: "10%",
-            width: "200px",
-            height: "200px",
-            backgroundColor: "#7454FD",
-          }}
-        />
-        <div
-          style={{
-            ...styles.decorativeCircle,
-            bottom: "10%",
-            right: "10%",
-            width: "150px",
-            height: "150px",
-            backgroundColor: "#1A064F",
-          }}
-        />
-        <h1 style={styles.header}>404</h1>
-        <p style={styles.message}>Oops! The page you're looking for doesn't exist.</p>
-        <button
-          style={styles.button}
-          onClick={handleGoHome}
-          onMouseOver={(e) => (e.target.style.backgroundColor = "#5c43cc")}
-          onMouseOut={(e) => (e.target.style.backgroundColor = "#7454FD")}
-        >
-          Go Back to Home
-        </button>
-      </div>
+      <>
+        <div style={styles.container}>
+          <div style={styles.content}>
+            <h1 style={styles.header}>404</h1>
+            <p style={styles.message}>Oops! The page you're looking for doesn't exist.</p>
+            <button
+              style={styles.button}
+              onClick={handleGoHome}
+              onMouseOver={(e) => (e.target.style.backgroundColor = "#5c43cc")}
+              onMouseOut={(e) => (e.target.style.backgroundColor = "#7454FD")}
+            >
+              Go Back to Home
+            </button>
+          </div>
+        </div>
+        <Footer />
+      </>
     )
-  }
-  
-  export default NotFound
-  
-  
+}
+
+export default NotFound

@@ -28,6 +28,23 @@ const userAuthApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags : ['User']
         }),
+        userForgotPassword : builder.mutation({
+            query : (credentials)=>({
+                url : 'user/forgot-password',
+                method : 'POST',
+                body : credentials
+            }),
+            invalidatesTags : ['User']
+        }),
+        userResetPassword : builder.mutation({
+            query : (credentials)=>({
+                url : 'user/reset-password',
+                method : 'POST',
+                body : credentials
+            }),
+            invalidatesTags : ['User']
+        }),
+        
         userLogout : builder.mutation({
             query : ()=>({
                 url : 'user/logout',
@@ -50,6 +67,8 @@ export const {
     useUserSignupMutation,
     useUserVerifyOtpMutation,
     useUserLoginMutation,
+    useUserForgotPasswordMutation,
+    useUserResetPasswordMutation,
     useUserLogoutMutation,
     useUserRefreshTokenMutation
 

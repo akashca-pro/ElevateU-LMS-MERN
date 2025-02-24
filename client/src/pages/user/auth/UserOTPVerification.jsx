@@ -2,14 +2,13 @@ import useOTP from "@/hooks/useOtp.js";
 import { useLocation, useNavigate } from "react-router-dom";
 import {useUserVerifyOtpMutation} from  '../../../services/userApi/userAuthApi.js'
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
-import {setUserCredentials} from '../../../features/auth/user/userAuthSlice.js'
+import { useUserAuthActions } from "@/hooks/useDispatch.js";
 
 
 const OTPVerification = () => {
 
   const location = useLocation();
-  const dispatch = useDispatch()
+  const {login} = useUserAuthActions()
   const email = location.state;
   const { otp, inputs, timer, handleChange, handleKeyDown, handleResend } = useOTP(6, 58);
 
@@ -33,8 +32,8 @@ const OTPVerification = () => {
         const response = await userVerifyOtp({otp : otpCode}).unwrap();
 
         toast.update(toastId, { render: response.message, type: "success", isLoading: false, autoClose: 3000 });
-
-        dispatch(setUserCredentials(response.user));      
+        
+        login(response.data)   
 
         navigate('/')
   

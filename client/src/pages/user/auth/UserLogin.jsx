@@ -3,11 +3,10 @@ import { Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
 import {useUserLoginMutation} from '../../../services/userApi/userAuthApi.js'
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import {setUserCredentials} from '../../../features/auth/user/userAuthSlice.js'
+import { useUserAuthActions } from "@/hooks/useDispatch.js";
 
 function Login() {
-  const dispatch = useDispatch()
+  const {login} = useUserAuthActions()
   const navigate = useNavigate()
   const [userLogin] = useUserLoginMutation()
   const {formData,handleChange,errors,togglePasswordVisibility,showPassword} = useForm()
@@ -26,7 +25,7 @@ function Login() {
 
       toast.update(toastId, { render: response.message, type: "success", isLoading: false, autoClose: 3000 });
     
-      dispatch(setUserCredentials(response.user))
+      login(response.user)
 
       navigate('/')
       
@@ -75,6 +74,7 @@ function Login() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     name="password"
+                    placeholder="Password"
                     value={formData.password}
                     onChange={handleChange}
                     className={`w-full rounded-lg border p-2 focus:ring-2 ${
@@ -113,13 +113,6 @@ function Login() {
               >
                 <img src="https://www.google.com/favicon.ico" alt="Google" className="h-5 w-5" />
                 Continue with Google
-              </button>
-              <button 
-                onClick={() => {/* Handle Facebook login */}}
-                className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-sm font-medium hover:bg-gray-50"
-              >
-                <img src="https://www.facebook.com/favicon.ico"  alt="Facebook" className="h-5 w-5" />
-                Continue with Facebook
               </button>
             </div>
             <p className="text-center text-sm text-gray-500">

@@ -42,7 +42,7 @@ elevateulms@gmail.com
 
 };
 
-export const sendEmailResetPassword = async (email,name,resetLink) => {
+export const sendEmailResetPassword = async (email,name,resetToken) => {
     
     const transport = nodemailer.createTransport({
         service : 'gmail',
@@ -56,17 +56,17 @@ export const sendEmailResetPassword = async (email,name,resetLink) => {
         await transport.sendMail({
             from : process.env.SENDER_EMAIL,
             to : email,
-            subject : 'ElevateU Reset Password Link',
+            subject : 'ElevateU Reset Password OTP',
             text : `
 Dear ${name},
 
 We received a request to reset your password for your ElevateU account associated with this email address. If you didn't request a password reset, please ignore this email.
 
-To reset your password, please click the link below or copy and paste it into your browser:
+To reset your password, Please use the One-Time Password (OTP) provided below :
 
-${resetLink}
+${resetToken}
 
-This link will expire in 10 minutes for your security. If the link has expired, you can request a new password reset from the ElevateU website.
+This code will expire in 10 minutes for your security. If the OTP has expired, you can request a new password reset OTP from the ElevateU website.
 
 Best regards,
 The ElevateU Team

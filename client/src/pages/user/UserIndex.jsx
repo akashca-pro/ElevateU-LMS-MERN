@@ -5,6 +5,15 @@ import UserSignUp from './auth/UserSignup';
 import UserOTPVerification from './auth/UserOTPVerification';
 import UserLogin from './auth/UserLogin';
 import UserForgotPassword from './auth/UserForgotPassword';
+import ResetPassword from './auth/ResetPassword';
+
+import Index from '@/pages/user/userProfile/Index.jsx'
+import ProfileDetails from './userProfile/ProfileDetails';
+import ProfileEnrolledCourse from './userProfile/ProfileEnrolledCourse';
+import ProfileTeachers from './userProfile/ProfileTeachers';
+import ProfileMessages2 from './userProfile/ProfileMessages2';
+import UserLoginProtect from '@/protectors/user/UserLoginProtect';
+
 
 const UserIndex = () => {
   return (
@@ -22,6 +31,15 @@ const UserRoutes = () => {
         <Route path="verify-otp" element={<UserOTPVerification />} />
         <Route path="login" element={<UserLogin />} />
         <Route path="forgot-password" element={<UserForgotPassword />} />
+        <Route path='reset-password' element={<ResetPassword/>}/>
+
+        <Route path='profile' element={<UserLoginProtect> <Index/> </UserLoginProtect>}>
+          <Route index element={<ProfileDetails/>}/>
+          <Route path='enrolled-courses' element={<ProfileEnrolledCourse/>}/>
+          <Route path='teachers' element={<ProfileTeachers/>}/>
+          <Route path='messages' element={<ProfileMessages2/>}/>
+
+        </Route>
       </Route>
     </Routes>
   );

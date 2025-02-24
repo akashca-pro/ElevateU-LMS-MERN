@@ -1,0 +1,148 @@
+import { Eye, EyeOff } from "lucide-react";
+import Footer from "@/components/Footer.jsx"
+import useForm from "@/hooks/useForm"
+import useOtp from "@/hooks/useOtp";
+import {useUserResetPasswordMutation} from '@/services/userApi/userAuthApi.js'
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+
+const ResetPassword = () => {
+    const navigate = useNavigate()
+    const [userResetPassword,{isLoading}] = useUserResetPasswordMutation()
+ 
+    const {formData,errors,handleChange,showPassword,showConfirmPassword,toggleConfirmPasswordVisibility
+        ,togglePasswordVisibility
+    } = useForm()
+
+    const {handleChange : handleOtp ,handleKeyDown,inputs,otp} = useOtp()
+
+
+  const handleSubmit = async(e) => {
+    e.preventDefault()
+    
+    const otpCode = otp.join('')
+
+    if(Object.values(errors).some((err)=> err)) return
+
+    const toastId = toast.loading('Loading')
+
+    try {
+        const response = await userResetPassword({password : formData.password , token : otpCode }).unwrap()
+
+        toast.update(toastId, { render: response?.message, type: "success", isLoading: false, autoClose: 3000 });
+
+        navigate('/user/login')
+
+    } catch (error) {
+        console.log(error)
+        toast.update(toastId, { render: error?.data?.message || error?.error || "Reset password Failed try again later",type : 'error', isLoading: false, autoClose: 3000 });
+    }
+
+  }
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      {/* Main Content - Scrollable 30% */}
+      <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto min-h-[72vh]">
+        <div className="w-full max-w-6xl flex flex-col md:flex-row items-center justify-center gap-8 p-4">
+          {/* Left side - Illustration */}
+          <div className="w-full md:w-1/2 flex items-center justify-center h-full">
+            <img
+              src="/resetpassword.svg"
+              alt="Online learning illustration"
+              className="w-full max-w-[400px] md:max-w-[500px]"
+            />
+          </div>
+
+          {/* Right side - Form */}
+          <div className="w-full md:w-1/2 flex items-center justify-center h-full">
+            <div className="max-w-[400px] w-full">
+            <div className="space-y-2 text-center">
+          <h1 className="text-3xl font-bold"> Password Reset code</h1>
+          <p className="text-gray-500">
+            <br/>
+          </p>
+        </div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="flex justify-center gap-2">
+            {otp.map((data, index) => (
+              <input
+                key={index}
+                type="text"
+                ref={(el) => (inputs.current[index] = el)}
+                value={data}
+                onChange={(e) => handleOtp(e.target, index)}
+                onKeyDown={(e) => handleKeyDown(e, index)}
+                maxLength="1"
+                className="h-12 w-12 rounded-lg border border-gray-300 text-center text-lg focus:border-primary focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+              />
+            ))}
+            </div>
+                 {/* Password Field with Eye Icon */}
+              <div className="space-y-2 relative">
+                <label htmlFor="password" className="text-sm font-medium block">
+                  New Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    placeholder="New password"
+                    onChange={handleChange}
+                    className={`w-full rounded-lg border p-2 focus:ring-2 ${
+                      errors.password ? "border-red-500" : "border-gray-300 focus:border-purple-500/20"
+                    }`}
+                    required
+                  />
+                  <button type="button" onClick={togglePasswordVisibility} className="absolute right-2 top-2">
+                    {showPassword ? <EyeOff className="h-5 w-5 text-gray-500" /> : <Eye className="h-5 w-5 text-gray-500" />}
+                  </button>
+                </div>
+                {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
+              </div>
+
+              {/* Confirm Password Field with Eye Icon */}
+              <div className="space-y-2 relative">
+                <label htmlFor="confirmPassword" className="text-sm font-medium block">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    placeholder="Confirm password"
+                    onChange={handleChange}
+                    className={`w-full rounded-lg border p-2 focus:ring-2 ${
+                      errors.confirmPassword ? "border-red-500" : "border-gray-300 focus:border-purple-500/20"
+                    }`}
+                    required
+                  />
+                  <button type="button" onClick={toggleConfirmPasswordVisibility} className="absolute right-2 top-2">
+                    {showConfirmPassword ? <EyeOff className="h-5 w-5 text-gray-500" /> : <Eye className="h-5 w-5 text-gray-500" />}
+                  </button>
+                </div>
+                {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword}</p>}
+              </div>
+                <button
+                  type="submit"
+                  className="w-full py-3 px-4 bg-[#7C4DFF] hover:bg-[#6c3fff] text-white rounded-lg transition-colors duration-200"
+                >
+                  Submit
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer - Stays at Bottom */}
+      <Footer />
+    </div>
+  )
+}
+
+export default ResetPassword

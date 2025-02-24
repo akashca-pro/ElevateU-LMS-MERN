@@ -1,18 +1,18 @@
+import { Link } from "react-router-dom";
+import { Facebook, Github, Twitter, Mail, Globe } from "lucide-react"; 
+
+
 const Footer = () => {
+
   return (
     <footer className="bg-[#1D1042] text-white">
       <div className="mx-auto max-w-7xl px-4 py-12">
         <div className="grid gap-8 md:grid-cols-4">
           <div>
-            <div className="flex items-center gap-2">
-              {/* Replaced SVG tag with img tag for public folder asset */}
-              <img
-                src="/logo.svg"
-                alt="ElevateU Logo"
-                className="h-8 w-8"
-              />
+            <Link to="/" className="flex items-center gap-2">
+              <img src="/logo.svg" alt="ElevateU Logo" className="h-8 w-8" />
               <span className="text-xl font-bold">ElevateU</span>
-            </div>
+            </Link>
             <p className="mt-4 text-sm text-gray-300">
               Empowering learners through accessible and engaging online education.
             </p>
@@ -21,27 +21,43 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold">Get Help</h3>
             <ul className="mt-4 space-y-2 text-sm text-gray-300">
-              <li>Contact Us</li>
-              <li>Latest Articles</li>
-              <li>FAQ</li>
+              <li>
+                <Link to="/contact">Contact Us</Link>
+              </li>
+              <li>
+                <Link to="/articles">Latest Articles</Link>
+              </li>
+              <li>
+                <Link to="/faq">FAQ</Link>
+              </li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-semibold">Programs</h3>
             <ul className="mt-4 space-y-2 text-sm text-gray-300">
-              <li>Art & Design</li>
-              <li>Business</li>
-              <li>IT & Software</li>
-              <li>Languages</li>
-              <li>Programming</li>
+              <li>
+                <Link to="/courses/art-design">Art & Design</Link>
+              </li>
+              <li>
+                <Link to="/courses/business">Business</Link>
+              </li>
+              <li>
+                <Link to="/courses/it-software">IT & Software</Link>
+              </li>
+              <li>
+                <Link to="/courses/languages">Languages</Link>
+              </li>
+              <li>
+                <Link to="/courses/programming">Programming</Link>
+              </li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-semibold">Contact Us</h3>
             <ul className="mt-4 space-y-2 text-sm text-gray-300">
-              <li>Gmail: elevateulms@gmail.com</li>
+              <li>Email: elevateulms@gmail.com</li>
             </ul>
           </div>
         </div>
@@ -49,23 +65,26 @@ const Footer = () => {
         <div className="mt-8 flex items-center justify-between border-t border-gray-700 pt-8">
           <p className="text-sm text-gray-300">© 2025 ElevateU. All rights reserved.</p>
           <div className="flex gap-4">
-            {["facebook", "github", "google", "twitter", "microsoft"].map((social) => (
-              <a
-                key={social}
-                href={`https://${social}.com`}
-                className="rounded-full bg-white/10 p-2 hover:bg-white/20"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span className="sr-only">{social}</span>
-                <div className="h-5 w-5" />
-              </a>
-            ))}
+            <Link to="https://facebook.com" target="_blank" className="hover:text-blue-500">
+              <Facebook className="h-5 w-5" />
+            </Link>
+            <Link to="https://github.com" target="_blank" className="hover:text-gray-400">
+              <Github className="h-5 w-5" />
+            </Link>
+            <Link to="https://twitter.com" target="_blank" className="hover:text-blue-400">
+              <Twitter className="h-5 w-5" />
+            </Link>
+            <Link to="https://mail.google.com" target="_blank" className="hover:text-red-500">
+              <Mail className="h-5 w-5" />
+            </Link>
+            <Link to="https://www.google.com" target="_blank" className="hover:text-green-500">
+              <Globe className="h-5 w-5" />
+            </Link>
           </div>
         </div>
       </div>
     </footer>
-  )
-}
+  );
+};
 
-export default Footer
+export default Footer;
