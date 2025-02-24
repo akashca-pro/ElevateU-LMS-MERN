@@ -9,14 +9,17 @@ import tutorRouter from './routes/tutor.js'
 import adminRouter from './routes/admin.js'
 
 import {errorHandler,notFound} from './middleware/errorHandling.js'
+import passport from './config/passport.js'
 
 connectDB();
 
+
 const app= express()
+app.use(passport.initialize())
 
 app.use(cors({
     credentials : true,
-    origin : "http://localhost:5173"
+    origin : process.env.CLIENT_URL
 }))
 
 app.use(express.json());

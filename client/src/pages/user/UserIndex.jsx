@@ -13,6 +13,7 @@ import ProfileEnrolledCourse from './userProfile/ProfileEnrolledCourse';
 import ProfileTeachers from './userProfile/ProfileTeachers';
 import ProfileMessages2 from './userProfile/ProfileMessages2';
 import UserLoginProtect from '@/protectors/user/UserLoginProtect';
+import GoogleAuth from './auth/GoogleAuth';
 
 
 const UserIndex = () => {
@@ -32,6 +33,7 @@ const UserRoutes = () => {
         <Route path="login" element={<UserLogin />} />
         <Route path="forgot-password" element={<UserForgotPassword />} />
         <Route path='reset-password' element={<ResetPassword/>}/>
+        <Route path='auth-success' element={<GoogleAuth/>}/>
 
         <Route path='profile' element={<UserLoginProtect> <Index/> </UserLoginProtect>}>
           <Route index element={<ProfileDetails/>}/>

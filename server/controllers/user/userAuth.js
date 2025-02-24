@@ -5,6 +5,7 @@ import { generateOtpCode, saveOtp } from '../../utils/generateOtp.js'
 import {sendToken,clearToken} from '../../utils/tokenManage.js'
 import {sendEmailOTP, sendEmailResetPassword} from '../../utils/sendEmail.js'
 import {randomInt} from 'node:crypto'
+import 'dotenv/config'
 
 // User Registration with OTP
 
@@ -46,6 +47,8 @@ export const registerUser = async (req,res) => {
 
 }
 
+// verify otp
+
 export const verifyOtp = async (req, res) => {
     try {
       const { otp } = req.body;
@@ -70,7 +73,6 @@ export const verifyOtp = async (req, res) => {
     }
   };
   
-
 //Login with JWT
 
 export const loginUser = async (req,res) => {
@@ -203,4 +205,50 @@ export const logoutUser = async (req,res) => {
 
     }
     
+}
+
+// google callback
+
+export const passportCallback = async (req,res) => {
+    
+    try {
+
+        if(!req.user) return res.status(404).json({message : 'Google authentication failed'});
+
+        const {user,token} = req.user;
+
+        sendToken(res,'userAccessToken',token,1 * 24 * 60 * 60 * 1000);
+
+        return res.redirect(`${process.env.CLIENT_URL}/user/auth-success`);
+        
+    } catch (error) {
+        console.error("Error during Google OAuth callback:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+
+}
+
+// google failure 
+
+export const authFailure = async (req,res) => {
+
+    res.status(404).json({ message: "Google authentication failed. Please try again." });
+    
+}
+
+export const authLoad = async (req,res) => {
+    
+    try {
+        const {id} = req.user
+
+        const user = await User.findById(id)
+        if(!user) return res.status(404).json({message : "Google authentication failed. Please try again."})
+
+        return res.status(200).json({message : 'Google Authentication success',user})
+        
+    } catch (error) {
+        console.error("Error during Google OAuth callback:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+
 }

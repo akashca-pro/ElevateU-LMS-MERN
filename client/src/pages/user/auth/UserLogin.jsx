@@ -11,6 +11,9 @@ function Login() {
   const [userLogin] = useUserLoginMutation()
   const {formData,handleChange,errors,togglePasswordVisibility,showPassword} = useForm()
 
+  const handleGoogleAuth =()=>{
+    window.location.href = "http://localhost:9000/api/user/google"
+  }
 
   const handleSubmit = async(e) => {
     e.preventDefault()
@@ -108,7 +111,7 @@ function Login() {
             </div>
             <div className="grid gap-2">
               <button 
-                onClick={() => {/* Handle Google login */}}
+                onClick={handleGoogleAuth}
                 className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-sm font-medium hover:bg-gray-50"
               >
                 <img src="https://www.google.com/favicon.ico" alt="Google" className="h-5 w-5" />

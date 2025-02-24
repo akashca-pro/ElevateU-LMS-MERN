@@ -1,6 +1,7 @@
 import express from 'express'
 
-import {registerTutor, verifyOtp, loginTutor, forgotPassword, verifyResetLink, logoutTutor, refreshToken 
+import {registerTutor, verifyOtp, loginTutor, forgotPassword, verifyResetLink, logoutTutor, refreshToken ,
+    passportCallback,authFailure
 } from '../controllers/tutor/tutorAuth.js'
 
 import {loadProfile,updateProfile,deleteAccount,requestVerification
@@ -15,6 +16,7 @@ import { updateEmail, verifyEmail } from '../controllers/commonControllers.js';
 import {createCourse, updateCourse, publishCourse, deleteCourse, loadCourses, courseDetails
 
 } from '../controllers/course/tutorOps.js'
+import passport from 'passport';
 
 const router = express.Router()
 
@@ -27,6 +29,13 @@ router.post('/forgot-password',otpLimiter,forgotPassword)
 router.post('/reset-password',verifyResetLink)
 router.patch('/logout',logoutTutor)
 router.patch('/refresh-token',verifyTutorRefreshToken,refreshToken)
+
+router.get('/google',passport.authenticate('google-tutor',{ scope: ["profile", "email"] }))
+
+router.get('/auth-callback',passport.authenticate('google-tutor',{ session : false , 
+    failureRedirect : '/auth-failure' }),passportCallback);
+
+router.get('/auth-failure',authFailure)
 
 // CRUD routes
 

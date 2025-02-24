@@ -59,6 +59,12 @@ const userAuthApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags : ['User']
         }),
+        userGoogleCallback : builder.query({
+            query : ()=>({
+                url : `user/auth-load`,
+                method : 'GET',
+            }),
+        })
     })
 })
 
@@ -70,6 +76,7 @@ export const {
     useUserForgotPasswordMutation,
     useUserResetPasswordMutation,
     useUserLogoutMutation,
-    useUserRefreshTokenMutation
+    useUserRefreshTokenMutation,
+    useUserGoogleCallbackQuery
 
 } = userAuthApi

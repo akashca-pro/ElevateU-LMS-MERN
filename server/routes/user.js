@@ -1,6 +1,7 @@
 import express from 'express'
 
-import {registerUser,verifyOtp,loginUser,refreshToken,logoutUser,forgotPassword,verifyResetLink
+import {registerUser,verifyOtp,loginUser,refreshToken,logoutUser,forgotPassword,verifyResetLink,
+    passportCallback, authFailure ,authLoad
 } from '../controllers/user/userAuth.js'
 
 import {loadProfile,updateProfile,deleteAccount
@@ -14,6 +15,10 @@ import retryVerify from '../middleware/retryVerify.js';
 
 import { updateEmail, verifyEmail } from '../controllers/commonControllers.js';
 
+import passport from 'passport'
+
+
+
 const router =  express.Router();
 
 // Auth routes
@@ -25,6 +30,14 @@ router.post('/forgot-password',otpLimiter,forgotPassword)
 router.post('/reset-password',verifyResetLink)
 router.patch('/logout',logoutUser)
 router.patch('/refresh-token',verifyUserRefreshToken,refreshToken)
+
+router.get('/google',passport.authenticate("google-user",{ scope: ["profile", "email"] }))
+
+router.get('/auth-callback',passport.authenticate("google-user",{ session : false }),passportCallback);
+
+router.get('/auth-failure',authFailure)
+
+router.get('/auth-load',verifyUserAccessToken,authLoad) 
 
 // CRUD routes
 

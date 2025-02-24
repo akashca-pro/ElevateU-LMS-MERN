@@ -210,3 +210,32 @@ export const logoutTutor = async (req,res) => {
     }
     
 }
+
+// google callback
+
+export const passportCallback = async (req,res) => {
+    
+    try {
+
+        if(!req.tutor) return res.status(404).json({message : 'Google authentication failed'});
+
+        const {user,token} = req.user;
+
+        sendToken(res,'tutorAccessToken',token,1 * 24 * 60 * 60 * 1000);
+
+        return res.status(200).json({message : 'Google login successfull',user})
+        
+    } catch (error) {
+        console.error("Error during Google OAuth callback:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+
+}
+
+// google failure 
+
+export const authFailure = async (req,res) => {
+
+    res.status(404).json({ message: "Google authentication failed. Please try again." });
+
+}

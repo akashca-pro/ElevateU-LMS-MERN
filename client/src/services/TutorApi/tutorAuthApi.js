@@ -52,6 +52,6 @@ export const {
     useTutorVerifyOtpMutation,
     useTutorLoginMutation,
     useTutorLogoutMutation,
-    useTutorRefreshTokenMutation
+    useTutorRefreshTokenMutation,
 
 } = tutorAuthApi

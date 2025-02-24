@@ -15,6 +15,11 @@ const SignUp = () => {
 
   } = useForm()
 
+  const handleGoogleAuth =()=>{
+    window.location.href = "http://localhost:9000/api/user/google"
+  }
+
+
   const handleSubmit = async(e)=>{
      e.preventDefault();
 
@@ -177,18 +182,11 @@ const SignUp = () => {
             </div>
             <div className="grid gap-2">
               <button 
-                onClick={() => {/* Handle Google signup */}}
+                onClick={handleGoogleAuth}
                 className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-sm font-medium hover:bg-gray-50"
               >
                 <img src="https://www.google.com/favicon.ico" alt="Google" className="h-5 w-5" />
                 Continue with Google
-              </button>
-              <button 
-                onClick={() => {/* Handle Facebook signup */}}
-                className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-sm font-medium hover:bg-gray-50"
-              >
-                <img src="https://www.facebook.com/favicon.ico" alt="Facebook" className="h-5 w-5" />
-                Continue with Facebook
               </button>
             </div>
             <p className="text-center text-sm text-gray-500">
