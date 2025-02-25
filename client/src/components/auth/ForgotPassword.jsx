@@ -1,14 +1,14 @@
 import useForm from "@/hooks/useForm"
 import { Link, useNavigate } from "react-router-dom"
-import {useUserForgotPasswordMutation} from '@/services/userApi/userAuthApi.js'
 import { toast } from "react-toastify"
 
 
-const ForgotPassword = () => {
+const ForgotPassword = ({useForgotPassword , navigateTo }) => {
   const navigate = useNavigate()
-  const [userForgotPassword,{isLoading}] = useUserForgotPasswordMutation()
-  const {formData,handleChange,errors} = useForm()
-
+  const [forgotPassword,{isLoading}] = useForgotPassword()
+  const {formData, handleChange, errors} = useForm()
+  const isFormValid = !Object.values(errors).some((err) => err) && formData.email.trim() !== "";
+  
   const handleSubmit = async(e) => {
     e.preventDefault()
     
@@ -17,17 +17,18 @@ const ForgotPassword = () => {
     const toastId = toast.loading('Loading')
 
     try {
-      const response = await userForgotPassword({email : formData.email}).unwrap()
+      const response = await forgotPassword({email : formData.email}).unwrap()
 
       toast.update(toastId, { render: response?.message, type: "success", isLoading: false, autoClose: 3000 });
 
-      navigate('/user/reset-password')
+      navigate(navigateTo,{state : formData.email})
 
     } catch (error) {
       console.log(error)
       toast.update(toastId, { render: error?.data?.message || error?.error || "Reset password Failed try again later",type : 'error', isLoading: false, autoClose: 3000 });
     }
-
+    
+    
   }
 
   return (
@@ -67,13 +68,16 @@ const ForgotPassword = () => {
                 {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
               </div>
             <button
+             disabled={isLoading || !isFormValid}
               type="submit"
-              className="w-full rounded-lg bg-primary px-4 py-2 text-white hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+              className={`w-full rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 
+                ${isLoading || !isFormValid ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-secondary"}
+              `}
             >
               Reset Password
             </button>
           </form>
-          <Link to="/login" className="flex items-center justify-center gap-2 text-sm text-primary hover:underline">
+          <Link to="/user/login" className="flex items-center justify-center gap-2 text-sm text-primary hover:underline">
             Back to login screen
           </Link>
         </div>

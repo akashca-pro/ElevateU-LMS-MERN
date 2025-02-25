@@ -3,11 +3,11 @@ import { ToastContainer } from 'react-toastify'
 import "react-toastify/dist/ReactToastify.css";
 import {Routes , Route} from 'react-router-dom'
 
-import UserRoutes from './pages/user/UserIndex'
-import TutorRoutes from './pages/tutor/TutorIndex'
-import AdminRoutes from './pages/admin/AdminIndex'
-import Index from './pages/Home/Index'
-import NotFound from './pages/NotFound';
+import UserRoutes from '@/pages/user/UserIndex'
+import TutorRoutes from '@/pages/tutor/TutorIndex'
+import AdminRoutes from '@/pages/admin/AdminIndex'
+import Index from '@/pages/Home/Index'
+import NotFound from '@/pages/NotFound';
 
 const App = () => {
   return (

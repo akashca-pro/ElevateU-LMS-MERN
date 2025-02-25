@@ -64,7 +64,7 @@ const userAuthApi = apiSlice.injectEndpoints({
                 url : `user/auth-load`,
                 method : 'GET',
             }),
-        })
+        }),
     })
 })
 
@@ -77,6 +77,6 @@ export const {
     useUserResetPasswordMutation,
     useUserLogoutMutation,
     useUserRefreshTokenMutation,
-    useUserGoogleCallbackQuery
+    useUserGoogleCallbackQuery,
 
 } = userAuthApi

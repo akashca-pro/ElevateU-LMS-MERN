@@ -28,6 +28,22 @@ const tutorAuthApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags : ['Tutor']
         }),
+        forgotPassword : builder.mutation({
+            query : (credentials)=>({
+                url : 'tutor/forgot-password',
+                method : 'POST',
+                body : credentials
+            }),
+            invalidatesTags : ['User']
+        }),
+        resetPassword : builder.mutation({
+            query : (credentials)=>({
+                url : 'tutor/reset-password',
+                method : 'POST',
+                body : credentials
+            }),
+            invalidatesTags : ['User']
+        }),
         tutorLogout : builder.mutation({
             query : ()=> ({
                 url : 'tutor/logout',
@@ -42,6 +58,12 @@ const tutorAuthApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags : ['Tutor']
         }),
+        tutorGoogleCallback : builder.query({
+            query : ()=>({
+                url : `tutor/auth-load`,
+                method : 'GET',
+            }),
+        }),
     })
 })
 
@@ -53,5 +75,8 @@ export const {
     useTutorLoginMutation,
     useTutorLogoutMutation,
     useTutorRefreshTokenMutation,
+    useForgotPasswordMutation,
+    useResetPasswordMutation,
+    useTutorGoogleCallbackQuery
 
 } = tutorAuthApi

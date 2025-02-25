@@ -1,25 +1,23 @@
 import React, { useEffect } from 'react';
-import { useUserAuthActions } from '@/hooks/useDispatch.js';
 import { useNavigate } from 'react-router-dom';
-import { useUserGoogleCallbackQuery } from '@/services/userApi/userAuthApi.js';
 import { toast } from 'react-toastify';
 
-const GoogleAuth = () => {
-  const { login } = useUserAuthActions();
+const GoogleAuth = ({role,useGoogleCalback ,useAuthActions}) => {
+  const { login } = useAuthActions();
   const navigate = useNavigate();
-  const { isLoading, data, error } = useUserGoogleCallbackQuery();
+  const { isLoading, data, error } = useGoogleCalback();
 
   useEffect(() => {
     if (isLoading) return; // Wait until the API call is complete
 
     if (error) {
       toast.error(error?.data?.message || "Google authentication failed.");
-      navigate("/user/login"); // Redirect to login page
+      navigate(`${role}/login`); // Redirect to login page
     }
 
     if (data) {
       toast.success("Google login successful!");
-      login(data.user); // Save user in Redux
+      login(data.role); // Save user in Redux
       navigate("/");
     }
   }, [data, error, isLoading, navigate, login]);

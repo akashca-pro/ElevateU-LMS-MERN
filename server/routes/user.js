@@ -13,11 +13,9 @@ import {verifyUserAccessToken,verifyUserRefreshToken} from '../utils/verifyToken
 import {otpLimiter} from '../middleware/rateLimiting.js';
 import retryVerify from '../middleware/retryVerify.js';
 
-import { updateEmail, verifyEmail } from '../controllers/commonControllers.js';
+import { updateEmail, verifyEmail , reSendOtp} from '../controllers/commonControllers.js';
 
 import passport from 'passport'
-
-
 
 const router =  express.Router();
 
@@ -26,7 +24,7 @@ const router =  express.Router();
 router.post('/signup',registerUser)
 router.post('/verify-otp',otpLimiter,verifyOtp)
 router.post('/login',retryVerify('user'),loginUser)
-router.post('/forgot-password',otpLimiter,forgotPassword)
+router.post('/forgot-password',forgotPassword)
 router.post('/reset-password',verifyResetLink)
 router.patch('/logout',logoutUser)
 router.patch('/refresh-token',verifyUserRefreshToken,refreshToken)

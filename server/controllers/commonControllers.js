@@ -1,7 +1,7 @@
 import User from "../model/user.js"
 import Tutor from "../model/tutor.js"
 import { generateOtpCode, saveOtp } from "../utils/generateOtp.js"
-import { sendEmailOTP } from "../utils/sendEmail.js"
+import { sendEmailOTP, sendEmailResetPassword } from "../utils/sendEmail.js"
 
 //Update Email
 
@@ -72,4 +72,38 @@ export const verifyEmail = (role) =>{
         }
     
     }
+}
+
+export const forgotPassword = async (req,res) => {
+    
+    
+
+}
+
+// re-send otp
+
+export const reSendOtp = async (req,res) => {
+        
+    try {
+        const {email ,role} = req.body
+        const db = role === 'user' ? User : Tutor
+        const {otp,otpExpires} = generateOtpCode();
+        const user = await db.findOne({email})
+
+        if(!user) return res.status(404).json({message : `${role} is not found`})
+
+        user.otp = otp
+        user.otpExpires = otpExpires
+
+        await user.save()
+
+        await sendEmailResetPassword(email,user.firstName,otp)
+
+        return res.status(200).json({message : 'New OTP sent to your mail'})
+
+    } catch (error) {
+        console.log('Error Re-sending OTP');
+        res.status(500).json({ message: 'Error Re-sending OTP', error: error.message });
+    }
+
 }

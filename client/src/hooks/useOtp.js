@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-const useOtp = (length = 6, initialTime = 58) => {
+const useOtp = (length = 6, initialTime = 600) => {
   const [otp, setOtp] = useState(new Array(length).fill(""));
   const [timer, setTimer] = useState(initialTime);
   const inputs = useRef([]);

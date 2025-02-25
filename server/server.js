@@ -7,6 +7,7 @@ import connectDB from './config/db.js'
 import userRouter from './routes/user.js'
 import tutorRouter from './routes/tutor.js'
 import adminRouter from './routes/admin.js'
+import commonRouter from './routes/common.js'
 
 import {errorHandler,notFound} from './middleware/errorHandling.js'
 import passport from './config/passport.js'
@@ -25,6 +26,9 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({extended : true}));
+
+// Common routes
+app.use('/api',commonRouter)
 
 //User Route
 app.use('/api/user',userRouter);

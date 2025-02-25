@@ -2,19 +2,47 @@ import { Eye, EyeOff } from "lucide-react";
 import Footer from "@/components/Footer.jsx"
 import useForm from "@/hooks/useForm"
 import useOtp from "@/hooks/useOtp";
-import {useUserResetPasswordMutation} from '@/services/userApi/userAuthApi.js'
+import {useReSendOtpMutation} from '@/services/commonApi.js'
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
-const ResetPassword = () => {
+const ResetPassword = ({role, useResetPassword, navigateTo}) => {
+    
+    const location = useLocation()
+    const [resendOtp] = useReSendOtpMutation()
     const navigate = useNavigate()
-    const [userResetPassword,{isLoading}] = useUserResetPasswordMutation()
+    const [resetPassword,{isLoading}] = useResetPassword()
  
     const {formData,errors,handleChange,showPassword,showConfirmPassword,toggleConfirmPasswordVisibility
         ,togglePasswordVisibility
     } = useForm()
+    
+    const {handleChange : handleOtp ,handleKeyDown,inputs,otp, handleResend : reset, timer} = useOtp()
+    
+    const isFormValid = Object.values(errors).some((err) => err) || 
+    !formData.password || 
+    !formData.confirmPassword || otp.includes('');
 
-    const {handleChange : handleOtp ,handleKeyDown,inputs,otp} = useOtp()
+  const handleResend = async() => {
+
+    const toastId = toast.loading('Loading') 
+
+    try {
+      reset()
+      const response = await resendOtp({role ,email : location.state}).unwrap();
+      toast.update(toastId,{ render: response?.message, type: "success", isLoading: false, autoClose: 3000 })
+
+    } catch (error) {
+      toast.update(toastId, { render: error?.data?.message || error?.error || "Reset password Failed try again later",type : 'error', isLoading: false, autoClose: 3000 });
+    }
+
+  }
+
+  const resetForm = () => {
+    formData.password = "";
+    formData.confirmPassword = "";
+    otp.fill("");
+  };
 
 
   const handleSubmit = async(e) => {
@@ -27,15 +55,16 @@ const ResetPassword = () => {
     const toastId = toast.loading('Loading')
 
     try {
-        const response = await userResetPassword({password : formData.password , token : otpCode }).unwrap()
+        const response = await resetPassword({password : formData.password , token : otpCode }).unwrap()
 
         toast.update(toastId, { render: response?.message, type: "success", isLoading: false, autoClose: 3000 });
 
-        navigate('/user/login')
+        navigate(navigateTo)
 
     } catch (error) {
         console.log(error)
         toast.update(toastId, { render: error?.data?.message || error?.error || "Reset password Failed try again later",type : 'error', isLoading: false, autoClose: 3000 });
+        resetForm()
     }
 
   }
@@ -77,6 +106,22 @@ const ResetPassword = () => {
                 className="h-12 w-12 rounded-lg border border-gray-300 text-center text-lg focus:border-primary focus:outline-none focus:ring-2 focus:ring-purple-500/20"
               />
             ))}
+            </div>
+            <div className="mt-4 text-sm text-gray-500">
+              Didn't receive code?{" "}
+              <button
+                type="button"
+                className={`font-medium ${timer === 0 && !isFormValid ? "text-primary" : "text-gray-400"}`}
+                disabled={timer > 0 || (isLoading || isFormValid)}
+                onClick={handleResend}
+              >
+                Resend
+              </button>
+              {timer > 0 && (
+                <span className="ml-1">
+                    {`${String(Math.floor(timer / 60)).padStart(2, "0")}:${String(timer % 60).padStart(2, "0")}`}
+                </span>
+              )}
             </div>
                  {/* Password Field with Eye Icon */}
               <div className="space-y-2 relative">
@@ -128,8 +173,11 @@ const ResetPassword = () => {
                 {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword}</p>}
               </div>
                 <button
+                 disabled={isLoading || isFormValid}
                   type="submit"
-                  className="w-full py-3 px-4 bg-[#7C4DFF] hover:bg-[#6c3fff] text-white rounded-lg transition-colors duration-200"
+                  className={`w-full rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 
+                    ${isLoading || isFormValid ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-secondary"}
+                  `}
                 >
                   Submit
                 </button>

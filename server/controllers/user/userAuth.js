@@ -84,6 +84,7 @@ export const loginUser = async (req,res) => {
     
         if(!user)return res.status(404).json({message : "Invalid credentials"});
     
+        
         if(!(await bcrypt.compare(password,user.password))){
             return res.status(404).json({message : "Incorrect password"});
         }
@@ -142,8 +143,6 @@ export const verifyResetLink = async (req,res) => {
     
     try {
         const { password ,token } = req.body;
-
-        console.log(req.body)
 
         const user = await User.findOne({
             otp : token , 

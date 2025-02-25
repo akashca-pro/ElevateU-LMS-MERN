@@ -1,5 +1,4 @@
 //  Base API configuration
-
 import {createApi,fetchBaseQuery} from '@reduxjs/toolkit/query/react';
 
 // use this if refreshtoken is invalid or anything error happens so the user will be logged out to log in page
@@ -8,7 +7,7 @@ import { tutorLogout } from '../features/auth/tutor/tutorAuthSlice';
 import { removeUserCredentials } from '../features/auth/user/userAuthSlice';
 
 const baseQuery = fetchBaseQuery({
-    baseUrl : "http://localhost:9000/api/",
+    baseUrl : import.meta.env.VITE_BASE_URL,
    credentials : 'include',
 });
 

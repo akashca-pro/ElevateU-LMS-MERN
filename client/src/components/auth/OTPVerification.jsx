@@ -1,19 +1,36 @@
 import useOTP from "@/hooks/useOtp.js";
 import { useLocation, useNavigate } from "react-router-dom";
-import {useUserVerifyOtpMutation} from  '../../../services/userApi/userAuthApi.js'
 import { toast } from "react-toastify";
-import { useUserAuthActions } from "@/hooks/useDispatch.js";
+import {useReSendOtpMutation} from '@/services/commonApi.js'
 
 
-const OTPVerification = () => {
+const OTPVerification = ({role, useVerifyOtp , useAuthActions}) => {
 
   const location = useLocation();
-  const {login} = useUserAuthActions()
+  const {login} = useAuthActions()
+  const [resendOtp] = useReSendOtpMutation()
   const email = location.state;
-  const { otp, inputs, timer, handleChange, handleKeyDown, handleResend } = useOTP(6, 58);
+  const { otp, inputs, timer, handleChange, handleKeyDown, handleResend : reset } = useOTP();
 
-  const [userVerifyOtp,{isLoading}] = useUserVerifyOtpMutation()
+  const isOtpValid = otp.includes('');
+
+  const [verifyOtp,{isLoading}] = useVerifyOtp()
   const navigate = useNavigate()
+
+  const handleResend = async() => {
+
+    const toastId = toast.loading('Loading') 
+
+    try {
+      reset()
+      const response = await resendOtp({role ,email : location.state}).unwrap();
+      toast.update(toastId,{ render: response?.message, type: "success", isLoading: false, autoClose: 3000 })
+
+    } catch (error) {
+      toast.update(toastId, { render: error?.data?.message || error?.error || "Reset password Failed try again later",type : 'error', isLoading: false, autoClose: 3000 });
+    }
+
+  }
 
   const handleVerify = async(e)=>{
 
@@ -29,7 +46,7 @@ const OTPVerification = () => {
       const toastId = toast.loading('Verifying OTP')
 
       try {
-        const response = await userVerifyOtp({otp : otpCode}).unwrap();
+        const response = await verifyOtp({otp : otpCode}).unwrap();
 
         toast.update(toastId, { render: response.message, type: "success", isLoading: false, autoClose: 3000 });
         
@@ -85,7 +102,13 @@ const OTPVerification = () => {
             ))}
           </div>
           <div className="text-center">
-            <button type="submit" className="w-full rounded-lg bg-primary px-4 py-2 text-white">
+            <button 
+            type="submit"
+            disabled = {isOtpValid}
+             className={`w-full rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 
+              ${isLoading || isOtpValid ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-secondary"}
+            `}
+            >
               Verify
             </button>
             <div className="mt-4 text-sm text-gray-500">
@@ -98,7 +121,11 @@ const OTPVerification = () => {
               >
                 Resend
               </button>
-              {timer > 0 && <span className="ml-1">{`00:${timer.toString().padStart(2, "0")}s`}</span>}
+              {timer > 0 && (
+                <span className="ml-1">
+                    {`${String(Math.floor(timer / 60)).padStart(2, "0")}:${String(timer % 60).padStart(2, "0")}`}
+                </span>
+              )}
             </div>
           </div>
         </form>

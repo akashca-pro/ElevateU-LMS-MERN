@@ -223,7 +223,7 @@ export const passportCallback = async (req,res) => {
 
         sendToken(res,'tutorAccessToken',token,1 * 24 * 60 * 60 * 1000);
 
-        return res.status(200).json({message : 'Google login successfull',user})
+        return res.redirect(`${process.env.CLIENT_URL}/tutor/auth-success`);
         
     } catch (error) {
         console.error("Error during Google OAuth callback:", error);
@@ -237,5 +237,22 @@ export const passportCallback = async (req,res) => {
 export const authFailure = async (req,res) => {
 
     res.status(404).json({ message: "Google authentication failed. Please try again." });
+
+}
+
+export const authLoad = async (req,res) => {
+    
+    try {
+        const {id} = req.user
+
+        const tutor = await Tutor.findById(id)
+        if(!tutor) return res.status(404).json({message : "Google authentication failed. Please try again."})
+
+        return res.status(200).json({message : 'Google Authentication success',tutor})
+        
+    } catch (error) {
+        console.error("Error during Google OAuth callback:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
 
 }

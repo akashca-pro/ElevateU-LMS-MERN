@@ -1,7 +1,7 @@
 import express from 'express'
 
 import {registerTutor, verifyOtp, loginTutor, forgotPassword, verifyResetLink, logoutTutor, refreshToken ,
-    passportCallback,authFailure
+    passportCallback,authFailure,authLoad
 } from '../controllers/tutor/tutorAuth.js'
 
 import {loadProfile,updateProfile,deleteAccount,requestVerification
@@ -36,6 +36,8 @@ router.get('/auth-callback',passport.authenticate('google-tutor',{ session : fal
     failureRedirect : '/auth-failure' }),passportCallback);
 
 router.get('/auth-failure',authFailure)
+
+router.get('/auth-load',verifyTutorAccessToken,authLoad)
 
 // CRUD routes
 

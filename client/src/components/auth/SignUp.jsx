@@ -1,22 +1,29 @@
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import {useUserSignupMutation} from '../../../services/userApi/userAuthApi'
 import useForm from "@/hooks/useForm";
 import { toast } from "react-toastify";
 
-const SignUp = () => {
+const SignUp = ({role,useSignup}) => {
   
   const navigate = useNavigate();
-  const [userSignup] = useUserSignupMutation();
+  const [signup,{isLoading}] = useSignup();
   const {
     formData, errors, showPassword, showConfirmPassword, handleChange, 
     toggleConfirmPasswordVisibility, togglePasswordVisibility
 
   } = useForm()
 
+  const isFormValid = Object.values(errors).some((err) => err) || 
+    !formData.password || 
+    !formData.confirmPassword || 
+    !formData.email ||
+    !formData.firstName
+
   const handleGoogleAuth =()=>{
-    window.location.href = "http://localhost:9000/api/user/google"
+    window.location.href = role === 'user' 
+    ? import.meta.env.VITE_GOOGLE_USER_AUTH_REQ 
+    : import.meta.env.VITE_GOOGLE_TUTOR_AUTH_REQ
   }
 
 
@@ -31,7 +38,7 @@ const SignUp = () => {
 
     try {
 
-      const response = await userSignup(formData).unwrap();
+      const response = await signup(formData).unwrap();
 
       toast.update(toastId, {
         render: response.message,
@@ -40,7 +47,7 @@ const SignUp = () => {
         autoClose: 3000,
       });
       
-      navigate('/user/verify-otp',{state : formData.email})
+      navigate(`/${role}/verify-otp`,{state : formData.email})
 
     } catch (error) {
       
@@ -74,7 +81,7 @@ const SignUp = () => {
         <div className="flex items-center justify-center p-8 overflow-auto">
           <div className="w-full max-w-sm space-y-6">
             <div className="text-center">
-              <h1 className="text-3xl font-bold">Sign Up</h1>
+              <h1 className="text-3xl font-bold">{role === 'user' ? 'Student' : 'Tutor'} Sign Up</h1>
               <p className="text-gray-500">Create your account to get started</p>
             </div>
 
@@ -135,6 +142,7 @@ const SignUp = () => {
                       errors.password ? "border-red-500" : "border-gray-300 focus:border-purple-500/20"
                     }`}
                     required
+                    placeholder="Password"
                   />
                   <button type="button" onClick={togglePasswordVisibility} className="absolute right-2 top-2">
                     {showPassword ? <EyeOff className="h-5 w-5 text-gray-500" /> : <Eye className="h-5 w-5 text-gray-500" />}
@@ -159,6 +167,7 @@ const SignUp = () => {
                       errors.confirmPassword ? "border-red-500" : "border-gray-300 focus:border-purple-500/20"
                     }`}
                     required
+                    placeholder="Confirm Password"
                   />
                   <button type="button" onClick={toggleConfirmPasswordVisibility} className="absolute right-2 top-2">
                     {showConfirmPassword ? <EyeOff className="h-5 w-5 text-gray-500" /> : <Eye className="h-5 w-5 text-gray-500" />}
@@ -168,7 +177,13 @@ const SignUp = () => {
               </div>
 
               {/* Submit Button */}
-              <Button type="submit" className="w-full rounded-lg bg-primary px-4 py-2 text-white hover:bg-secondary focus:ring-2 focus:ring-purple-500/20">
+              <Button 
+              disabled={isLoading || isFormValid}
+              type="submit"
+              className={`w-full rounded-lg py-2 px-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 
+                ${isLoading || isFormValid ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-secondary"}
+              `}
+              >
                 Sign Up
               </Button>
             </form>
