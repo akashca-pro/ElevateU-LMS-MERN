@@ -1,26 +1,30 @@
 import {createSlice} from '@reduxjs/toolkit'
 
+const storedData = localStorage.getItem("tutor");
+
 const initialState = {
-    tutor : null,
-    isAuthenticated : false
+    tutorData : storedData ? JSON.parse(storedUser) : null,
+    isAuthenticated : !!storedData,
 }
 
 const tutorAuthSlice = createSlice({
     name : 'tutorAuth',
     initialState,
     reducers : {
-        tutorLogin : (state,action)=>{
-            state.tutor = action.payload.tutor;
+        setTutorCredentials : (state,action)=>{
+            state.tutorData = action.payload;
             state.isAuthenticated = true;
+            localStorage.setItem("tutor",JSON.stringify(action.payload))
         },
-        tutorLogout : (state)=>{
-            state.tutor = null;
+        removeTutorCredentials : (state)=>{
+            state.tutorData = null;
             state.isAuthenticated = false;
+            localStorage.removeItem("tutor");
             window.location.href = '/tutor/login'
         }
     }
 })
 
-export const {tutorLogin,tutorLogout} = tutorAuthSlice.actions
+export const {setTutorCredentials,removeTutorCredentials} = tutorAuthSlice.actions
 
 export default tutorAuthSlice.reducer

@@ -2,9 +2,8 @@ import React from 'react';
 import { Routes, Route, Outlet } from 'react-router-dom';
 
 
-import Index from '@/pages/user/userProfile/Index.jsx'
-import ProfileDetails from './userProfile/ProfileDetails';
-import ProfileEnrolledCourse from './userProfile/ProfileEnrolledCourse';
+import ProfileDetails from './userProfile/ProfileDetails/ProfileDetails';
+import CourseDetails from './userProfile/my-course/CourseDetails';
 import ProfileTeachers from './userProfile/ProfileTeachers';
 import ProfileMessages2 from './userProfile/ProfileMessages2';
 import UserLoginProtect from '@/protectors/user/UserLoginProtect';
@@ -13,6 +12,7 @@ import UserLoginProtect from '@/protectors/user/UserLoginProtect';
 import {useUserForgotPasswordMutation,useUserResetPasswordMutation,useUserGoogleCallbackQuery,
   useUserVerifyOtpMutation,useUserSignupMutation,useUserLoginMutation
 } from '@/services/userApi/userAuthApi.js'
+
 
 import { useUserAuthActions } from '@/hooks/useDispatch.js';
 
@@ -24,6 +24,11 @@ import ResetPassword from '@/components/auth/ResetPassword';
 import OTPVerification from '@/components/auth/OTPVerification';
 import SignUp from '@/components/auth/SignUp';
 import Login from '@/components/auth/Login';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import Layout from '@/components/Drawer/Layout';
+
+import Logout from './userProfile/Logout';
 
 const UserIndex = () => {
   return (
@@ -32,6 +37,17 @@ const UserIndex = () => {
     </>
   );
 };
+
+const ProtectedLayout = () => (
+  <UserLoginProtect>
+    <Navbar/>
+    <Layout>
+      <Outlet />
+    </Layout>
+    <Footer/>
+  </UserLoginProtect>
+);
+
 
 const UserRoutes = () => {
   return (
@@ -44,13 +60,15 @@ const UserRoutes = () => {
         <Route path='reset-password' element={<ResetPassword role={'user'} useResetPassword={useUserResetPasswordMutation} navigateTo={'/user/login'} />}/>
         <Route path='auth-success' element={<GoogleAuth role={'user'} useGoogleCalback={useUserGoogleCallbackQuery} useAuthActions={useUserAuthActions}/>}/>
 
-        <Route path='profile' element={<UserLoginProtect> <Index/> </UserLoginProtect>}>
-          <Route index element={<ProfileDetails/>}/>
-          <Route path='enrolled-courses' element={<ProfileEnrolledCourse/>}/>
+        <Route path='profile' element={<ProtectedLayout/>}>
+          <Route index element={<ProfileDetails />}/>
+          <Route path='my-courses' element={<CourseDetails/>}/>
           <Route path='teachers' element={<ProfileTeachers/>}/>
           <Route path='messages' element={<ProfileMessages2/>}/>
+          <Route path='logout' element={<Logout/>}/>
 
         </Route>
+  
       </Route>
     </Routes>
   );

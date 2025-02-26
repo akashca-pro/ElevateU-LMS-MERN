@@ -1,27 +1,28 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
-const GoogleAuth = ({role,useGoogleCalback ,useAuthActions}) => {
+const GoogleAuth = ({ role, useGoogleCalback, useAuthActions }) => {
   const { login } = useAuthActions();
   const navigate = useNavigate();
   const { isLoading, data, error } = useGoogleCalback();
 
   useEffect(() => {
-    if (isLoading) return; // Wait until the API call is complete
+    if (isLoading) {
+      return;
+    }
 
     if (error) {
-      toast.error(error?.data?.message || "Google authentication failed.");
-      navigate(`${role}/login`); // Redirect to login page
+      toast.error('Google authentication failed. Please try again.');
+      navigate(`/${role}/login`);
     }
 
     if (data) {
-      toast.success("Google login successful!");
-      login(data.role); // Save user in Redux
-      navigate("/");
+      toast.success('Google authentication successful!');
+      login(data[role]); // Save user in Redux
+      navigate('/');
     }
-  }, [data, error, isLoading, navigate, login]);
-
+  }, [data, error, isLoading, navigate, login, role]);
 
   return (
     <div className="flex h-screen w-screen items-center justify-center">

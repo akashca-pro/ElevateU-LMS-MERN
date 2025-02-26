@@ -1,8 +1,10 @@
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useForm from "@/hooks/useForm";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
+import React from "react";
+// import { toast } from "react-toastify";
 
 const SignUp = ({role,useSignup}) => {
   
@@ -27,40 +29,30 @@ const SignUp = ({role,useSignup}) => {
   }
 
 
-  const handleSubmit = async(e)=>{
-     e.preventDefault();
-
-
-    // If there are any validation errors, prevent submission
-     if(Object.values(errors).some((err)=> err)) return
-
-     const toastId = toast.loading("Loading");
-
-    try {
-
-      const response = await signup(formData).unwrap();
-
-      toast.update(toastId, {
-        render: response.message,
-        type: "success",
-        isLoading: false,
-        autoClose: 3000,
-      });
-      
-      navigate(`/${role}/verify-otp`,{state : formData.email})
-
-    } catch (error) {
-      
-      toast.update(toastId, {
-        render: error?.data?.message || "Signup failed!",
-        type: "error",
-        isLoading: false,
-        autoClose: 3000,
-      });
-
-      console.log(error.data.message)
-    }
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    if (Object.values(errors).some((err) => err)) return;
+  
+    // Using Sonner's toast.promise
+    const signupPromise = new Promise(async (resolve, reject) => {
+      try {
+        const response = await signup(formData).unwrap();
+        resolve(response); // Resolve the promise if successful
+      } catch (error) {
+        reject(error); // Reject the promise on failure
+      }
+    });
+  
+    toast.promise(signupPromise, {
+      loading: "Signing up...",
+      success: () => {
+        navigate(`/${role}/verify-otp`, { state: formData.email });
+        return "An OTP has been sent to your registered email address.";
+      },
+      error: (error) => error?.data?.message || "Signup failed. Try again.",
+    });
+  };
 
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-gray-100">
@@ -79,12 +71,16 @@ const SignUp = ({role,useSignup}) => {
 
         {/* Right Side - Form */}
         <div className="flex items-center justify-center p-8 overflow-auto">
-          <div className="w-full max-w-sm space-y-6">
+          <div className="w-full max-w-sm space-y-5">
             <div className="text-center">
               <h1 className="text-3xl font-bold">{role === 'user' ? 'Student' : 'Tutor'} Sign Up</h1>
-              <p className="text-gray-500">Create your account to get started</p>
+              <p className="text-center text-sm text-gray-600">
+              {`Are you a ${role === 'user' ? 'tutor' : 'student'}? Switch to ${role === 'user' ? 'tutor' : 'student'}`} {" "}
+              <Link to={`/${role === 'user' ? 'tutor' : 'user'}/sign-up`} className="text-purple-600 hover:underline">
+              Signup here!
+              </Link>
+            </p>
             </div>
-
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Username Field */}
               <div className="space-y-2">
@@ -206,9 +202,9 @@ const SignUp = ({role,useSignup}) => {
             </div>
             <p className="text-center text-sm text-gray-500">
               Already have an account?{" "}
-              <a href="/user/login" className="text-purple-600 hover:underline">
+              <Link to="/user/login" className="text-purple-600 hover:underline">
                 Log in
-              </a>
+              </Link>
             </p>
           </div>
         </div>

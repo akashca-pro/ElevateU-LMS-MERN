@@ -1,11 +1,11 @@
 import React from 'react'
-import { useUserAuthActions } from '@/hooks/useDispatch'
+import { useTutorAuthActions } from '@/hooks/useDispatch'
 import { useNavigate } from 'react-router-dom'
 
 
 const ProfileNavbar = () => {
   const navigate = useNavigate()
-  const {logout} = useUserAuthActions()
+  const {logout} = useTutorAuthActions()
 
   return (
     <div className="space-y-6">
@@ -28,13 +28,13 @@ const ProfileNavbar = () => {
 
       <nav className="space-y-1">
         {[
-          { name: "Profile", path: "/user/profile" },
-          { name: "My Courses", path: "/user/profile/enrolled-courses" },
-          { name: "Teachers", path: "/user/profile/teachers" },
-          { name: "Message", path: "/user/profile/messages" },
-          { name: "My orders", path: "/user/profile/orders" },
-          { name: "Wishlist", path: "/user/profile/wish-list" },
-          { name: "Certificates", path: "/user/profile/certificates" },
+          { name: "Profile", path: "/tutor/profile" },
+          {name : "Dashboard" ,path : "/tutor/dashboard"},
+          { name: "Courses", path: "/tutor/profile/courses" },
+          { name: "Message", path: "/tutor/profile/messages" },
+          { name: "Quiz", path: "/tutor/profile/quiz" },
+          { name: "Wishlist", path: "/tutor/profile/" },
+          { name: "Certificates", path: "/tutor/profile/certificates" },
         ].map((item) => (
           <button
             key={item.name}

@@ -1,49 +1,47 @@
-import useForm from "@/hooks/useForm"
+import useForm from "@/hooks/useForm";
 import { Eye, EyeOff } from "lucide-react";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { Link, useNavigate } from "react-router-dom";
 
+function Login({ role, useLogin, useAuthActions }) {
+  const { login } = useAuthActions();
+  const navigate = useNavigate();
+  const [loginAuth, { isLoading }] = useLogin();
+  const { formData, handleChange, errors, togglePasswordVisibility, showPassword } = useForm();
 
-function Login({role,useLogin,useAuthActions}) {
-  const {login} = useAuthActions()
-  const navigate = useNavigate()
-  const [loginAuth,{isLoading}] = useLogin()
-  const {formData,handleChange,errors,togglePasswordVisibility,showPassword} = useForm()
+  const isFormValid =
+    Object.values(errors).some((err) => err) ||
+    !formData.password ||
+    !formData.email;
 
-  const isFormValid = Object.values(errors).some((err) => err) || 
-    !formData.password || 
-    !formData.email
+  const handleGoogleAuth = () => {
+    window.location.href =
+      role === "user"
+        ? import.meta.env.VITE_GOOGLE_USER_AUTH_REQ
+        : import.meta.env.VITE_GOOGLE_TUTOR_AUTH_REQ;
+  };
 
-  const handleGoogleAuth =()=>{
-    window.location.href = role === 'user' 
-    ? import.meta.env.VITE_GOOGLE_USER_AUTH_REQ 
-    : import.meta.env.VITE_GOOGLE_TUTOR_AUTH_REQ
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isFormValid) return;
 
-  const handleSubmit = async(e) => {
-    e.preventDefault()
-   
-    if(Object.values(errors).some((err)=> err)) return
+    const loginPromise = new Promise(async (resolve, reject) => {
+      try {
+        const response = await loginAuth(formData).unwrap();
+        login(response.user);
+        resolve("Login successful!");
+        navigate("/");
+      } catch (error) {
+        reject(error?.data?.message || "Login failed. Please try again.");
+      }
+    });
 
-    const toastId = toast.loading("Loading");
-
-    try {
-
-      const response = await loginAuth(formData).unwrap();
-
-      toast.update(toastId, { render: response.message, type: "success", isLoading: false, autoClose: 3000 });
-    
-      login(response.user)
-
-      navigate('/')
-      
-    } catch (error) {
-      console.log(error)
-      toast.update(toastId, { render: error?.data?.message || error?.error || "Login Failed. Please try again.",type : 'error', isLoading: false, autoClose: 3000 });
-    }
-
-  }
-
+    toast.promise(loginPromise, {
+      loading: "Logging in...",
+      success: (msg) => msg,
+      error: (err) => err,
+    });
+  };
 
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-gray-100">
@@ -51,11 +49,25 @@ function Login({role,useLogin,useAuthActions}) {
         <div className="flex items-center justify-center p-8 overflow-auto">
           <div className="w-full max-w-sm space-y-6">
             <div className="space-y-2 text-center">
-              <h1 className="text-3xl font-bold"> {role === 'user' ? 'Student' : 'Tutor' } Log In</h1>
-              <p className="text-gray-500">Enter your details to access your account</p>
+              <h1 className="text-3xl font-bold">
+                {role === "user" ? "Student" : "Tutor"} Log In
+              </h1>
+              <p className="text-center text-sm text-gray-600">
+                {`Are you a ${
+                  role === "user" ? "tutor" : "student"
+                }? Switch to ${
+                  role === "user" ? "tutor" : "student"
+                }`}{" "}
+                <Link
+                  to={`/${role === "user" ? "tutor" : "user"}/login`}
+                  className="text-purple-600 hover:underline"
+                >
+                  Login here!
+                </Link>
+              </p>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
+              <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium block">
                   Your Email
                 </label>
@@ -66,12 +78,16 @@ function Login({role,useLogin,useAuthActions}) {
                   value={formData.email}
                   onChange={handleChange}
                   className={`w-full rounded-lg border p-2 focus:ring-2 ${
-                    errors.email ? "border-red-500" : "border-gray-300 focus:border-purple-500/20"
+                    errors.email
+                      ? "border-red-500"
+                      : "border-gray-300 focus:border-purple-500/20"
                   }`}
                   placeholder="name@example.com"
                   required
                 />
-                {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
+                {errors.email && (
+                  <p className="text-red-500 text-xs">{errors.email}</p>
+                )}
               </div>
               <div className="space-y-2 relative">
                 <label htmlFor="password" className="text-sm font-medium block">
@@ -86,24 +102,43 @@ function Login({role,useLogin,useAuthActions}) {
                     value={formData.password}
                     onChange={handleChange}
                     className={`w-full rounded-lg border p-2 focus:ring-2 ${
-                      errors.password ? "border-red-500" : "border-gray-300 focus:border-purple-500/20"
+                      errors.password
+                        ? "border-red-500"
+                        : "border-gray-300 focus:border-purple-500/20"
                     }`}
                     required
                   />
-                  <button type="button" onClick={togglePasswordVisibility} className="absolute right-2 top-2">
-                    {showPassword ? <EyeOff className="h-5 w-5 text-gray-500" /> : <Eye className="h-5 w-5 text-gray-500" />}
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-2 top-2"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5 text-gray-500" />
+                    ) : (
+                      <Eye className="h-5 w-5 text-gray-500" />
+                    )}
                   </button>
                 </div>
-                {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
+                {errors.password && (
+                  <p className="text-red-500 text-xs">{errors.password}</p>
+                )}
               </div>
-              <a href="/user/forgot-password" className="block text-right text-sm text-primary hover:underline">
+              <a
+                href="/user/forgot-password"
+                className="block text-right text-sm text-primary hover:underline"
+              >
                 Forgot password?
               </a>
               <button
                 type="submit"
                 disabled={isLoading || isFormValid}
                 className={`w-full rounded-lg py-2 px-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 
-                  ${isLoading || isFormValid ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-secondary"}
+                  ${
+                    isLoading || isFormValid
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-primary hover:bg-secondary"
+                  }
                 `}
               >
                 Log in
@@ -118,11 +153,15 @@ function Login({role,useLogin,useAuthActions}) {
               </div>
             </div>
             <div className="grid gap-2">
-              <button 
+              <button
                 onClick={handleGoogleAuth}
                 className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-sm font-medium hover:bg-gray-50"
               >
-                <img src="https://www.google.com/favicon.ico" alt="Google" className="h-5 w-5" />
+                <img
+                  src="https://www.google.com/favicon.ico"
+                  alt="Google"
+                  className="h-5 w-5"
+                />
                 Continue with Google
               </button>
             </div>
@@ -137,7 +176,7 @@ function Login({role,useLogin,useAuthActions}) {
         <div className="hidden md:flex items-center justify-center bg-[#1D1042] p-8 text-white w-full h-full">
           <div className="max-w-md space-y-4 text-center">
             <p className="text-2xl font-light">
-              In learning you will <span className="text-purple-400">teach</span>, and in teaching you will {" "}
+              In learning you will <span className="text-purple-400">teach</span>, and in teaching you will{" "}
               <span className="text-purple-400">learn</span>.
             </p>
             <p className="text-sm">- Eleanor Roosevelt</p>
@@ -146,7 +185,7 @@ function Login({role,useLogin,useAuthActions}) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

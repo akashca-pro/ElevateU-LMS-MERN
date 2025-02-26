@@ -2,9 +2,9 @@
 import {createApi,fetchBaseQuery} from '@reduxjs/toolkit/query/react';
 
 // use this if refreshtoken is invalid or anything error happens so the user will be logged out to log in page
-import { adminLogout } from '../features/auth/admin/adminAuthSlice';
-import { tutorLogout } from '../features/auth/tutor/tutorAuthSlice';
-import { removeUserCredentials } from '../features/auth/user/userAuthSlice';
+import { removeAdminCredentials } from '@/features/auth/admin/adminAuthSlice.js';
+import { removeTutorCredentials } from '@/features/auth/tutor/tutorAuthSlice.js';
+import { removeUserCredentials } from '@/features/auth/user/userAuthSlice.js';
 
 const baseQuery = fetchBaseQuery({
     baseUrl : import.meta.env.VITE_BASE_URL,
@@ -47,8 +47,8 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
           return await baseQuery(args, api, extraOptions); // Retry the original request
       } else {
           console.log(' Refresh failed for all roles, logging out...');
-          if (state.adminAuth?.isAuthenticated) api.dispatch(adminLogout());
-          if (state.tutorAuth?.isAuthenticated) api.dispatch(tutorLogout());
+          if (state.adminAuth?.isAuthenticated) api.dispatch(removeAdminCredentials());
+          if (state.tutorAuth?.isAuthenticated) api.dispatch(removeTutorCredentials());
           if (state.userAuth?.isAuthenticated) api.dispatch(removeUserCredentials());
       }
   }

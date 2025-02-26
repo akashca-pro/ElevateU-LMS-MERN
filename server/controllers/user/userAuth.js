@@ -242,7 +242,7 @@ export const authLoad = async (req,res) => {
 
         const user = await User.findById(id)
         if(!user) return res.status(404).json({message : "Google authentication failed. Please try again."})
-
+            
         return res.status(200).json({message : 'Google Authentication success',user})
         
     } catch (error) {

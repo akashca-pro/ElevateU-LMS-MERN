@@ -1,6 +1,7 @@
 import useForm from "@/hooks/useForm"
 import { Link, useNavigate } from "react-router-dom"
-import { toast } from "react-toastify"
+import { toast } from "sonner"
+import React from "react"
 
 
 const ForgotPassword = ({useForgotPassword , navigateTo }) => {
@@ -9,27 +10,28 @@ const ForgotPassword = ({useForgotPassword , navigateTo }) => {
   const {formData, handleChange, errors} = useForm()
   const isFormValid = !Object.values(errors).some((err) => err) && formData.email.trim() !== "";
   
-  const handleSubmit = async(e) => {
-    e.preventDefault()
-    
-    if(Object.values(errors).some((err)=> err)) return
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    const toastId = toast.loading('Loading')
+    if (Object.values(errors).some((err) => err)) return;
+
+    const promise = forgotPassword({ email: formData.email }).unwrap();
+
+    toast.promise(promise, {
+        loading: 'Sending OTP...',
+        success: () => {
+            navigate(navigateTo, { state: formData.email });
+            return 'OTP has been sent to your registered email.';
+        },
+        error: 'Failed to send OTP. Please try again.',
+    });
 
     try {
-      const response = await forgotPassword({email : formData.email}).unwrap()
-
-      toast.update(toastId, { render: response?.message, type: "success", isLoading: false, autoClose: 3000 });
-
-      navigate(navigateTo,{state : formData.email})
-
+        await promise;
     } catch (error) {
-      console.log(error)
-      toast.update(toastId, { render: error?.data?.message || error?.error || "Reset password Failed try again later",type : 'error', isLoading: false, autoClose: 3000 });
+        console.error(error);
     }
-    
-    
-  }
+};
 
   return (
     <div className="grid min-h-screen md:grid-cols-2">

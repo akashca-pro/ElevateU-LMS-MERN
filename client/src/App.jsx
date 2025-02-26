@@ -1,6 +1,5 @@
 import React from 'react'
-import { ToastContainer } from 'react-toastify'
-import "react-toastify/dist/ReactToastify.css";
+import {Toaster} from 'sonner'
 import {Routes , Route} from 'react-router-dom'
 
 import UserRoutes from '@/pages/user/UserIndex'
@@ -12,8 +11,7 @@ import NotFound from '@/pages/NotFound';
 const App = () => {
   return (
     <>
-      <ToastContainer position="top-right" autoClose={3000} />
-
+      <Toaster richColors position='top-right' duration={2000} />
       <Routes>
 
         <Route path="/" element={<Index />} />

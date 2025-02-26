@@ -35,7 +35,11 @@ const userSchema  = new mongoose.Schema({
         default : ""
     },
     phone : {
-        type : Number,
+        type : String,
+    },
+    dob : {
+        type : String,
+        default : ''
     },
     enrolledCourses : {
         type : [String],

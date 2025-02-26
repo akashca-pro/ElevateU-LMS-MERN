@@ -6,8 +6,7 @@ export const loadProfile = async (req,res) => {
     
     try {
         const user_ID = req.params.id 
-        const userData = await User.findById(user_ID,'email firstName lastName profileImage bio socialLinks phone enrolledCourses')
-
+        const userData = await User.findById(user_ID,'email firstName lastName profileImage bio socialLinks phone enrolledCourses dob')
         if(!userData)return res.status(404).json({message : 'user not found'})
 
         return res.status(200).json(userData)
@@ -28,7 +27,7 @@ export const updateProfile = async (req,res) => {
         const user = await User.findById(user_ID)
         if(!user) return res.status(404).json({message : 'user not found'});
 
-        const {firstName, lastName, profileImage, phone, bio, socialLinks } = req.body;
+        const {firstName, lastName, profileImage, phone, bio, socialLinks, dob} = req.body;
 
         const updatedData = await User.findByIdAndUpdate(user_ID , {
             firstName,
@@ -36,7 +35,8 @@ export const updateProfile = async (req,res) => {
             profileImage,
             phone,
             bio,
-            socialLinks
+            socialLinks,
+            dob
         } , {new : true })
         .select('firstName lastName profileImage phone bio socialLinks')
 

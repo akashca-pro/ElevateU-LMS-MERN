@@ -28,7 +28,7 @@ const tutorAuthApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags : ['Tutor']
         }),
-        forgotPassword : builder.mutation({
+        tutorForgotPassword : builder.mutation({
             query : (credentials)=>({
                 url : 'tutor/forgot-password',
                 method : 'POST',
@@ -36,7 +36,7 @@ const tutorAuthApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags : ['User']
         }),
-        resetPassword : builder.mutation({
+        tutorResetPassword : builder.mutation({
             query : (credentials)=>({
                 url : 'tutor/reset-password',
                 method : 'POST',
@@ -75,8 +75,8 @@ export const {
     useTutorLoginMutation,
     useTutorLogoutMutation,
     useTutorRefreshTokenMutation,
-    useForgotPasswordMutation,
-    useResetPasswordMutation,
+    useTutorForgotPasswordMutation,
+    useTutorResetPasswordMutation,
     useTutorGoogleCallbackQuery
 
 } = tutorAuthApi

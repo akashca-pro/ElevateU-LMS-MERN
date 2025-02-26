@@ -1,69 +1,62 @@
 import useOTP from "@/hooks/useOtp.js";
 import { useLocation, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import {useReSendOtpMutation} from '@/services/commonApi.js'
+import { toast } from "sonner";
+import { useReSendOtpMutation } from "@/services/commonApi.js";
 
-
-const OTPVerification = ({role, useVerifyOtp , useAuthActions}) => {
-
+const OTPVerification = ({ role, useVerifyOtp, useAuthActions }) => {
   const location = useLocation();
-  const {login} = useAuthActions()
-  const [resendOtp] = useReSendOtpMutation()
+  const { login } = useAuthActions();
+  const [resendOtp] = useReSendOtpMutation();
   const email = location.state;
-  const { otp, inputs, timer, handleChange, handleKeyDown, handleResend : reset } = useOTP();
+  const { otp, inputs, timer, handleChange, handleKeyDown, handleResend: reset } = useOTP(6,1);
 
-  const isOtpValid = otp.includes('');
+  const isOtpValid = otp.includes("");
 
-  const [verifyOtp,{isLoading}] = useVerifyOtp()
-  const navigate = useNavigate()
+  const [verifyOtp, { isLoading }] = useVerifyOtp();
+  const navigate = useNavigate();
 
-  const handleResend = async() => {
-
-    const toastId = toast.loading('Loading') 
+  const handleResend = async () => {
+    const toastId = toast.loading("Loading");
 
     try {
-      reset()
-      const response = await resendOtp({role ,email : location.state}).unwrap();
-      toast.update(toastId,{ render: response?.message, type: "success", isLoading: false, autoClose: 3000 })
-
+      reset();
+      const response = await resendOtp({ role, email: location.state }).unwrap();
+      toast.success(response?.message);
+      toast.dismiss(toastId);
     } catch (error) {
-      toast.update(toastId, { render: error?.data?.message || error?.error || "Reset password Failed try again later",type : 'error', isLoading: false, autoClose: 3000 });
+      toast.error(error?.data?.message || error?.error || "Reset password failed, try again later");
+      toast.dismiss(toastId);
+    }
+  };
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+
+    const otpCode = otp.join("");
+
+    if (otpCode.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP.");
+      return;
     }
 
-  }
+    const toastId = toast.loading("Verifying OTP");
 
-  const handleVerify = async(e)=>{
-
-      e.preventDefault();
-
-      const otpCode = otp.join('')
-
-      if (otpCode.length !== 6) {
-        toast.error("Please enter a valid 6-digit OTP.");
-        return;
-      }
-
-      const toastId = toast.loading('Verifying OTP')
-
-      try {
-        const response = await verifyOtp({otp : otpCode}).unwrap();
-
-        toast.update(toastId, { render: response.message, type: "success", isLoading: false, autoClose: 3000 });
-        
-        login(response.data)   
-
-        navigate('/')
-  
-      } catch (error) {
-        toast.update(toastId, { render: error?.data?.message || "OTP verification failed!", type: "error", isLoading: false, autoClose: 3000 });
-      }
-
-  }
+    try {
+      const response = await verifyOtp({ otp: otpCode }).unwrap();
+      toast.success(response.message);
+      toast.dismiss(toastId);
+      login(response.data);
+      navigate("/");
+    } catch (error) {
+      toast.error(error?.data?.message || "OTP verification failed!");
+      toast.dismiss(toastId);
+    }
+  };
 
   return (
     <div className="flex h-screen items-center justify-center bg-gray-50 p-8">
       <div className="w-full max-w-md space-y-8">
-      <div className="mx-auto w-20">
+        <div className="mx-auto w-20">
           <div className="rounded-full bg-purple-100 p-5">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -86,7 +79,7 @@ const OTPVerification = ({role, useVerifyOtp , useAuthActions}) => {
             Enter the verification code we just sent to your email {email || "name@example.com"}
           </p>
         </div>
-        <form onSubmit={handleVerify} className="space-y-6" >
+        <form onSubmit={handleVerify} className="space-y-6">
           <div className="flex justify-center gap-2">
             {otp.map((data, index) => (
               <input
@@ -103,11 +96,11 @@ const OTPVerification = ({role, useVerifyOtp , useAuthActions}) => {
           </div>
           <div className="text-center">
             <button 
-            type="submit"
-            disabled = {isOtpValid}
-             className={`w-full rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 
-              ${isLoading || isOtpValid ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-secondary"}
-            `}
+              type="submit"
+              disabled={isOtpValid}
+              className={`w-full rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 
+                ${isLoading || isOtpValid ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-secondary"}
+              `}
             >
               Verify
             </button>
@@ -123,7 +116,7 @@ const OTPVerification = ({role, useVerifyOtp , useAuthActions}) => {
               </button>
               {timer > 0 && (
                 <span className="ml-1">
-                    {`${String(Math.floor(timer / 60)).padStart(2, "0")}:${String(timer % 60).padStart(2, "0")}`}
+                  {`${String(Math.floor(timer / 60)).padStart(2, "0")}:${String(timer % 60).padStart(2, "0")}`}
                 </span>
               )}
             </div>

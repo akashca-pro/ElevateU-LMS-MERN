@@ -3,7 +3,7 @@ import Footer from "@/components/Footer.jsx"
 import useForm from "@/hooks/useForm"
 import useOtp from "@/hooks/useOtp";
 import {useReSendOtpMutation} from '@/services/commonApi.js'
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const ResetPassword = ({role, useResetPassword, navigateTo}) => {
@@ -23,52 +23,44 @@ const ResetPassword = ({role, useResetPassword, navigateTo}) => {
     !formData.password || 
     !formData.confirmPassword || otp.includes('');
 
-  const handleResend = async() => {
-
-    const toastId = toast.loading('Loading') 
-
-    try {
-      reset()
-      const response = await resendOtp({role ,email : location.state}).unwrap();
-      toast.update(toastId,{ render: response?.message, type: "success", isLoading: false, autoClose: 3000 })
-
-    } catch (error) {
-      toast.update(toastId, { render: error?.data?.message || error?.error || "Reset password Failed try again later",type : 'error', isLoading: false, autoClose: 3000 });
-    }
-
-  }
-
-  const resetForm = () => {
-    formData.password = "";
-    formData.confirmPassword = "";
-    otp.fill("");
-  };
-
-
-  const handleSubmit = async(e) => {
-    e.preventDefault()
+    const handleResend = async () => {
+      const toastId = toast.loading("Loading...");
     
-    const otpCode = otp.join('')
-
-    if(Object.values(errors).some((err)=> err)) return
-
-    const toastId = toast.loading('Loading')
-
-    try {
-        const response = await resetPassword({password : formData.password , token : otpCode }).unwrap()
-
-        toast.update(toastId, { render: response?.message, type: "success", isLoading: false, autoClose: 3000 });
-
-        navigate(navigateTo)
-
-    } catch (error) {
-        console.log(error)
-        toast.update(toastId, { render: error?.data?.message || error?.error || "Reset password Failed try again later",type : 'error', isLoading: false, autoClose: 3000 });
-        resetForm()
-    }
-
-  }
-
+      try {
+        reset();
+        const response = await resendOtp({ role, email: location.state }).unwrap();
+        toast.success(response?.message, { id: toastId, duration: 3000 });
+      } catch (error) {
+        toast.error(error?.data?.message || error?.error || "Reset password Failed, try again later", {
+          id: toastId,
+          duration: 3000,
+        });
+      }
+    };
+    
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+    
+      const otpCode = otp.join("");
+    
+      if (Object.values(errors).some((err) => err)) return;
+    
+      const toastId = toast.loading("Loading...");
+    
+      try {
+        const response = await resetPassword({ password: formData.password, token: otpCode }).unwrap();
+        toast.success(response?.message, { id: toastId, duration: 3000 });
+    
+        navigate(navigateTo);
+      } catch (error) {
+        console.log(error);
+        toast.error(error?.data?.message || error?.error || "Reset password Failed, try again later", {
+          id: toastId,
+          duration: 3000,
+        });
+        resetForm();
+      }
+    };
   return (
     <div className="flex flex-col min-h-screen">
       {/* Main Content - Scrollable 30% */}
@@ -111,8 +103,8 @@ const ResetPassword = ({role, useResetPassword, navigateTo}) => {
               Didn't receive code?{" "}
               <button
                 type="button"
-                className={`font-medium ${timer === 0 && !isFormValid ? "text-primary" : "text-gray-400"}`}
-                disabled={timer > 0 || (isLoading || isFormValid)}
+                className={`font-medium ${timer === 0 && isFormValid ? "text-primary" : "text-gray-400"}`}
+                disabled={timer > 0 || (isLoading )}
                 onClick={handleResend}
               >
                 Resend
