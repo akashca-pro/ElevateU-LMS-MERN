@@ -8,7 +8,7 @@ export const loadProfile = async (req,res) => {
     try {
         const tutor_ID = req.params.id 
         const tutorData = await Tutor.findById(tutor_ID)
-        .select('email firstName lastName phone profileImage bio socialLinks expertise experience earnings isAdminVerified')
+        .select('-password')
 
         if(!tutorData)return res.status(404).json({message : 'tutor not found'})
 
@@ -31,7 +31,7 @@ export const updateProfile = async (req,res) => {
         if(!tutor) return res.status(404).json({message : 'tutor not found'});
 
         const {firstName, lastName, profileImage, phone, bio, socialLinks,
-             expertise, experience, earnings} = req.body;
+             expertise, experience, earnings , dob} = req.body;
 
         const changedData = await Tutor.findByIdAndUpdate(tutor_ID , {
             firstName,
@@ -42,9 +42,10 @@ export const updateProfile = async (req,res) => {
             socialLinks,
             expertise,
             experience,
-            earnings
+            earnings,
+            dob
         } , {new : true})
-        .select('firstName lastName profileImage phone bio socialLinks expertise experience earnings')
+        .select('-password')
 
         return res.status(200).json(changedData)
 

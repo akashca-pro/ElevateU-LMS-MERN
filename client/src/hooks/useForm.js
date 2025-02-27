@@ -11,6 +11,8 @@ const useForm = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    expertise : [],
+    experience : ''
   });
 
   const [errors, setErrors] = useState({});

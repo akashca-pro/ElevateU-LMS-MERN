@@ -202,7 +202,7 @@ const SignUp = ({role,useSignup}) => {
             </div>
             <p className="text-center text-sm text-gray-500">
               Already have an account?{" "}
-              <Link to="/user/login" className="text-purple-600 hover:underline">
+              <Link to={`/${role}/login`} className="text-purple-600 hover:underline">
                 Log in
               </Link>
             </p>

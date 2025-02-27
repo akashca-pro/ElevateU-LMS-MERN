@@ -3,6 +3,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 
+
 function Login({ role, useLogin, useAuthActions }) {
   const { login } = useAuthActions();
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ function Login({ role, useLogin, useAuthActions }) {
     const loginPromise = new Promise(async (resolve, reject) => {
       try {
         const response = await loginAuth(formData).unwrap();
-        login(response.user);
+        login(response[role]);
         resolve("Login successful!");
         navigate("/");
       } catch (error) {
@@ -125,7 +126,7 @@ function Login({ role, useLogin, useAuthActions }) {
                 )}
               </div>
               <a
-                href="/user/forgot-password"
+                href={`/${role}/forgot-password`}
                 className="block text-right text-sm text-primary hover:underline"
               >
                 Forgot password?
@@ -167,7 +168,7 @@ function Login({ role, useLogin, useAuthActions }) {
             </div>
             <p className="text-center text-sm text-gray-500">
               Don't have an account?{" "}
-              <a href="/user/sign-up" className="text-primary hover:underline">
+              <a href={`/${role}/sign-up`} className="text-primary hover:underline">
                 Sign up
               </a>
             </p>
@@ -176,10 +177,10 @@ function Login({ role, useLogin, useAuthActions }) {
         <div className="hidden md:flex items-center justify-center bg-[#1D1042] p-8 text-white w-full h-full">
           <div className="max-w-md space-y-4 text-center">
             <p className="text-2xl font-light">
-              In learning you will <span className="text-purple-400">teach</span>, and in teaching you will{" "}
-              <span className="text-purple-400">learn</span>.
+            The only way to do <span className="text-purple-400">great work</span>, is to{" "}
+              <span className="text-purple-400">love</span> what you do.
             </p>
-            <p className="text-sm">- Eleanor Roosevelt</p>
+            <p className="text-sm">- Steve Jobs</p>
             <img src="/Login.svg" alt="" className="w-[710px] h-[595px]" />
           </div>
         </div>

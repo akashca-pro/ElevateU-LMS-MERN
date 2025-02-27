@@ -1,9 +1,14 @@
 import { Link } from "react-router-dom";
-import { UserCircle , ShoppingCart, MessageSquare } from "lucide-react"; 
+import { UserCircle , ShoppingCart, MessageSquare, LogOut } from "lucide-react"; 
 import { useSelect } from "@/hooks/useSelect";
+import { useUserAuthActions, useTutorAuthActions } from "@/hooks/useDispatch";
 
 const Navbar = () => {
-  const {user} = useSelect()
+  const {user,tutor} = useSelect()
+
+  const {logout : userLogout} = useUserAuthActions()
+  const {logout : tutorLogout} = useTutorAuthActions()
+
   return (
     <nav className="border-b bg-white">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
@@ -44,19 +49,32 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-4">
-       { user.isAuthenticated ? ( <> <Link to="/user/cart" className="text-gray-600 hover:text-purple-600">
+       { user.isAuthenticated || tutor.isAuthenticated
+       ? ( <>{ user && <Link to="/user/cart" className="text-gray-600 hover:text-purple-600">
             <ShoppingCart className="h-6 w-6" />
-          </Link>
+          </Link> }
 
-          <Link to="/user/profile/messages" className="text-gray-600 hover:text-purple-600">
+          <Link to={user.isAuthenticated ? `/user/profile/messages  ` 
+            : `/tutor/profile/messages`
+          } className="text-gray-600 hover:text-purple-600">
             <MessageSquare className="h-6 w-6" />
           </Link>
-
-
-          {/* Profile Icon */}
-          <Link to="/user/profile" className="text-gray-600 hover:text-purple-600">
+          
+          <Link to={user.isAuthenticated ? `/user/profile  ` 
+            : `/tutor/profile`
+          } className="text-gray-600 hover:text-purple-600">
             <UserCircle className="h-6 w-6" />
-          </Link> </> ) : <><div className="flex gap-4">
+          </Link> 
+
+          <Link onClick={()=>user.isAuthenticated ? userLogout() : tutorLogout()}
+          className="text-gray-600 hover:text-red-600">
+            <LogOut className="h-6 w-6"/>
+          </Link>
+
+          </> ) 
+          : <>
+          <div className="flex gap-4">
+            
             <Link
               to="/user/login"
               className="rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"

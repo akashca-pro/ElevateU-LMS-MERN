@@ -88,7 +88,7 @@ export const loginTutor = async (req,res) => {
         if(!tutor)return res.status(401).json({message : "Invalid credentials"});
     
         if(!(await bcrypt.compare(password,tutor.password))){
-            return res.status(401).json({message : "Incorrect password"});
+            return res.status(404).json({message : "Incorrect password"});
         }
 
         if(!tutor.isVerified)return res.status(403).json({message : "User is not verified"})
@@ -102,7 +102,8 @@ export const loginTutor = async (req,res) => {
         // Set refresh token as cookie (only if "Remember Me" is checked)
         if(rememberMe) sendToken(res,'tutorRefreshToken',refreshToken,7 * 24 * 60 * 60 * 1000);
     
-        return res.status(200).json({message : "Login successfull"});
+        console.log(tutor)
+        return res.status(200).json({message : "Login successfull",tutor});
 
     } catch (error) {
         console.log(error)
@@ -119,7 +120,7 @@ export const forgotPassword = async (req,res) => {
         const {email} = req.body;
         const emailExist = await Tutor.findOne({email})
 
-        if(!emailExist)return res.status(404).json({message : 'user not found'});
+        if(!emailExist)return res.status(404).json({message : 'Tutor not found'});
 
         const resetToken = randomInt(100000, 999999).toString();
         const resetTokenExpires = Date.now() + 10 * 60 * 1000;
@@ -128,26 +129,22 @@ export const forgotPassword = async (req,res) => {
             {otp : resetToken,
             otpExpires : resetTokenExpires} ,{new : true})
 
-        const resetLink = `http://localhost:9000/api/tutor/reset-password?token=${resetToken}`
+        await sendEmailResetPassword(tutor.email,tutor.firstName,resetToken);
 
-        await sendEmailResetPassword(tutor.email,tutor.firstName,resetLink);
-
-        return res.status(200).json({message : 'Password reset link sent to your email'})
+        return res.status(200).json({message : 'Password reset otp sent to your email'})
         
     } catch (error) {
-        console.log('from forgotpassword controller',error);
-        res.status(500).json({ message: 'Error sending email', error: error.message });
+        console.log('from forgotpassword tutor controller',error);
+        return res.status(500).json({ message: 'Error sending password reset code', error: error.message });
     }
 
 }
 
 // verify the resetPassword token and create new password
-
 export const verifyResetLink = async (req,res) => {
     
     try {
-        const token = req.query.token;
-        const { newPassword } = req.body;
+        const { password ,token } = req.body;
 
         const tutor = await Tutor.findOne({
             otp : token , 
@@ -156,7 +153,7 @@ export const verifyResetLink = async (req,res) => {
 
         if(!tutor) return res.status(400).json({message : 'Invalid or expired token'})
 
-        const hashedPassword = await bcrypt.hash(newPassword,10);
+        const hashedPassword = await bcrypt.hash(password,10);
 
         if(!tutor.isVerified) tutor.isVerified = true
         tutor.password = hashedPassword;
@@ -165,7 +162,7 @@ export const verifyResetLink = async (req,res) => {
 
         await tutor.save();
 
-        return res.status(200).json({ message: 'Password reset successful Redirecting to login' });
+        return res.status(200).json({ message: 'Password reset successful' });
 
     } catch (error) {
         console.log('from verifyResetLink',error);

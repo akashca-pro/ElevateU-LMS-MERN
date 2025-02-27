@@ -1,33 +1,25 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  LayoutDashboard,
-  BookOpen,
-  Bookmark,
-  MessageSquare,
-  PlusCircle,
-  Star,
-  Settings,
-  LogOut,
-  ChevronLeft,
-  Menu,
-} from "lucide-react";
+import {  useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useSelect } from "@/hooks/useSelect";
+import  {Menu, ChevronLeft} from 'lucide-react'
 
-const Sidebar = ({ onToggle }) => {
+
+const Sidebar = ({ onToggle , menuItems}) => {
+  const {user,tutor} = useSelect()
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeItem, setActiveItem] = useState("Profile");
   const navigate = useNavigate(); 
+  const location = useLocation();
 
-  const menuItems = [
-    { id: 1, title: "Profile", icon: LayoutDashboard, path: "/user/profile" },
-    { id: 2, title: "My Courses", icon: BookOpen, path: "/user/profile/my-courses" },
-    { id: 3, title: "Bookmarks", icon: Bookmark, path: "/bookmarks" },
-    { id: 4, title: "Messages", icon: MessageSquare, path: "/messages" },
-    { id: 5, title: "Create Course", icon: PlusCircle, path: "/create-course" },
-    { id: 6, title: "Reviews", icon: Star, path: "/reviews" },
-    { id: 7, title: "Settings", icon: Settings, path: "/settings" },
-    { id: 8, title: "Logout", icon: LogOut, path: "/user/profile/logout" },
-  ];
+  useEffect(()=>{
+    
+    if(location.pathname === `/${user.isAuthenticated ? 'user' : 'tutor'}/profile/messages`){
+      setActiveItem("Messages")
+    }else if (location.pathname === `/${user.isAuthenticated ? 'user' : 'tutor'}/profile`){
+      setActiveItem('Profile')
+    }
+
+  },[location.pathname])
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);

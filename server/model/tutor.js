@@ -40,6 +40,10 @@ const tutorSchema = mongoose.Schema({
         type : String,
         trim : true
     },
+    dob : {
+        type : String,
+        default : ''
+    },
     socialLinks :{
         type : [String],
         default : [] 
@@ -49,7 +53,7 @@ const tutorSchema = mongoose.Schema({
         default : []
     },
     experience: {
-        type: Number, 
+        type: String, 
         default : 0
     },
     earnings: {

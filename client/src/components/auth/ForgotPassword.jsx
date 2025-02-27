@@ -4,7 +4,7 @@ import { toast } from "sonner"
 import React from "react"
 
 
-const ForgotPassword = ({useForgotPassword , navigateTo }) => {
+const ForgotPassword = ({role,useForgotPassword , navigateTo }) => {
   const navigate = useNavigate()
   const [forgotPassword,{isLoading}] = useForgotPassword()
   const {formData, handleChange, errors} = useForm()
@@ -79,7 +79,7 @@ const ForgotPassword = ({useForgotPassword , navigateTo }) => {
               Reset Password
             </button>
           </form>
-          <Link to="/user/login" className="flex items-center justify-center gap-2 text-sm text-primary hover:underline">
+          <Link to={`/${role}/login`} className="flex items-center justify-center gap-2 text-sm text-primary hover:underline">
             Back to login screen
           </Link>
         </div>

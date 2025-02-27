@@ -3,7 +3,7 @@ import {createSlice} from '@reduxjs/toolkit'
 const storedData = localStorage.getItem("tutor");
 
 const initialState = {
-    tutorData : storedData ? JSON.parse(storedUser) : null,
+    tutorData : storedData ? JSON.parse(storedData) : null,
     isAuthenticated : !!storedData,
 }
 

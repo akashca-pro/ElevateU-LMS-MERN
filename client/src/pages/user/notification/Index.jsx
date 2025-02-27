@@ -1,11 +1,11 @@
 import React from 'react'
 
-const Profile = () => {
+const Index = () => {
   return (
     <div>
-      
+      Notfication
     </div>
   )
 }
 
-export default Profile
+export default Index
