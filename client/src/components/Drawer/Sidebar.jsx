@@ -6,7 +6,7 @@ import  {Menu, ChevronLeft} from 'lucide-react'
 
 const Sidebar = ({ onToggle , menuItems}) => {
   const {user,tutor} = useSelect()
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [activeItem, setActiveItem] = useState("Profile");
   const navigate = useNavigate(); 
   const location = useLocation();

@@ -1,5 +1,5 @@
 import { useState ,useEffect} from "react";
-import { RefreshCw, Trash2 } from "lucide-react";
+import { RefreshCw, Trash2, CircleCheckBig, ShieldAlert } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -14,14 +14,17 @@ import {useTutorAuthActions} from '@/hooks/useDispatch'
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { SelectExperience } from "./components/SelectExperience";
-
+import Tooltip from "./components/Tooltip";
+import {useTutorRequestVerificationMutation} from '@/services/TutorApi/tutorProfileApi'
 
 
 const ProfileDetails = () => {
   const {login} = useTutorAuthActions()
   const {tutor} = useSelect()
+
   const {data : teacher , error, isLoading} = useTutorLoadProfileQuery(tutor.tutorData._id)
   const [tutorLoadProfile] = useTutorUpdateProfileMutation()
+  const [requestVerification,{}] = useTutorRequestVerificationMutation()
 
   const [expertise,setExpertise] = useState([])
   const [input,setInput] = useState('');
@@ -89,8 +92,7 @@ const ProfileDetails = () => {
     }
   };
 
-  console.log('formdata',formData)
-  console.log('teacher',teacher)
+ 
 
   // this is to avoid duplicate update , disables button 
   //  addition function is used because one of the field is an array
@@ -129,7 +131,7 @@ const ProfileDetails = () => {
       toast.success('Profile updated successfully',{ id: toastId })
     } catch (error) {
       console.log(error)
-      toast.error('Updation Failed please try again later ...')
+      toast.error('Updation Failed please try again later ...',{id : toastId})
     }
     finally{
       if (closeDialog) closeDialog();
@@ -137,6 +139,19 @@ const ProfileDetails = () => {
     
   };
 
+  const handleVerificationRequest = async(e) =>{
+    e.preventDefault()
+    const toastId = toast.loading('Please wait...')
+        try {
+          const response = await requestVerification(tutor.tutorData._id).unwrap()
+          login(response?.updatedData)
+          toast.success(response?.message,{ id: toastId });
+          setTimeout(()=>{toast.info('Track verification status in notification section');},[4000])
+        } catch (error) {
+          toast.error(error?.data?.message || "Verification request failed try again later",{id : toastId})
+        }
+  }
+ 
   return (
     <div className="max-w-4xl p-6">
       <div className="space-y-6">
@@ -154,6 +169,12 @@ const ProfileDetails = () => {
                   alt="Avatar preview"
                   className="w-20 h-20 rounded-full object-cover"
                 />
+                {tutor.tutorData?.isAdminVerified 
+                ? <Label className = 'flex gap-2'>
+                  <CircleCheckBig color="#008000"/> 
+                </Label>
+                : <Tooltip/>
+                }
                 <Input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" id="profileImage" />
               </div>
               <div className="flex gap-2">
@@ -176,6 +197,8 @@ const ProfileDetails = () => {
                   <Trash2 className="w-4 h-4" />
                   Remove
                 </Button>
+
+                
               </div>
             </div>
           </div>
@@ -283,13 +306,20 @@ const ProfileDetails = () => {
           </div>
 
           {/* Submit Button */}
-          <div>
+          <div className="flex gap-2 ">
           <ProfileDialog  notValid={notValid || !isFormChanged}
             btnName={"Save changes"}
             title={"Update profile details"}
             desc={`Make changes to your profile here. Click save when you're done.`}
             onSave={(closeDialog) => handleSubmit(event, closeDialog)} // Pass closeDialog
           />
+          {!tutor.tutorData?.isAdminVerified  && 
+          <Button 
+          className='bg-blue-600 hover:bg-blue-700'
+          onClick = {handleVerificationRequest}
+          >
+            {tutor.tutorData?.status === 'pending' ? 'Check verification status' : 'Request verification'}
+          </Button>}
           </div>
         </form>
       </div>

@@ -1,5 +1,5 @@
 import Tutor from '../../model/tutor.js'
-import VerificationRequest from '../../model/verificationRequest.js'
+
 
 // create tutor
 
@@ -156,7 +156,7 @@ export const loadRequests = async (req,res) => {
     
     try {
         
-        const request = await VerificationRequest.find({status : 'pending'})
+        const request = await Tutor.find({status : 'pending'})
 
         if(!request) return res.status(404).json({message : 'No pending requests'})
 
@@ -171,48 +171,28 @@ export const loadRequests = async (req,res) => {
 
 // approve verification requests 
 
-export const approveRequest = async (req,res) => {
+export const approveOrRejectrequest = async (req,res) => {
     
     try {
-        const requestID = req.params.id;
-        const request = await VerificationRequest.findById(requestID)
+        const {tutorId , input , reason} = req.body
 
-        if(!request) return res.status(404).json({message : 'Verification request not found.'})
+        const tutor = await Tutor.findById(tutorId)
 
-        if(request.status !== 'pending' ) return res.status(400).json({message : 'Verification request is not pending'})
+        if(!tutor) return res.status(404).json({message : 'Verification request not found.'})
 
-        request.status = 'approved'
+        if(tutor.status === 'approved' ) return res.status(409).json({message : 'Verification request is already approved'})
+        
+        if(tutor.status === 'rejected') return res.status(409).json({message : 'Verification request is already rejected'})
 
-        await request.save();
-
-        return res.status(200).json({ message: 'Tutor verified successfully.' });
-
-    } catch (error) {
-        console.log('Error approving tutor ',error);
-        return res.status(500).json({ message: 'Error approving tutor ', error: error.message });
-    }
-
-}
-
-// reject verification requests 
-
-export const rejectRequest = async (req,res) => {
-    
-    try {
-        const requestID = req.params.id;
-        const {reason} = req.body
-        const request = await VerificationRequest.findById(requestID)
-
-        if(!request) return res.status(404).json({message : 'Verification request not found.'})
-
-        if(request.status !== 'pending' ) return res.status(400).json({message : 'Verification request is not pending'})
-
-        request.status = 'rejected'
-        request.reason = reason
-
-        await request.save();
-
-        return res.status(200).json({ message: 'Verification request rejected ' });
+        if(input === 'approve'){
+            await Tutor.findByIdAndUpdate(tutorId,{status : 'approved'})
+            return res.status(200).json({message : `Verification approved for tutor ${tutor?.firstName}`})
+        } 
+        else if(input === 'reject') {
+            await Tutor.findByIdAndUpdate(tutorId,{status : 'approved' , reason})
+            return res.status(200).json({message : `Verification rejected for tutor ${tutor?.firstName}`})
+        }   
+        else return res.status(400).json({message : 'Invalid input' })
 
     } catch (error) {
         console.log('Error approving tutor ',error);

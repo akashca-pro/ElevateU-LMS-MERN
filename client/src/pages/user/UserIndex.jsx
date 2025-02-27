@@ -40,6 +40,8 @@ import Certificates from './certificates/Index';
 import Quiz from './quiz/Index';
 import Setting from './settings/Index';
 
+import ProtectAuthPage from '@/protectors/ProtectAuthPage';
+
 const UserIndex = () => {
   return (
     <>
@@ -77,8 +79,16 @@ const UserRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<UserIndex />}>
-        <Route path="sign-up" element={<SignUp role={'user'} useSignup={useUserSignupMutation} />} />
-        <Route path="verify-otp" element={<OTPVerification role={'user'} useVerifyOtp={useUserVerifyOtpMutation} useAuthActions={useUserAuthActions}/>} />
+        <Route path="sign-up" element={
+          <ProtectAuthPage>
+          <SignUp role={'user'} useSignup={useUserSignupMutation} />
+          </ProtectAuthPage>
+          } />
+        <Route path="verify-otp" element={
+          <ProtectAuthPage>
+          <OTPVerification role={'user'} useVerifyOtp={useUserVerifyOtpMutation} useAuthActions={useUserAuthActions}/>
+          </ProtectAuthPage>
+          } />
         <Route path="login" element={<Login role={'user'} useLogin={useUserLoginMutation} useAuthActions={useUserAuthActions} />} />
         <Route path="forgot-password" element={<ForgotPassword role={'user'} useForgotPassword={useUserForgotPasswordMutation} navigateTo = {'/user/reset-password'}/>} />
         <Route path='reset-password' element={<ResetPassword role={'user'} useResetPassword={useUserResetPasswordMutation} navigateTo={'/user/login'} />}/>

@@ -1,5 +1,4 @@
 import Tutor from '../../model/tutor.js'
-import VerificationRequest from '../../model/verificationRequest.js'
 
 // View Profile
 
@@ -85,22 +84,19 @@ export const requestVerification = async (req,res) => {
         const tutor = await Tutor.findById(tutorID)
         if(!tutor) return res.status(404).json({message : 'tutor not found'})
         
-        const existingRequest = await VerificationRequest.findOne({ tutorID , status : 'pending' })
+        const existingRequest = await Tutor.findOne({ _id : tutorID , status : 'pending' })
 
-        if(existingRequest) return res.status(409).json({message : 'A pending verification request already exists.'})
+        if(existingRequest) return res.status(409).json({message : 'Verification request is pending'})
 
-        const request = new VerificationRequest({
-            tutorID,
-            name : tutor.firstName
-        })
+        const updatedData = await Tutor.findByIdAndUpdate(tutorID,{
+            status : 'pending'
+        },{new : true}).select('-password')
 
-        await request.save()
-
-        return res.status(200).json({message : 'Verification request submitted successfully' })
+        return res.status(200).json({message : 'Verification request submitted successfully' ,updatedData})
 
     } catch (error) {
-        console.log('Error requestVerification in tutor');
-        return res.status(500).json({ message: 'Error requestVerification in tutor', error: error.message });
+        console.log('Error requesting Verification in tutor');
+        return res.status(500).json({ message: 'Error requesting Verification', error: error.message });
     }
 
 }

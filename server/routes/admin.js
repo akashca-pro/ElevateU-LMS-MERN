@@ -7,7 +7,7 @@ import {addUser,loadUsers,loadUserDetails,updateUserDetails,deleteUser
 } from '../controllers/admin/adminUserOps.js' // Admin - User CRUD
 
 import {addTutor,loadTutors,loadTutorDetails,updateTutorDetails,deleteTutor,
-loadRequests,approveRequest,rejectRequest
+loadRequests,approveOrRejectrequest
 } from '../controllers/admin/adminTutorOps.js' // Admin - Tutor CRUD
 
 import {loadCategory, addCategory, updateCategory, deleteCategory
@@ -51,8 +51,8 @@ router.delete('/delete-tutor/:id',verifyAdminAccessToken,deleteTutor)
 // notification from tutor verification request
 
 router.get('/verification-request',verifyAdminAccessToken,loadRequests)
-router.patch('/approve-verification/:id',verifyAdminAccessToken,approveRequest)
-router.post('/reject-verification/:id',verifyAdminAccessToken,rejectRequest)
+router.patch('/control-verification',verifyAdminAccessToken,approveOrRejectrequest)
+
 
 // category CRUD
 

@@ -8,7 +8,7 @@ const UserLoginProtect = ({ children }) => {
 
   useEffect(() => {
     if (!user?.isAuthenticated) {
-      navigate('/user/login');
+      navigate('/user/login',{ replace: true });
     }
   }, [user, navigate]); 
 

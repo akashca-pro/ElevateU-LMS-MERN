@@ -86,6 +86,14 @@ const tutorSchema = mongoose.Schema({
         type : Date,
         default : ()=> Date.now() + 10 * 60 * 1000 
     },
+    status : {
+        type : String,
+        enum : ['pending','approved','rejected','none'],
+        default : 'none'
+    },
+    reason : {
+        type : String,
+    },
     isBlocked : {
         type : Boolean,
     }
