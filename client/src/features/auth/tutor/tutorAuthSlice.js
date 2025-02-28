@@ -20,7 +20,6 @@ const tutorAuthSlice = createSlice({
             state.tutorData = null;
             state.isAuthenticated = false;
             localStorage.removeItem("tutor");
-            window.location.href = '/tutor/login'
         }
     }
 })

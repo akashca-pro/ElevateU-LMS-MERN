@@ -32,6 +32,7 @@ router.patch('/refresh-token',verifyTutorRefreshToken,refreshToken)
 
 router.get('/google',passport.authenticate('google-tutor',{ scope: ["profile", "email"] }))
 
+
 router.get('/auth-callback',passport.authenticate('google-tutor',{ session : false , 
     failureRedirect : '/auth-failure' }),passportCallback);
 
@@ -41,10 +42,10 @@ router.get('/auth-load',verifyTutorAccessToken,authLoad)
 
 // CRUD routes
 
-router.get('/profile/:id',verifyTutorAccessToken,loadProfile)
+router.get('/profile',verifyTutorAccessToken,loadProfile)
 router.post('/update-email/:id',otpLimiter,verifyTutorAccessToken,updateEmail('tutor'))
 router.post('/verify-email',verifyTutorAccessToken,verifyEmail('tutor'))
-router.post('/update-profile/:id',verifyTutorAccessToken,updateProfile)
+router.post('/update-profile',verifyTutorAccessToken,updateProfile)
 router.delete('/delete-account/:id',verifyTutorAccessToken,deleteAccount)
 
 // request verification from admin

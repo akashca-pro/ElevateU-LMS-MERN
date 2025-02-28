@@ -55,7 +55,9 @@ export const loginAdmin = async (req,res) => {
 
         if(rememberMe) sendToken(res,'adminRefreshToken',refreshToken,7 * 24 * 60 * 60 * 1000);
 
-        return res.status(200).json({message : 'admin login successfull'});
+        const updatedData = await Admin.findOne({email}).select('firstName email lastName profileImage')
+
+        return res.status(200).json({message : 'admin login successfull',admin : updatedData});
 
     } catch (error) {
         console.log('Error logging in admin ',error);
@@ -106,18 +108,14 @@ export const refreshToken = async (req,res) => {
 export const loadProfile = async (req,res) =>{
 
     try {
-        const admin_ID = req.params.id;
+        const admin_ID = req.admin.id;
 
-        const adminData = await Admin.findById(admin_ID);
+        const adminData = await Admin.findById(admin_ID).select('email firstName lastName profileImage')
 
         if(!adminData) return res.status(404).json({message : 'admin data is not found'})
+    
 
-        return res.status(200).json({
-            email : adminData.email,
-            firstName : adminData.firstName,
-            lastName : adminData.lastName,
-            profileImage : adminData.profileImage
-        })
+        return res.status(200).json(adminData)
         
     } catch (error) {
         console.log('Error loading admin profile',error);
@@ -131,7 +129,7 @@ export const loadProfile = async (req,res) =>{
 export const updateProfile = async (req,res) => {
     
     try {
-        const admin_ID = req.params.id
+        const admin_ID = req.admin.id
         const admin = await Admin.findById(admin_ID)
         if(!admin)return res.status(404).json({message : 'admin details not found'});
 

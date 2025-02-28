@@ -99,8 +99,10 @@ export const loginUser = async (req,res) => {
     
         // Set refresh token as cookie (only if "Remember Me" is checked)
         if(rememberMe) sendToken(res,'userRefreshToken',refreshToken,7 * 24 * 60 * 60 * 1000);
-    
-        res.status(200).json({message : "Login successfull",user});
+
+        const data = await User.findOne({email}).select('email firstName lastName profileImage bio socialLinks phone dob _id') 
+
+        return res.status(200).json({message : "Login successfull",user : data});
 
     } catch (error) {
         console.log(error)

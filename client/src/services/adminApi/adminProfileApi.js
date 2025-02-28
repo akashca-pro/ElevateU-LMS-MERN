@@ -6,16 +6,17 @@ export const adminProfileApi = apiSlice.injectEndpoints({
     endpoints : (builder) => ({
 
         adminLoadProfile : builder.query({
-            query : (id)=>({
-                url : `admin/profile/${id}`,
+            query : ()=>({
+                url : `admin/profile`,
                 method : 'GET',
             }),
             providesTags : ['Admin']
         }),
         adminUpdateProfile : builder.mutation({
-            query : (id) => ({
-                url : `admin/update-profile/${id}`,
-                method : 'PATCH' 
+            query : (credentials) => ({
+                url : `admin/update-profile`,
+                method : 'POST' ,
+                body : credentials
             }),
             invalidatesTags : ['Admin']
        }),

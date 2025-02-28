@@ -5,10 +5,11 @@ import Tutor from '../../model/tutor.js'
 export const loadProfile = async (req,res) => {
     
     try {
-        const tutor_ID = req.params.id 
+        const tutor_ID = req.tutor.id 
         const tutorData = await Tutor.findById(tutor_ID)
-        .select('-password')
+        .select('_id email firstName lastName profileImage bio dob phone socialLinks expertise experience isAdminVerified status reason ');
 
+    
         if(!tutorData)return res.status(404).json({message : 'tutor not found'})
 
         return res.status(200).json(tutorData);
@@ -25,13 +26,13 @@ export const loadProfile = async (req,res) => {
 export const updateProfile = async (req,res) => {
     
     try {
-        const tutor_ID = req.params.id;
+        const tutor_ID = req.tutor.id;
         const tutor = await Tutor.findById(tutor_ID)
         if(!tutor) return res.status(404).json({message : 'tutor not found'});
 
         const {firstName, lastName, profileImage, phone, bio, socialLinks,
              expertise, experience, earnings , dob} = req.body;
-
+            
         const changedData = await Tutor.findByIdAndUpdate(tutor_ID , {
             firstName,
             lastName,
@@ -44,7 +45,7 @@ export const updateProfile = async (req,res) => {
             earnings,
             dob
         } , {new : true})
-        .select('-password')
+        .select('_id email firstName lastName profileImage bio dob socialLinks phone expertise experience isAdminVerified status reason ');
 
         return res.status(200).json(changedData)
 

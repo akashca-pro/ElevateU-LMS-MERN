@@ -5,6 +5,8 @@ import { toast } from 'sonner';
 const GoogleAuth = ({ role, useGoogleCalback, useAuthActions }) => {
   const { login } = useAuthActions();
   const navigate = useNavigate();
+
+
   const { isLoading, data, error } = useGoogleCalback();
 
   useEffect(() => {

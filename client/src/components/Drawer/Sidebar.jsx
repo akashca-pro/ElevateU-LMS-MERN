@@ -15,7 +15,8 @@ const Sidebar = ({ onToggle , menuItems}) => {
     
     if(location.pathname === `/${user.isAuthenticated ? 'user' : 'tutor'}/profile/messages`){
       setActiveItem("Messages")
-    }else if (location.pathname === `/${user.isAuthenticated ? 'user' : 'tutor'}/profile`){
+    }else if (location.pathname === `/${user.isAuthenticated ? 'user' : 
+       tutor.isAuthenticated ? 'tutor' : 'admin' }/profile`){
       setActiveItem('Profile')
     }
 

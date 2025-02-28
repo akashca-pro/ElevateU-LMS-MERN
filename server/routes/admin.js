@@ -29,8 +29,8 @@ router.patch('/refresh-token',verifyAdminRefreshToken,refreshToken)
 
 // Admin profile CRUD
 
-router.get('/profile/:id',verifyAdminAccessToken,loadProfile)
-router.patch('/update-profile/:id',verifyAdminAccessToken,updateProfile)
+router.get('/profile',verifyAdminAccessToken,loadProfile)
+router.post('/update-profile',verifyAdminAccessToken,updateProfile)
 
 //  Admin - Users CRUD
 

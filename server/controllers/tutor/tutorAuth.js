@@ -102,8 +102,9 @@ export const loginTutor = async (req,res) => {
         // Set refresh token as cookie (only if "Remember Me" is checked)
         if(rememberMe) sendToken(res,'tutorRefreshToken',refreshToken,7 * 24 * 60 * 60 * 1000);
     
-        console.log(tutor)
-        return res.status(200).json({message : "Login successfull",tutor});
+        const data = await Tutor.findOne({email}).select('_id email firstName lastName profileImage bio dob socialLinks expertise experience isAdminVerified status reason ')
+    
+        return res.status(200).json({message : "Login successfull",tutor : data});
 
     } catch (error) {
         console.log(error)
@@ -214,9 +215,9 @@ export const passportCallback = async (req,res) => {
     
     try {
 
-        if(!req.tutor) return res.status(404).json({message : 'Google authentication failed'});
+        if(!req.user) return res.status(404).json({message : 'Google authentication failed'});
 
-        const {user,token} = req.user;
+        const {tutor,token} = req.user;
 
         sendToken(res,'tutorAccessToken',token,1 * 24 * 60 * 60 * 1000);
 
@@ -233,14 +234,15 @@ export const passportCallback = async (req,res) => {
 
 export const authFailure = async (req,res) => {
 
-    res.status(404).json({ message: "Google authentication failed. Please try again." });
+    return res.redirect(`${process.env.CLIENT_URL}/user/login`);
 
 }
+
 
 export const authLoad = async (req,res) => {
     
     try {
-        const {id} = req.user
+        const {id} = req.tutor
 
         const tutor = await Tutor.findById(id)
         if(!tutor) return res.status(404).json({message : "Google authentication failed. Please try again."})

@@ -6,8 +6,8 @@ const tutorProfileApi = apiSlice.injectEndpoints({
     endpoints : (builder) => ({
 
         tutorLoadProfile : builder.query({
-            query : (id) =>({
-                url : `tutor/profile/${id}`,
+            query : () =>({
+                url : `tutor/profile`,
                 method : 'GET'
             }),
             providesTags : ['Tutor']
@@ -29,8 +29,8 @@ const tutorProfileApi = apiSlice.injectEndpoints({
             invalidatesTags : ['Tutor']
         }),
         tutorUpdateProfile : builder.mutation({
-            query : ({id,credentials})=>({
-                url : `tutor/update-profile/${id}`,
+            query : (credentials)=>({
+                url : `tutor/update-profile`,
                 method : 'POST',
                 body : credentials
             }),

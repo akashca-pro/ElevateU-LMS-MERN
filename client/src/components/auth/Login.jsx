@@ -49,11 +49,11 @@ function Login({ role, useLogin, useAuthActions }) {
       <div className="grid h-full w-full md:grid-cols-2 bg-white shadow-lg">
         <div className="flex items-center justify-center p-8 overflow-auto">
           <div className="w-full max-w-sm space-y-6">
-            <div className="space-y-2 text-center">
+             <div className="space-y-2 text-center">
               <h1 className="text-3xl font-bold">
-                {role === "user" ? "Student" : "Tutor"} Log In
+              {role === "user" ? "Student" : role === "tutor" ? "Tutor" : "Admin"} Log In
               </h1>
-              <p className="text-center text-sm text-gray-600">
+              {role!=='admin' && <p className="text-center text-sm text-gray-600">
                 {`Are you a ${
                   role === "user" ? "tutor" : "student"
                 }? Switch to ${
@@ -65,7 +65,7 @@ function Login({ role, useLogin, useAuthActions }) {
                 >
                   Login here!
                 </Link>
-              </p>
+              </p>}
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -125,12 +125,12 @@ function Login({ role, useLogin, useAuthActions }) {
                   <p className="text-red-500 text-xs">{errors.password}</p>
                 )}
               </div>
-              <a
+              {role !== 'admin' && <a
                 href={`/${role}/forgot-password`}
                 className="block text-right text-sm text-primary hover:underline"
               >
                 Forgot password?
-              </a>
+              </a>}
               <button
                 type="submit"
                 disabled={isLoading || isFormValid}
@@ -153,7 +153,7 @@ function Login({ role, useLogin, useAuthActions }) {
                 <span className="bg-white px-2 text-gray-500">or</span>
               </div>
             </div>
-            <div className="grid gap-2">
+            {role !== 'admin' && <div className="grid gap-2">
               <button
                 onClick={handleGoogleAuth}
                 className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-sm font-medium hover:bg-gray-50"
@@ -165,7 +165,7 @@ function Login({ role, useLogin, useAuthActions }) {
                 />
                 Continue with Google
               </button>
-            </div>
+            </div>}
             <p className="text-center text-sm text-gray-500">
               Don't have an account?{" "}
               <a href={`/${role}/sign-up`} className="text-primary hover:underline">

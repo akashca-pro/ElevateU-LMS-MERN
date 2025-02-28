@@ -5,8 +5,8 @@ import apiSlice from "../apiSlice";
 const userProfileApi = apiSlice.injectEndpoints({
     endpoints : (builder)=>({
         userLoadProfile : builder.query({
-            query : (id)=>({
-                url : `user/profile/${id}`,
+            query : ()=>({
+                url : `user/profile`,
                 method : 'GET'
             }),
             providesTags : ['User']

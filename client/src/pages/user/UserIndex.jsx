@@ -7,7 +7,6 @@ import {SquareUser, BookOpen, LibraryBig, MessagesSquare, BellRing, Handshake, P
 
 import ProfileDetails from './userProfile/ProfileDetails/ProfileDetails';
 import CourseDetails from './my-course/CourseDetails';
-import ProfileMessages2 from './userProfile/ProfileMessages2';
 import UserLoginProtect from '@/protectors/user/UserLoginProtect';
 
 
@@ -41,6 +40,9 @@ import Quiz from './quiz/Index';
 import Setting from './settings/Index';
 
 import ProtectAuthPage from '@/protectors/ProtectAuthPage';
+import ProtectedRoute from '@/protectors/ProtectedRoute';
+
+import NotFound from '@/pages/NotFound';
 
 const UserIndex = () => {
   return (
@@ -65,13 +67,14 @@ const menuItems = [
 
 
 const ProtectedLayout = () => (
-  <UserLoginProtect>
+  <ProtectedRoute role={'user'}>
     <Navbar/>
     <Layout menuItems = {menuItems}  >
       <Outlet/>
     </Layout>
     <Footer/>
-  </UserLoginProtect>
+    </ProtectedRoute>
+   
 );
 
 
@@ -89,10 +92,26 @@ const UserRoutes = () => {
           <OTPVerification role={'user'} useVerifyOtp={useUserVerifyOtpMutation} useAuthActions={useUserAuthActions}/>
           </ProtectAuthPage>
           } />
-        <Route path="login" element={<Login role={'user'} useLogin={useUserLoginMutation} useAuthActions={useUserAuthActions} />} />
-        <Route path="forgot-password" element={<ForgotPassword role={'user'} useForgotPassword={useUserForgotPasswordMutation} navigateTo = {'/user/reset-password'}/>} />
-        <Route path='reset-password' element={<ResetPassword role={'user'} useResetPassword={useUserResetPasswordMutation} navigateTo={'/user/login'} />}/>
-        <Route path='auth-success' element={<GoogleAuth role={'user'} useGoogleCalback={useUserGoogleCallbackQuery} useAuthActions={useUserAuthActions}/>}/>
+        <Route path="login" element={
+          <ProtectAuthPage>
+          <Login role={'user'} useLogin={useUserLoginMutation} useAuthActions={useUserAuthActions} />
+          </ProtectAuthPage>
+          } />
+        <Route path="forgot-password" element={
+          <ProtectAuthPage>
+          <ForgotPassword role={'user'} useForgotPassword={useUserForgotPasswordMutation} navigateTo = {'/user/reset-password'}/>
+          </ProtectAuthPage>
+          } />
+        <Route path='reset-password' element={
+           <ProtectAuthPage>
+          <ResetPassword role={'user'} useResetPassword={useUserResetPasswordMutation} navigateTo={'/user/login'} />
+          </ProtectAuthPage>
+          }/>
+        <Route path='auth-success' element={
+          <ProtectAuthPage>
+          <GoogleAuth role={'user'} useGoogleCalback={useUserGoogleCallbackQuery} useAuthActions={useUserAuthActions}/>
+          </ProtectAuthPage>
+          }/>
 
         <Route path='profile' element={<ProtectedLayout/>}>
           <Route index element={<ProfileDetails />}/>
@@ -105,9 +124,8 @@ const UserRoutes = () => {
           <Route path='quiz' element={<Quiz/>}/>
           <Route path='certificates' element={<Certificates/>}/>
           <Route path='settings' element={<Setting/>}/>
-
         </Route>
-  
+        <Route path='*' element={<NotFound/>}/>
       </Route>
     </Routes>
   );

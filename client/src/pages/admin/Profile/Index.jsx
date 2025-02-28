@@ -1,48 +1,45 @@
 import { useState ,useEffect} from "react";
 import { RefreshCw, Trash2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";;
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ProfileDialog } from "./ProfileDialog";
 import useForm from "@/hooks/useForm";
 import { imageUpload } from "@/services/Cloudinary/imageUpload";
-import {useUserLoadProfileQuery, useUserUpdateProfileMutation} from '@/services/userApi/userProfileApi'
-import { useSelect } from "@/hooks/useSelect";
-import { formatDate } from "@/utils/dateToString";
-import {useUserAuthActions} from '@/hooks/useDispatch'
+import {useAdminLoadProfileQuery, useAdminUpdateProfileMutation} from '@/services/adminApi/adminProfileApi'
+import {useAdminAuthActions} from '@/hooks/useDispatch'
 import { toast } from "sonner";
 
-const ProfileDetails = () => {
-  const {login} = useUserAuthActions()
-  const {user} = useSelect()
-  const {data : student , error, isLoading} = useUserLoadProfileQuery()
-  const loadProfile = useUserLoadProfileQuery()
-  const [userLoadProfile] = useUserUpdateProfileMutation()
+const Index = () => {
+  const {login} = useAdminAuthActions()
+  const {data : adminDetails , error, isLoading} = useAdminLoadProfileQuery()
+  const loadProfile = useAdminLoadProfileQuery()
+  const [updateProfile] = useAdminUpdateProfileMutation()
 
   const [avatarPreview, setAvatarPreview] = useState(null);  
   const { formData, errors, handleChange ,setFormData} = useForm();
 
+
   useEffect(() => {
-    if (student) {
+    if (adminDetails) {
       setFormData({
-        firstName: student?.firstName || "",
-        lastName: student?.lastName || "",
-        phone: student?.phone || "",
-        dob: formatDate(student.dob) || "",
-        bio: student?.bio || "",
-        profileImage: student?.profileImage || "", // Set profile image if available
+        firstName: adminDetails?.firstName || "",
+        lastName: adminDetails?.lastName || "",
+        profileImage: adminDetails?.profileImage || null, 
+        email : adminDetails?.email || ""
       });
     }
-  }, [student , loadProfile]);
+  }, [adminDetails , loadProfile]);
+
+  console.log('adminData',adminDetails)
+  console.log('formdata',formData)
 
 
   const notValid = 
   Object.values(errors).some((err) => err) || 
   !formData.firstName || 
-  !formData.lastName || 
-  !formData.phone || 
-  !formData.dob
+  !formData.lastName 
+ 
 
   
   const handleAvatarChange = (e) => {
@@ -57,12 +54,11 @@ const ProfileDetails = () => {
     }
   };
 
-  console.log('formdata',formData)
-  console.log('student',student)
+
 
   const isFormChanged =
-  student &&
-  Object.keys(formData).some((key) => formData[key] !== student[key]);
+  adminDetails &&
+  Object.keys(formData).some((key) => formData[key] !== adminDetails[key]);
 
 
 
@@ -76,14 +72,9 @@ const ProfileDetails = () => {
       formData.profileImage = uploadedImageUrl
     }
 
-
-    const payload = {
-      id : student._id ,
-      credentials : formData
-    }
-
+   
     try {
-      const response = await userLoadProfile(payload).unwrap()
+      const response = await updateProfile(formData).unwrap()
       login(response)
       toast.success('Profile updated successfully',{ id: toastId })
     } catch (error) {
@@ -168,48 +159,20 @@ const ProfileDetails = () => {
               />
               {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
             </div>
-
-            {/* Phone & Birthday */}
             <div>
-          <Label className="block text-sm font-medium text-gray-700 mb-2">Phone</Label>
-            <Input
-            id="phone"
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            pattern="[0-9]{10}" // Ensures only 10-digit numbers
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#7454FD] focus:border-transparent"
-            placeholder="Enter 10-digit phone number"
-            />
-            {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>} 
-          </div>
-          
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Birthday</Label>
+              <Label className="block text-sm font-medium text-gray-700 mb-2">Email</Label>
               <Input
-                type="date"
-                name="dob"
-                value={formData.dob}
+                type="email"
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#7454FD] focus:border-transparent"
+                placeholder="Email"
               />
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
             </div>
+             
           </div>
-
-          {/* Bio */}
-          <div>
-            <Label className="block text-sm font-medium text-gray-700 mb-2">Bio</Label>
-            <Textarea
-              name="bio"
-              value={formData.bio}
-              onChange={handleChange}
-              rows={4}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#7454FD] focus:border-transparent"
-              placeholder="Tell us about yourself..."
-            />
-          </div>
-
           {/* Submit Button */}
           <div>
           <ProfileDialog  notValid={notValid || !isFormChanged}
@@ -225,4 +188,4 @@ const ProfileDetails = () => {
   );
 };
 
-export default ProfileDetails;
+export default Index

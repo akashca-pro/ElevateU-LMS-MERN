@@ -11,7 +11,8 @@ const ProtectAuthPage = ({children}) =>{
   
     useEffect(() => {
       if (isAuthenticated) {
-        navigate(location.state?.from?.pathname || '/', { replace: true });
+        navigate('/',{replace : true});
+       
       }
     }, [isAuthenticated, navigate, location]);
   

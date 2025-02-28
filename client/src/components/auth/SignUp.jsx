@@ -47,8 +47,11 @@ const SignUp = ({role,useSignup}) => {
     toast.promise(signupPromise, {
       loading: "Signing up...",
       success: () => {
+        if(!role === 'admin'){
         navigate(`/${role}/verify-otp`, { state: formData.email });
-        return "An OTP has been sent to your registered email address.";
+        return "An OTP has been sent to your registered email address.";}
+        navigate('/admin/login');
+        return "Signup successfull"
       },
       error: (error) => error?.data?.message || "Signup failed. Try again.",
     });
@@ -73,13 +76,13 @@ const SignUp = ({role,useSignup}) => {
         <div className="flex items-center justify-center p-8 overflow-auto">
           <div className="w-full max-w-sm space-y-5">
             <div className="text-center">
-              <h1 className="text-3xl font-bold">{role === 'user' ? 'Student' : 'Tutor'} Sign Up</h1>
-              <p className="text-center text-sm text-gray-600">
+              <h1 className="text-3xl font-bold">{role === "user" ? "Student" : role === "tutor" ? "Tutor" : "Admin"}  Sign Up</h1>
+              {role!=='admin' && <p className="text-center text-sm text-gray-600">
               {`Are you a ${role === 'user' ? 'tutor' : 'student'}? Switch to ${role === 'user' ? 'tutor' : 'student'}`} {" "}
               <Link to={`/${role === 'user' ? 'tutor' : 'user'}/sign-up`} className="text-purple-600 hover:underline">
               Signup here!
               </Link>
-            </p>
+            </p>}
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Username Field */}
@@ -191,7 +194,7 @@ const SignUp = ({role,useSignup}) => {
                 <span className="bg-white px-2 text-gray-500">or</span>
               </div>
             </div>
-            <div className="grid gap-2">
+            {role!=='admin' && <div className="grid gap-2">
               <button 
                 onClick={handleGoogleAuth}
                 className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-sm font-medium hover:bg-gray-50"
@@ -199,7 +202,7 @@ const SignUp = ({role,useSignup}) => {
                 <img src="https://www.google.com/favicon.ico" alt="Google" className="h-5 w-5" />
                 Continue with Google
               </button>
-            </div>
+            </div>}
             <p className="text-center text-sm text-gray-500">
               Already have an account?{" "}
               <Link to={`/${role}/login`} className="text-purple-600 hover:underline">

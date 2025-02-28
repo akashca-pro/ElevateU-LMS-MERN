@@ -6,7 +6,7 @@ BellRing, SquareUser, BookOpen, MessagesSquare, IndianRupee, ChartNoAxesCombined
 import {Routes , Route, Outlet} from 'react-router-dom'
 
 import {useTutorSignupMutation, useTutorVerifyOtpMutation, useTutorLoginMutation,
-   useTutorForgotPasswordMutation, useTutorResetPasswordMutation
+   useTutorForgotPasswordMutation, useTutorResetPasswordMutation ,useTutorGoogleCallbackQuery
 } from '@/services/TutorApi/tutorAuthApi.js'
 
 import { useTutorAuthActions } from '@/hooks/useDispatch'
@@ -22,9 +22,9 @@ import GoogleAuth from '@/components/auth/GoogleAuth'
 import Navbar from '@/components/Navbar.jsx'
 import Layout from '@/components/Drawer/Layout.jsx'
 import Footer from '@/components/Footer.jsx'
+import NotFound from '@/pages/NotFound'
 
 
-import TutorLoginProtect from '@/protectors/tutor/TutorLoginProtect.jsx'
 
 // Tutor Profile
 
@@ -36,6 +36,8 @@ import Analytics from './analytics/Analytics.jsx'
 import Notification from './Notification/Notification.jsx'
 import Setting from './settings/Settings.jsx'
 
+import ProtectAuthPage from '@/protectors/ProtectAuthPage.jsx';
+import ProtectedRoute from '@/protectors/ProtectedRoute.jsx';
 
 const TutorIndex = () => {
   return (
@@ -57,13 +59,13 @@ const menuItems = [
 
 const ProtectedLayout = ()=>{
   return (
-    <TutorLoginProtect>
+    <ProtectedRoute role={'tutor'}>
       <Navbar/>
       <Layout menuItems = {menuItems}>
       <Outlet/>
       </Layout>
       <Footer/>
-    </TutorLoginProtect>
+    </ProtectedRoute>
   )
 }
 
@@ -74,12 +76,36 @@ return (
   <Routes>
     <Route path='/' element={<TutorIndex/>}>
   
-        <Route path="sign-up" element={<SignUp role={'tutor'} useSignup={useTutorSignupMutation}/>} />
-        <Route path="verify-otp" element={<OTPVerification role={'tutor'} useVerifyOtp={useTutorVerifyOtpMutation} useAuthActions={useTutorAuthActions}/>} />
-        <Route path="login" element={<Login role={'tutor'} useLogin={useTutorLoginMutation} useAuthActions={useTutorAuthActions} /> } />
-        <Route path="forgot-password" element={<ForgotPassword role={'tutor'} useForgotPassword={useTutorForgotPasswordMutation} navigateTo={'/tutor/reset-password'}/>} />
-        <Route path='reset-password'element={<ResetPassword role={'tutor'} useResetPassword={useTutorResetPasswordMutation} navigateTo={'/tutor/login'}/>}/>
-        <Route path='auth-success' element={<GoogleAuth/>} />
+        <Route path="sign-up" element={
+          <ProtectAuthPage>
+          <SignUp role={'tutor'} useSignup={useTutorSignupMutation}/>
+          </ProtectAuthPage>
+          } />
+        <Route path="verify-otp" element={
+          <ProtectAuthPage>
+          <OTPVerification role={'tutor'} useVerifyOtp={useTutorVerifyOtpMutation} useAuthActions={useTutorAuthActions}/>
+          </ProtectAuthPage>
+          } />
+        <Route path="login" element={
+          <ProtectAuthPage>
+          <Login role={'tutor'} useLogin={useTutorLoginMutation} useAuthActions={useTutorAuthActions} /> 
+          </ProtectAuthPage>
+          } />
+        <Route path="forgot-password" element={
+          <ProtectAuthPage>
+          <ForgotPassword role={'tutor'} useForgotPassword={useTutorForgotPasswordMutation} navigateTo={'/tutor/reset-password'}/>
+          </ProtectAuthPage>
+          } />
+        <Route path='reset-password'element={
+          <ProtectAuthPage>
+          <ResetPassword role={'tutor'} useResetPassword={useTutorResetPasswordMutation} navigateTo={'/tutor/login'}/>
+          </ProtectAuthPage>
+          }/>
+        <Route path='auth-success' element={
+          <ProtectAuthPage>
+          <GoogleAuth role={'tutor'} useGoogleCalback={useTutorGoogleCallbackQuery} useAuthActions={useTutorAuthActions}/>
+          </ProtectAuthPage>
+          } />
 
         <Route path='profile' element={<ProtectedLayout/>}>
           <Route index element={<ProfileDetails/>}/>
@@ -90,7 +116,7 @@ return (
           <Route path='notification' element={<Notification/>}/>
           <Route path='settings' element={<Setting/>}/>
         </Route>
-  
+        <Route path='*' element={<NotFound/>}/>
     </Route>
   </Routes>
 )

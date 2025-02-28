@@ -20,7 +20,6 @@ const adminAuthSlice = createSlice({
             state.adminData = null;
             state.isAuthenticated = false;
             localStorage.removeItem("admin")
-            window.location.href = '/admin/login'
         }
     }
 })

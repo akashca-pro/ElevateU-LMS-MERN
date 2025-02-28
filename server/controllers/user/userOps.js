@@ -5,10 +5,9 @@ import User from '../../model/user.js'
 export const loadProfile = async (req,res) => {
     
     try {
-        const user_ID = req.params.id 
-        const userData = await User.findById(user_ID,'email firstName lastName profileImage bio socialLinks phone enrolledCourses dob')
+        const user_ID = req.user.id
+        const userData = await User.findById(user_ID,'email firstName lastName profileImage bio socialLinks phone dob _id')
         if(!userData)return res.status(404).json({message : 'user not found'})
-
         return res.status(200).json(userData)
 
     } catch (error) {
@@ -38,7 +37,7 @@ export const updateProfile = async (req,res) => {
             socialLinks,
             dob
         } , {new : true })
-        .select('firstName lastName profileImage phone bio socialLinks')
+            .select('email firstName lastName profileImage bio socialLinks phone dob _id'); 
 
         return res.status(200).json(updatedData)
 

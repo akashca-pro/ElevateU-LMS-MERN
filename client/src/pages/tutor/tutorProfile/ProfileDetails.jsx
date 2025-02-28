@@ -22,7 +22,7 @@ const ProfileDetails = () => {
   const {login} = useTutorAuthActions()
   const {tutor} = useSelect()
 
-  const {data : teacher , error, isLoading} = useTutorLoadProfileQuery(tutor.tutorData._id)
+  const {data : teacher , error, isLoading} = useTutorLoadProfileQuery()
   const [tutorLoadProfile] = useTutorUpdateProfileMutation()
   const [requestVerification,{}] = useTutorRequestVerificationMutation()
 
@@ -120,13 +120,11 @@ const ProfileDetails = () => {
       formData.profileImage = uploadedImageUrl
     }
 
-    const payload = {
-      id : teacher._id ,
-      credentials : formData
-    }
+    console.log(formData)
 
     try {
-      const response = await tutorLoadProfile(payload).unwrap()
+      const response = await tutorLoadProfile(formData).unwrap()
+      console.log(response)
       login(response)
       toast.success('Profile updated successfully',{ id: toastId })
     } catch (error) {

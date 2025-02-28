@@ -1,35 +1,32 @@
-import React, { useEffect } from 'react';
-import { useSelect } from '@/hooks/useSelect.js';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useSelect } from '@/hooks/useSelect';
+import { useNavigate } from 'react-router-dom';
 
-const ProtectedRoute = ({ children, role }) => {
-    const { user, tutor, admin } = useSelect();
+const ProtectedRoute = ({ role, children }) => {
     const navigate = useNavigate();
-    const location = useLocation();
-  
-   
+    const { user, tutor, admin } = useSelect();
+
+    let loginPath = '/login';
+    if (role === 'user') loginPath = '/user/login';
+    else if (role === 'tutor') loginPath = '/tutor/login';
+    else if (role === 'admin') loginPath = '/admin/login';
+
     const isAuthenticated =
-      (role === 'user' && user?.isAuthenticated) ||
-      (role === 'tutor' && tutor?.isAuthenticated) ||
-      (role === 'admin' && admin?.isAuthenticated);
-  
+        (role === 'user' && user?.isAuthenticated) ||
+        (role === 'tutor' && tutor?.isAuthenticated) ||
+        (role === 'admin' && admin?.isAuthenticated);
+
     useEffect(() => {
-      if (!isAuthenticated) {
-        let loginPath = '/login';
-  
-        if (role === 'user') loginPath = '/user/login';
-        else if (role === 'tutor') loginPath = '/tutor/login';
-        else if (role === 'admin') loginPath = '/admin/login';
-  
-        navigate(loginPath, { replace: true, state: { from: location } });
-      }
-    }, [isAuthenticated, navigate, location, role]);
-  
+        if (!isAuthenticated) {
+            navigate(loginPath, { replace: true });
+        }
+    }, [isAuthenticated, navigate, loginPath]);
+
     if (!isAuthenticated) {
-      return null;
+        return null; // Prevents rendering if not authenticated
     }
-  
+
     return <>{children}</>;
-  };
+};
 
 export default ProtectedRoute;

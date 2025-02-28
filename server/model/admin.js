@@ -24,7 +24,8 @@ const adminSchema = mongoose.Schema({
     },
     lastName : {
         type : String,
-        trim : true
+        trim : true,
+        default : ''
     },
     profileImage : {
         type : String,

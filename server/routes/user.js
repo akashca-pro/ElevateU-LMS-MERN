@@ -39,7 +39,7 @@ router.get('/auth-load',verifyUserAccessToken,authLoad)
 
 // CRUD routes
 
-router.get('/profile/:id',verifyUserAccessToken,loadProfile)
+router.get('/profile',verifyUserAccessToken,loadProfile)
 router.post('/update-email/:id',otpLimiter,verifyUserAccessToken,updateEmail('user'))
 router.post('/verify-email',verifyUserAccessToken,verifyEmail('user'))
 router.post('/update-profile/:id',verifyUserAccessToken,updateProfile)
