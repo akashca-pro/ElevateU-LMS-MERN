@@ -33,7 +33,7 @@ import Courses from './courseManagement/Courses.jsx'
 import Messages from './Messages/Messages.jsx'
 import Revenue from './revenue/Revenue.jsx'
 import Analytics from './analytics/Analytics.jsx'
-import Notification from './Notification/Notification.jsx'
+import Notification from './Notification/Index.jsx'
 import Setting from './settings/Settings.jsx'
 
 import ProtectAuthPage from '@/protectors/ProtectAuthPage.jsx';

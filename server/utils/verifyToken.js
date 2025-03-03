@@ -1,74 +1,56 @@
 import 'dotenv/config'
-import jwt from 'jsonwebtoken'
+import jwt from "jsonwebtoken";
 
-// For users
+const TOKEN_NAMES = {
+    user: process.env.USER_ACCESS_TOKEN_NAME,
+    tutor: process.env.TUTOR_ACCESS_TOKEN_NAME,
+    admin: process.env.ADMIN_ACCESS_TOKEN_NAME
+};
 
-export const verifyUserAccessToken = (req,res,next)=>{
-    const {userAccessToken} = req.cookies;
-    if(!userAccessToken) return res.status(401).json({ message: "Access Token Required" });
-
-    jwt.verify(userAccessToken, process.env.JWT_SECRET, (error,decoded)=>{
-        if(error)return res.status(401).json({message : "Invalid Token"})
-        req.user = decoded;
-        next()
-    })
+const REFRESH_TOKEN = {
+    user : process.env.USER_REFRESH_TOKEN_NAME,
+    tutor : process.env.TUTOR_REFRESH_TOKEN_NAME,
+    admin : process.env.ADMIN_REFRESH_TOKEN_NAME
 }
 
-export const verifyUserRefreshToken = (req,res,next)=>{
-    const {userRefreshToken} = req.cookies;
-    if (!userRefreshToken) return res.status(401).json({ message: "Refresh Token Required" });
+export const verifyAccessToken = (role) => (req, res, next) => {
+    const tokenName = TOKEN_NAMES[role];
 
-    jwt.verify(userRefreshToken, process.env.JWT_REFRESH, (error,decoded)=>{
-        if(error) return res.status(401).json({message : "Invalid Refresh Token"})
-        req.user = decoded;
+    if (!tokenName) {
+        return res.status(400).json({ message: "Invalid role specified" });
+    }
+
+    const token = req.cookies[tokenName];
+    if (!token) {
+        return res.status(401).json({ message: "Access Token Required" });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req[role] = decoded;
         next();
-    })
-}
+    } catch (error) {
+        return res.status(403).json({ message: "Invalid Token" });
+    }
+};
 
-// For tutors
+export const verifyRefreshToken = (role) => (req,res,next)=>{
+    const tokenName = REFRESH_TOKEN[role]
+    
+    if (!tokenName) {
+        return res.status(400).json({ message: "Invalid role specified" });
+    }
 
-export const verifyTutorAccessToken = (req,res,next)=>{
-    const {tutorAccessToken} = req.cookies;
-    if(!tutorAccessToken) return res.status(401).json({ message: "Access Token Required" });
+    const token = req.cookies[tokenName];
+    if (!token) {
+        return res.status(401).json({ message: "Refresh Token Required" });
+    }
 
-    jwt.verify(tutorAccessToken, process.env.JWT_SECRET, (error,decoded)=>{
-        if(error) return res.status(401).json({message : "Invalid Token"})
-        req.tutor = decoded;
-        next()
-    })
-}
-
-export const verifyTutorRefreshToken = (req,res,next)=>{
-    const {tutorRefreshToken} = req.cookies;
-    if (!tutorRefreshToken) return res.status(401).json({ message: "Refresh Token Required" });
-
-    jwt.verify(tutorRefreshToken, process.env.JWT_REFRESH, (error,decoded)=>{
-        if(error)return res.status(401).json({message : "Invalid Refresh Token"})
-        req.tutor = decoded;
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_REFRESH);
+        req[role] = decoded;
         next();
-    })
-}
-
-//For Admin
-
-export const verifyAdminAccessToken = (req,res,next)=>{
-    const {adminAccessToken} = req.cookies;
-    if(!adminAccessToken) return res.status(401).json({ message: "Access Token Required" });
-
-    jwt.verify(adminAccessToken, process.env.JWT_SECRET, (error,decoded)=>{
-        if(error)return res.status(401).json({message : "Invalid Token"})
-        req.admin = decoded;
-        next()
-    })
-}
-
-export const verifyAdminRefreshToken = (req,res,next)=>{
-    const {adminRefreshToken} = req.cookies;
-    if (!adminRefreshToken) return res.status(401).json({ message: "Refresh Token Required" });
-
-    jwt.verify(adminRefreshToken, process.env.JWT_REFRESH, (error,decoded)=>{
-        if(error)return res.status(401).json({message : "Invalid Refresh Token"})
-        req.admin = decoded;
-        next();
-    })
+    } catch (error) {
+        return res.status(403).json({ message: "Invalid Token" });
+    }
 }

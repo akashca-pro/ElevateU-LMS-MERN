@@ -24,7 +24,7 @@ export const adminAuthApi = apiSlice.injectEndpoints({
         adminLogout : builder.mutation({
             query : ()=> ({
                 url : 'admin/logout',
-                method : 'PATCH',
+                method : 'DELETE',
             }),
             invalidatesTags : ['Admin']
         }),

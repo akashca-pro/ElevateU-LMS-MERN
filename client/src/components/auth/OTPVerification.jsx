@@ -8,7 +8,7 @@ const OTPVerification = ({ role, useVerifyOtp, useAuthActions }) => {
   const { login } = useAuthActions();
   const [resendOtp] = useReSendOtpMutation();
   const email = location.state;
-  const { otp, inputs, timer, handleChange, handleKeyDown, handleResend: reset } = useOTP(6,1);
+  const { otp, inputs, timer, handleChange, handleKeyDown, handleResend: reset } = useOTP();
 
   const isOtpValid = otp.includes("");
 
@@ -43,10 +43,9 @@ const OTPVerification = ({ role, useVerifyOtp, useAuthActions }) => {
 
     try {
       const response = await verifyOtp({ otp: otpCode }).unwrap();
-      toast.success(response.message);
-      toast.dismiss(toastId);
-      login(response.data);
-      navigate("/");
+      toast.success(response.message,{id : toastId});
+      login(response.data)
+      navigate('/');
     } catch (error) {
       toast.error(error?.data?.message || "OTP verification failed!");
       toast.dismiss(toastId);

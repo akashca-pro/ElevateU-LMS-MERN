@@ -66,7 +66,11 @@ export const verifyOtp = async (req, res) => {
 
       await user.save()
 
-      return res.status(200).json({ message: "OTP verified successfully",user});
+      const accessToken = generateAccessToken(user._id);
+
+      sendToken(res,'userAccessToken',accessToken,1 * 24 * 60 * 60 * 1000)
+
+      return res.status(200).json({ message: "OTP verified successfully",data : user});
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Internal Server Error" });
@@ -197,6 +201,7 @@ export const logoutUser = async (req,res) => {
     try {
 
         clearToken(res,'userAccessToken','userRefreshToken');
+        console.log('hello')
         return res.json({ message: "Logged out successfully" });
 
     } catch (error) {

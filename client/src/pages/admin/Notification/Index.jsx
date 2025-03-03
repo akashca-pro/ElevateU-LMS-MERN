@@ -1,9 +1,10 @@
 import React from 'react'
+import { NotificationCard } from './components/NotificationCard'
 
 const Index = () => {
   return (
     <div>
-      Notification
+      <NotificationCard/>
     </div>
   )
 }

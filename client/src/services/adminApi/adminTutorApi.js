@@ -49,21 +49,13 @@ const adminTutorApi = apiSlice.injectEndpoints({
             }),
             providesTags : ['Admin']
         }),
-        adminApproveVerification : builder.mutation({
-            query : (id) => ({
-                url : `admin/approve-verification/${id}`,
-                method : 'PATCH',
-            }),
-            invalidatesTags : ['Admin']
-        }),
-        adminRejectVerification : builder.mutation({
-            query : ({id,credentials}) => ({
-                url : `admin/reject-verification/${id}`,
-                method : 'POST',
-                body : credentials
-            }),
-            invalidatesTags : ['Admin']
-        }),
+       adminApproveOrRequest : builder.mutation({
+        query : (credentials) => ({
+            url : `admin/control-verification`,
+            method : 'POST',
+            body : credentials
+        })
+       }),
     })
 })
 
@@ -80,7 +72,6 @@ export const {
     // notification from tutor verification request
 
     useAdminVerificationRequestQuery,
-    useAdminApproveVerificationMutation,
-    useAdminRejectVerificationMutation
+    useAdminApproveOrRequestMutation
 
 } = adminTutorApi

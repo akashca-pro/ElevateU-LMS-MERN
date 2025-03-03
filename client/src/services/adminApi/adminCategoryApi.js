@@ -6,11 +6,17 @@ const adminCategoryApi = apiSlice.injectEndpoints({
     endpoints : (builder) => ({
 
         adminLoadCategories : builder.query({
-            query : ({page,limit,search}) => ({
-                url : `admin/categories?page=${page}&limit${limit}&search=${search}`,
+            query : ({page,limit,search, filter}) => ({
+                url : `admin/categories?page=${page}&limit=${limit}&search=${search}&filter=${filter}`,
                 method : 'GET',
             }),
             providesTags : ['Admin']
+        }),
+        adminLoadCategory : builder.query({
+            query : (name)=>({
+                url : `admin/category?name=${name}`,
+                method : 'GET'
+            })
         }),
         adminAddCategory : builder.mutation({
             query : (credential) =>({
@@ -21,8 +27,8 @@ const adminCategoryApi = apiSlice.injectEndpoints({
             invalidatesTags : ['Admin']
         }),
         adminUpdateCategory : builder.mutation({
-            query : ({id,credential}) =>({
-                url : `admin/update-category/${id}`,
+            query : (credential) =>({
+                url : `admin/update-category`,
                 method : 'POST',
                 body : credential
             }),
@@ -31,7 +37,7 @@ const adminCategoryApi = apiSlice.injectEndpoints({
         adminDeleteCategory : builder.mutation({
             query : (id) =>({
                 url : `admin/delete-category/${id}`,
-                method : 'POST',
+                method : 'DELETE',
             }),
             invalidatesTags : ['Admin']
         }),
@@ -44,6 +50,7 @@ export const {
     useAdminLoadCategoriesQuery,
     useAdminAddCategoryMutation,
     useAdminUpdateCategoryMutation,
-    useAdminDeleteCategoryMutation
+    useAdminDeleteCategoryMutation,
+    useAdminLoadCategoryQuery
 
 } = adminCategoryApi

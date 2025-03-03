@@ -8,22 +8,60 @@ export const loadCategory = async (req,res) => {
         const page = parseInt(req.query.page) || 1
         const limit = parseInt(req.query.limit) || 5
         const skip = (page-1) * limit
-        const search = req.query.search
+        const {search, filter} = req.query
 
-        const searchQuery = {name : {$regex : search, $options : 'i'} }
+        let sort = {createdAt : -1}; 
+        let filterQuery = {}; 
+
+         if (filter === "oldest") {
+            sort = { createdAt: 1 };
+        } else if (filter === "active") {
+            filterQuery = { isActive: true };
+        } else if(filter === 'notActive') {
+            filterQuery = {isActive : false}
+        }
+
+        if(search) filterQuery.name = {$regex : search, $options : 'i'}
          
-        const categoryDetails = await Category.find(search ? searchQuery : {})
+        const categoryDetails = await Category.find(filterQuery)
         .skip(skip)
         .limit(limit)
+        .sort(sort)
+
+        const totalCategories = await Category.countDocuments(filterQuery);
         
         if(!categoryDetails || categoryDetails.length === 0) 
             return res.status(404).json({message : 'category not found'});
 
-        return res.status(200).json(categoryDetails)
-
+        return res.status(200).json({
+            categories: categoryDetails,
+            total: totalCategories, 
+            currentPage: page,
+            totalPages: Math.ceil(totalCategories / limit),
+          });
     } catch (error) {
         console.log('Error loading categories',error);
         return res.status(500).json({ message: 'Error loading categories', error: error.message });
+    }
+
+}
+
+//Load specific category
+
+export const loadCategoryDetails = async (req,res) => {
+    
+    try {
+        const {name} = req.query
+
+        const categoryDetails = await Category.findOne({name})
+
+        if(!categoryDetails) return res.status(404).json({message : 'Category not found'})
+        
+        return res.status(200).json(categoryDetails)
+
+    } catch (error) {
+        console.log('Error loading category details',error);
+        return res.status(500).json({ message: 'Error loading category details', error: error.message });
     }
 
 }
@@ -58,17 +96,21 @@ export const updateCategory = async (req,res) => {
     
     try {
 
-        const category_ID = req.params.id
-        const category = await Category.findById(category_ID)
+        const {id,name,description,icon,isActive} = req.body
+        const category = await Category.findById(id)
         if(!category) return res.status(404).json({message : 'category not found'})
 
-        const {description,icon,isActive} = req.body
+        const nameConflict = await Category.findOne({ name, _id: { $ne: id } });
+        if (nameConflict) {
+            return res.status(409).json({ message: 'Category with the same name already exists' });
+        }
 
-        const newData = await Category.findByIdAndUpdate(category_ID ,{
-            description,icon,isActive
+
+        const newData = await Category.findByIdAndUpdate(id ,{
+            name,description,icon,isActive
         },{new : true})
 
-        return res.status(200).json({message : 'updating category success ',newData})
+        return res.status(200).json({message : 'Category updated successfully ',newData})
 
         
     } catch (error) {

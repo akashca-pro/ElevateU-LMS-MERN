@@ -1,13 +1,11 @@
 import { Link } from "react-router-dom";
 import { Facebook, Github, Twitter, Mail, Globe } from "lucide-react"; 
 
-
 const Footer = () => {
-
   return (
     <footer className="bg-[#1D1042] text-white">
       <div className="mx-auto max-w-7xl px-4 py-12">
-        <div className="grid gap-8 md:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
           <div>
             <Link to="/" className="flex items-center gap-2">
               <img src="/logo.svg" alt="ElevateU Logo" className="h-8 w-8" />
@@ -62,9 +60,9 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-8 flex items-center justify-between border-t border-gray-700 pt-8">
+        <div className="mt-8 flex flex-col items-center justify-between border-t border-gray-700 pt-8 sm:flex-row">
           <p className="text-sm text-gray-300">© 2025 ElevateU. All rights reserved.</p>
-          <div className="flex gap-4">
+          <div className="mt-4 flex gap-4 sm:mt-0">
             <Link to="https://facebook.com" target="_blank" className="hover:text-blue-500">
               <Facebook className="h-5 w-5" />
             </Link>

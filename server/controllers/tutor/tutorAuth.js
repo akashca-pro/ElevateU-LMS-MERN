@@ -67,7 +67,11 @@ export const verifyOtp = async (req,res) => {
         tutor.verificationExpires = undefined;
         await tutor.save();
 
-        return res.json({message : 'OTP verified successfully'});
+        const accessToken = generateAccessToken(tutor._id)
+
+        sendToken(res,'tutorAccessToken',accessToken,1 * 24 * 60 * 60 * 1000)
+
+        return res.json({message : 'OTP verified successfully',data : tutor});
 
     } catch (error) {
         console.log(error)

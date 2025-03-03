@@ -31,30 +31,28 @@ const SignUp = ({role,useSignup}) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (Object.values(errors).some((err) => err)) return;
-  
-    // Using Sonner's toast.promise
-    const signupPromise = new Promise(async (resolve, reject) => {
-      try {
-        const response = await signup(formData).unwrap();
-        resolve(response); // Resolve the promise if successful
-      } catch (error) {
-        reject(error); // Reject the promise on failure
-      }
-    });
-  
-    toast.promise(signupPromise, {
-      loading: "Signing up...",
-      success: () => {
-        if(!role === 'admin'){
+
+    const toastId = toast.loading("Signing up...");
+
+    try {
+      const response = await signup(formData).unwrap();
+      toast.success(
+        role !== "admin"
+          ? "An OTP has been sent to your registered email address."
+          : "Signup successful",
+        { id: toastId }
+      );
+      
+      if (role !== "admin") {
         navigate(`/${role}/verify-otp`, { state: formData.email });
-        return "An OTP has been sent to your registered email address.";}
-        navigate('/admin/login');
-        return "Signup successfull"
-      },
-      error: (error) => error?.data?.message || "Signup failed. Try again.",
-    });
+      } else {
+        navigate("/admin/login");
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Signup failed. Try again.", { id: toastId });
+    }
   };
 
   return (

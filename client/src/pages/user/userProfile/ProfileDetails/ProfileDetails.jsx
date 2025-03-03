@@ -57,8 +57,6 @@ const ProfileDetails = () => {
     }
   };
 
-  console.log('formdata',formData)
-  console.log('student',student)
 
   const isFormChanged =
   student &&

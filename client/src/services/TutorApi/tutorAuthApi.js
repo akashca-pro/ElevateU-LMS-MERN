@@ -47,7 +47,7 @@ const tutorAuthApi = apiSlice.injectEndpoints({
         tutorLogout : builder.mutation({
             query : ()=> ({
                 url : 'tutor/logout',
-                method : 'PATCH',
+                method : 'DELETE',
             }),
             invalidatesTags : ['Tutor']
         }),

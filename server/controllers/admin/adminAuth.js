@@ -38,11 +38,13 @@ export const registerAdmin = async (req,res) => {
 export const loginAdmin = async (req,res) => {
     
     try {
-        const {email,password,rememberMe} = req.body
+        const {email,password,rememberMe} = req?.body
 
         const admin = await Admin.findOne({email})
 
-        if(!admin)res.status(401).json({message : "Invalid credentials"});
+        console.log(req.body)
+
+        if(!admin) return res.status(404).json({message : "Invalid credentials"});
 
         if(!(await bcrypt.compare(password,admin.password))){
             return res.status(401).json({message : "Incorrect password"});

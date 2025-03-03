@@ -10,13 +10,13 @@ import {addTutor,loadTutors,loadTutorDetails,updateTutorDetails,deleteTutor,
 loadRequests,approveOrRejectrequest
 } from '../controllers/admin/adminTutorOps.js' // Admin - Tutor CRUD
 
-import {loadCategory, addCategory, updateCategory, deleteCategory
+import {loadCategory, addCategory, updateCategory, deleteCategory , loadCategoryDetails
 } from '../controllers/admin/adminCategoryOps.js' // Admin - category CRUD
 
 import {loadPendingRequest, approvePublish, rejectPublish, deleteCourse, loadCourses, assignCategory
 } from '../controllers/course/adminOps.js' // Admin manage course approval and course Manage
 
-import {verifyAdminAccessToken,verifyAdminRefreshToken} from '../utils/verifyToken.js'
+import {verifyAccessToken,verifyRefreshToken} from '../utils/verifyToken.js'
 
 const router = express.Router()
 
@@ -24,55 +24,56 @@ const router = express.Router()
 
 router.post('/signup',registerAdmin);
 router.post('/login',loginAdmin);
-router.patch('/logout',logoutAdmin)
-router.patch('/refresh-token',verifyAdminRefreshToken,refreshToken)
+router.delete('/logout',logoutAdmin)
+router.patch('/refresh-token',verifyRefreshToken('admin'),refreshToken)
 
 // Admin profile CRUD
 
-router.get('/profile',verifyAdminAccessToken,loadProfile)
-router.post('/update-profile',verifyAdminAccessToken,updateProfile)
+router.get('/profile',verifyAccessToken('admin'),loadProfile)
+router.post('/update-profile',verifyAccessToken('admin'),updateProfile)
 
 //  Admin - Users CRUD
 
-router.post('/add-user',verifyAdminAccessToken,addUser)
-router.get('/users-details',verifyAdminAccessToken,loadUsers)
-router.get('/user-details/:id',verifyAdminAccessToken,loadUserDetails)
-router.post('/update-user-details/:id',verifyAdminAccessToken,updateUserDetails)
-router.delete('/delete-user/:id',verifyAdminAccessToken,deleteUser)
+router.post('/add-user',verifyAccessToken('admin'),addUser)
+router.get('/users-details',verifyAccessToken('admin'),loadUsers)
+router.get('/user-details/:id',verifyAccessToken('admin'),loadUserDetails)
+router.post('/update-user-details/:id',verifyAccessToken('admin'),updateUserDetails)
+router.delete('/delete-user/:id',verifyAccessToken('admin'),deleteUser)
 
 // Admin - Tutor CRUD
 
-router.post('/add-tutor',verifyAdminAccessToken,addTutor)
-router.get('/tutors-details',verifyAdminAccessToken,loadTutors)
-router.get('/tutor-details/:id',verifyAdminAccessToken,loadTutorDetails)
-router.post('/update-tutor-details/:id',verifyAdminAccessToken,updateTutorDetails)
-router.delete('/delete-tutor/:id',verifyAdminAccessToken,deleteTutor)
+router.post('/add-tutor',verifyAccessToken('admin'),addTutor)
+router.get('/tutors-details',verifyAccessToken('admin'),loadTutors)
+router.get('/tutor-details/:id',verifyAccessToken('admin'),loadTutorDetails)
+router.post('/update-tutor-details/:id',verifyAccessToken('admin'),updateTutorDetails)
+router.delete('/delete-tutor/:id',verifyAccessToken('admin'),deleteTutor)
 
 // notification from tutor verification request
 
-router.get('/verification-request',verifyAdminAccessToken,loadRequests)
-router.patch('/control-verification',verifyAdminAccessToken,approveOrRejectrequest)
+router.get('/verification-request',verifyAccessToken('admin'),loadRequests)
+router.post('/control-verification',verifyAccessToken('admin'),approveOrRejectrequest)
 
 
 // category CRUD
 
-router.get('/categories',verifyAdminAccessToken,loadCategory)
-router.post('/add-category',verifyAdminAccessToken,addCategory)
-router.post('/update-category/:id',verifyAdminAccessToken,updateCategory)
-router.delete('/delete-category/:id',verifyAdminAccessToken,deleteCategory)
+router.get('/categories',verifyAccessToken('admin'),loadCategory)
+router.get('/category',verifyAccessToken('admin'),loadCategoryDetails)
+router.post('/add-category',verifyAccessToken('admin'),addCategory)
+router.post('/update-category',verifyAccessToken('admin'),updateCategory)
+router.delete('/delete-category/:id',verifyAccessToken('admin'),deleteCategory)
 
 //course publish request manage
 
-router.get('/pending-request',verifyAdminAccessToken,loadPendingRequest)
-router.post('/course-approve/:id',verifyAdminAccessToken,approvePublish)
-router.post('/course-reject/:id',verifyAdminAccessToken,rejectPublish)
+router.get('/pending-request',verifyAccessToken('admin'),loadPendingRequest)
+router.post('/course-approve/:id',verifyAccessToken('admin'),approvePublish)
+router.post('/course-reject/:id',verifyAccessToken('admin'),rejectPublish)
 
 
 // course manage
 
-router.get('/view-courses',verifyAdminAccessToken,loadCourses)
-router.post('/assign-category',verifyAdminAccessToken,assignCategory)
-router.delete('/delete-course/:id',verifyAdminAccessToken,deleteCourse)
+router.get('/view-courses',verifyAccessToken('admin'),loadCourses)
+router.post('/assign-category',verifyAccessToken('admin'),assignCategory)
+router.delete('/delete-course/:id',verifyAccessToken('admin'),deleteCourse)
 
 
 export default router

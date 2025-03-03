@@ -1,30 +1,64 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { UserCircle , ShoppingCart, MessageSquare, LogOut } from "lucide-react"; 
+import { UserCircle, ShoppingCart, MessageSquare, LogOut, Menu, X } from "lucide-react"; 
 import { useSelect } from "@/hooks/useSelect";
-import { useUserAuthActions, useTutorAuthActions, useAdminAuthActions} from "@/hooks/useDispatch";
+import { useUserAuthActions, useTutorAuthActions, useAdminAuthActions } from "@/hooks/useDispatch";
+import {useTutorLogoutMutation} from '@/services/TutorApi/tutorAuthApi'
+import {useAdminLogoutMutation} from '@/services/adminApi/adminAuthApi'
+import {useUserLogoutMutation} from '@/services/userApi/userAuthApi'
+import { toast } from "sonner";
 
 const Navbar = () => {
-  const {user,tutor,admin} = useSelect()
-  const role = user.isAuthenticated ? 'user' : tutor.isAuthenticated ? 'tutor' : 'admin'
-  const {logout : userLogout} = useUserAuthActions()
-  const {logout : tutorLogout} = useTutorAuthActions()
-  const {logout : adminLogout } = useAdminAuthActions()
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { user, tutor, admin } = useSelect();
+  const role = user.isAuthenticated ? "user" : tutor.isAuthenticated ? "tutor" : "admin";
+
+  const { logout: userLogout } = useUserAuthActions();
+  const { logout: tutorLogout } = useTutorAuthActions();
+  const { logout: adminLogout } = useAdminAuthActions();
+
+  const [logout,{}] = role === 'user' 
+  ? useUserLogoutMutation() 
+  : role === 'tutor'
+  ? useTutorLogoutMutation()
+  : useAdminLogoutMutation()
+
+  const stateLogout = role === 'user' 
+  ? userLogout 
+  : role === 'tutor'
+  ? tutorLogout
+  : adminLogout
+
+  const handleLogout = async() =>{
+    const toastId = toast.loading('Please wait . . .')
+      try {
+        await logout().unwrap()
+        stateLogout()
+        toast.success('Logout successfull',{id : toastId})
+      } catch (error) {
+        toast.error(error?.data?.message || 'Error logout',{id : toastId})
+      }
+
+  }
 
   return (
     <nav className="border-b bg-white">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+        
+        {/* Left Side */}
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center gap-2">
             <img src="/logo.svg" alt="ElevateU Logo" className="h-8 w-8" />
             <span className="text-xl font-bold">ElevateU</span>
           </Link>
-          <Link to="/courses" className="text-gray-600 hover:text-purple-600">
+          <Link to="/courses" className="hidden text-gray-600 hover:text-purple-600 md:block">
             Explore
           </Link>
         </div>
 
-        <div className="flex flex-1 justify-center px-8">
-          <div className="relative w-full max-w-xl">
+        {/* Search Bar */}
+        <div className="hidden w-full max-w-xl md:flex justify-center px-8">
+          <div className="relative w-full">
             <input
               type="text"
               placeholder="Search courses"
@@ -49,47 +83,118 @@ const Navbar = () => {
           </div>
         </div>
 
+        {/* Right Side (Icons + Menu Button for Mobile) */}
         <div className="flex items-center gap-4">
-       { user.isAuthenticated || tutor.isAuthenticated || admin.isAuthenticated
-       ? ( <>{ user && !admin.isAuthenticated && <Link to="/user/cart" className="text-gray-600 hover:text-purple-600">
-            <ShoppingCart className="h-6 w-6" />
-          </Link> }
+          {/* Show for Desktop */}
+          {user.isAuthenticated || tutor.isAuthenticated || admin.isAuthenticated ? (
+            <>
+              {user && !admin.isAuthenticated && (
+                <Link to="/user/cart" className="hidden text-gray-600 hover:text-purple-600 md:block">
+                  <ShoppingCart className="h-6 w-6" />
+                </Link>
+              )}
 
-          {!admin.isAuthenticated && <Link to={user.isAuthenticated ? `/user/profile/messages  ` 
-            : `/tutor/profile/messages` 
-          } className="text-gray-600 hover:text-purple-600">
-            <MessageSquare className="h-6 w-6" />
-          </Link>}
-          
-          <Link to={`/${role}/profile`} 
-          className="text-gray-600 hover:text-purple-600">
-            <UserCircle className="h-6 w-6" />
-          </Link> 
+              {!admin.isAuthenticated && (
+                <Link
+                  to={user.isAuthenticated ? `/user/profile/messages` : `/tutor/profile/messages`}
+                  className="hidden text-gray-600 hover:text-purple-600 md:block"
+                >
+                  <MessageSquare className="h-6 w-6" />
+                </Link>
+              )}
 
-          <Link onClick={()=>user.isAuthenticated ? userLogout() : tutor.isAuthenticated ? tutorLogout() : adminLogout()}
-          className="text-gray-600 hover:text-red-600">
-            <LogOut className="h-6 w-6"/>
-          </Link>
+              <Link to={`/${role}/profile`} className="hidden text-gray-600 hover:text-purple-600 md:block">
+                <UserCircle className="h-6 w-6" />
+              </Link>
 
-          </> ) 
-          : <>
-          <div className="flex gap-4">
-            
-            <Link
-              to="/user/login"
-              className="rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
-            >
-              Log in
-            </Link>
-            <Link
-              to="/user/sign-up"
-              className="rounded-full bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
-            >
-              Sign Up
-            </Link>
-          </div></>}
+              <button
+                onClick={
+                  handleLogout
+                }
+                className="hidden text-gray-600 hover:text-red-600 md:block"
+              >
+                <LogOut className="h-6 w-6" />
+              </button>
+            </>
+          ) : (
+            <div className="hidden gap-4 md:flex">
+              <Link
+                to="/user/login"
+                className="rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+              >
+                Log in
+              </Link>
+              <Link
+                to="/user/sign-up"
+                className="rounded-full bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
+
+          {/* Mobile Menu Button */}
+          <button className="block md:hidden" onClick={() => setMenuOpen(!menuOpen)}>
+            {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {menuOpen && (
+        <div className="md:hidden border-t bg-white p-4">
+          {user.isAuthenticated || tutor.isAuthenticated || admin.isAuthenticated ? (
+            <>
+              {user && !admin.isAuthenticated && (
+                <Link to="/user/cart" className="block py-2 text-gray-600 hover:text-purple-600">
+                  <ShoppingCart className="h-6 w-6 inline-block mr-2" />
+                  Cart
+                </Link>
+              )}
+
+              {!admin.isAuthenticated && (
+                <Link
+                  to={user.isAuthenticated ? `/user/profile/messages` : `/tutor/profile/messages`}
+                  className="block py-2 text-gray-600 hover:text-purple-600"
+                >
+                  <MessageSquare className="h-6 w-6 inline-block mr-2" />
+                  Messages
+                </Link>
+              )}
+
+              <Link to={`/${role}/profile`} className="block py-2 text-gray-600 hover:text-purple-600">
+                <UserCircle className="h-6 w-6 inline-block mr-2" />
+                Profile
+              </Link>
+
+              <button
+                onClick={
+                  handleLogout
+                }
+                className="block py-2 text-gray-600 hover:text-red-600"
+              >
+                <LogOut className="h-6 w-6 inline-block mr-2" />
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/user/login"
+                className="block rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+              >
+                Log in
+              </Link>
+              <Link
+                to="/user/sign-up"
+                className="block rounded-full bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
+        </div>
+      )}
     </nav>
   );
 };

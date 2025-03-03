@@ -9,11 +9,11 @@ import {loadProfile,updateProfile,deleteAccount
 
 import {enrollInCourse, loadEnrolledCourses} from '../controllers/enrolledCourse/userOps.js'
 
-import {verifyUserAccessToken,verifyUserRefreshToken} from '../utils/verifyToken.js'
+import {verifyAccessToken,verifyRefreshToken} from '../utils/verifyToken.js'
 import {otpLimiter} from '../middleware/rateLimiting.js';
 import retryVerify from '../middleware/retryVerify.js';
 
-import { updateEmail, verifyEmail , reSendOtp} from '../controllers/commonControllers.js';
+import { updateEmail, verifyEmail } from '../controllers/commonControllers.js';
 
 import passport from 'passport'
 
@@ -26,8 +26,8 @@ router.post('/verify-otp',otpLimiter,verifyOtp)
 router.post('/login',retryVerify('user'),loginUser)
 router.post('/forgot-password',forgotPassword)
 router.post('/reset-password',verifyResetLink)
-router.patch('/logout',logoutUser)
-router.patch('/refresh-token',verifyUserRefreshToken,refreshToken)
+router.delete('/logout',logoutUser)
+router.patch('/refresh-token',verifyRefreshToken('user'),refreshToken)
 
 router.get('/google',passport.authenticate("google-user",{ scope: ["profile", "email"] }))
 
@@ -35,20 +35,20 @@ router.get('/auth-callback',passport.authenticate("google-user",{ session : fals
 
 router.get('/auth-failure',authFailure)
 
-router.get('/auth-load',verifyUserAccessToken,authLoad) 
+router.get('/auth-load',verifyAccessToken('user'),authLoad) 
 
 // CRUD routes
 
-router.get('/profile',verifyUserAccessToken,loadProfile)
-router.post('/update-email/:id',otpLimiter,verifyUserAccessToken,updateEmail('user'))
-router.post('/verify-email',verifyUserAccessToken,verifyEmail('user'))
-router.post('/update-profile/:id',verifyUserAccessToken,updateProfile)
-router.delete('/delete-account/:id',verifyUserAccessToken,deleteAccount)
+router.get('/profile',verifyAccessToken('user'),loadProfile)
+router.post('/update-email/:id',otpLimiter,verifyAccessToken('user'),updateEmail('user'))
+router.post('/verify-email',verifyAccessToken('user'),verifyEmail('user'))
+router.post('/update-profile/:id',verifyAccessToken('user'),updateProfile)
+router.delete('/delete-account/:id',verifyAccessToken('user'),deleteAccount)
 
 // course enrollment
 
-router.post('/enroll-course',verifyUserAccessToken,enrollInCourse)
-router.get('/enrolled-courses/:id',verifyUserAccessToken,loadEnrolledCourses)
+router.post('/enroll-course',verifyAccessToken('user'),enrollInCourse)
+router.get('/enrolled-courses/:id',verifyAccessToken('user'),loadEnrolledCourses)
 
 
 export default router

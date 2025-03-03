@@ -7,7 +7,7 @@ import {registerTutor, verifyOtp, loginTutor, forgotPassword, verifyResetLink, l
 import {loadProfile,updateProfile,deleteAccount,requestVerification
 } from '../controllers/tutor/tutorOps.js'
 
-import {verifyTutorAccessToken, verifyTutorRefreshToken} from '../utils/verifyToken.js'
+import {verifyAccessToken, verifyRefreshToken} from '../utils/verifyToken.js'
 import {otpLimiter} from '../middleware/rateLimiting.js';
 import retryVerify from '../middleware/retryVerify.js';
 
@@ -27,8 +27,8 @@ router.post('/verify-otp',otpLimiter,verifyOtp)
 router.post('/login',retryVerify('tutor'),loginTutor)
 router.post('/forgot-password',otpLimiter,forgotPassword)
 router.post('/reset-password',verifyResetLink)
-router.patch('/logout',logoutTutor)
-router.patch('/refresh-token',verifyTutorRefreshToken,refreshToken)
+router.delete('/logout',logoutTutor)
+router.patch('/refresh-token',verifyRefreshToken('tutor'),refreshToken)
 
 router.get('/google',passport.authenticate('google-tutor',{ scope: ["profile", "email"] }))
 
@@ -38,28 +38,28 @@ router.get('/auth-callback',passport.authenticate('google-tutor',{ session : fal
 
 router.get('/auth-failure',authFailure)
 
-router.get('/auth-load',verifyTutorAccessToken,authLoad)
+router.get('/auth-load',verifyAccessToken('tutor'),authLoad)
 
 // CRUD routes
 
-router.get('/profile',verifyTutorAccessToken,loadProfile)
-router.post('/update-email/:id',otpLimiter,verifyTutorAccessToken,updateEmail('tutor'))
-router.post('/verify-email',verifyTutorAccessToken,verifyEmail('tutor'))
-router.post('/update-profile',verifyTutorAccessToken,updateProfile)
-router.delete('/delete-account/:id',verifyTutorAccessToken,deleteAccount)
+router.get('/profile',verifyAccessToken('tutor'),loadProfile)
+router.post('/update-email/:id',otpLimiter,verifyAccessToken('tutor'),updateEmail('tutor'))
+router.post('/verify-email',verifyAccessToken('tutor'),verifyEmail('tutor'))
+router.post('/update-profile',verifyAccessToken('tutor'),updateProfile)
+router.delete('/delete-account/:id',verifyAccessToken('tutor'),deleteAccount)
 
 // request verification from admin
 
-router.patch('/request-verification/:id',verifyTutorAccessToken,requestVerification)
+router.patch('/request-verification/:id',verifyAccessToken('tutor'),requestVerification)
 
 // course manage
 
-router.post('/create-course/:id',verifyTutorAccessToken,createCourse)
-router.get('/courses',verifyTutorAccessToken,loadCourses)
-router.get('/view-course/:id',verifyTutorAccessToken,courseDetails)
-router.post('/update-course/:id',verifyTutorAccessToken,updateCourse)
-router.post('/publish-course/:id',verifyTutorAccessToken,publishCourse)
-router.delete('/delete-course/:id',verifyTutorAccessToken,deleteCourse)
+router.post('/create-course/:id',verifyAccessToken('tutor'),createCourse)
+router.get('/courses',verifyAccessToken('tutor'),loadCourses)
+router.get('/view-course/:id',verifyAccessToken('tutor'),courseDetails)
+router.post('/update-course/:id',verifyAccessToken('tutor'),updateCourse)
+router.post('/publish-course/:id',verifyAccessToken('tutor'),publishCourse)
+router.delete('/delete-course/:id',verifyAccessToken('tutor'),deleteCourse)
 
 
 export default router

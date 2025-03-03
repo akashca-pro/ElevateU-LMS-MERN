@@ -156,7 +156,7 @@ export const loadRequests = async (req,res) => {
     
     try {
         
-        const request = await Tutor.find({status : 'pending'})
+        const request = await Tutor.find({status : 'pending'}).select('_id email firstName status reason')
 
         if(!request) return res.status(404).json({message : 'No pending requests'})
 
@@ -185,12 +185,16 @@ export const approveOrRejectrequest = async (req,res) => {
         if(tutor.status === 'rejected') return res.status(409).json({message : 'Verification request is already rejected'})
 
         if(input === 'approve'){
-            await Tutor.findByIdAndUpdate(tutorId,{status : 'approved'})
-            return res.status(200).json({message : `Verification approved for tutor ${tutor?.firstName}`})
+            await Tutor.findByIdAndUpdate(tutorId,{
+                status : 'approved',
+                reason,
+                isAdminVerified : true
+            })
+            return res.status(200).json({message : `Verification approved for ${tutor?.firstName}`})
         } 
         else if(input === 'reject') {
             await Tutor.findByIdAndUpdate(tutorId,{status : 'approved' , reason})
-            return res.status(200).json({message : `Verification rejected for tutor ${tutor?.firstName}`})
+            return res.status(200).json({message : `Verification rejected for ${tutor?.firstName}`})
         }   
         else return res.status(400).json({message : 'Invalid input' })
 
