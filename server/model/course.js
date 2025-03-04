@@ -41,12 +41,12 @@ const courseSchema = mongoose.Schema({
         type : Boolean,
         default : false
     },
-    isApproved :  {
+    status :  {
         type : String,
         enum : ['pending','approved','rejected','none'],
         default : 'none'
     },
-    rejectReason : {
+    reason : {
         type : String
     },
     rating : {

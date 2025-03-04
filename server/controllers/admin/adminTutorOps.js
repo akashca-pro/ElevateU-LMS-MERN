@@ -1,4 +1,7 @@
 import Tutor from '../../model/tutor.js'
+import ResponseHandler from '../../utils/responseHandler.js';
+import HttpStatus from '../../utils/statusCodes.js';
+import { DATABASE_FIELDS, STRING_CONSTANTS } from '../../utils/stringConstants.js';
 
 
 // create tutor
@@ -11,24 +14,33 @@ export const addTutor = async (req,res) => {
              isVerified, isActive, isBlocked ,isAdminVerified} = req.body;
 
         const emailExist = await Tutor.findOne({email})
-        if(emailExist) return res.status(409).json({message : 'tutor already exist'})    
+        if(emailExist)
+             return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);  
 
-        const tutor = new Tutor({
-            email, password , firstName, lastName, phone, profileImage, enrolledCourses,
-             bio, socialLinks,expertise ,experience, earnings,
-             isVerified : isVerified === 'true',
-             isActive : isActive === 'true' ,
-             isBlocked : isBlocked === 'true',
-             isAdminVerified : isAdminVerified === 'true'
-        })
+        const tutor = await Tutor.create({
+            email, 
+            password, 
+            firstName, 
+            lastName, 
+            phone, 
+            profileImage, 
+            enrolledCourses,
+            bio, 
+            socialLinks, 
+            expertise, 
+            experience, 
+            earnings,
+            isVerified: isVerified === 'true',
+            isActive: isActive === 'true',
+            isBlocked: isBlocked === 'true',
+            isAdminVerified: isAdminVerified === 'true'
+        });
 
-        await tutor.save()
-
-        return res.status(200).json({message : 'tutor added successfully'})
+        return ResponseHandler.success(res, STRING_CONSTANTS.CREATION_SUCCESS, HttpStatus.CREATED,tutor)
 
     } catch (error) {
-        console.log('Error adding tutor profile',error);
-        return res.status(500).json({ message: 'Error adding tutor profile', error: error.message });
+        console.log(STRING_CONSTANTS.LOGIN_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.LOGIN_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -52,17 +64,29 @@ export const loadTutors = async (req,res) => {
         }
 
         const tutorData = await Tutor.find(search ? searchQuery : {})
-        .select('email firstName lastName profileImage isVerified isActive isBlocked isAdminVerified expertise experience earnings')
         .skip(skip)
         .limit(limit)
+        .select([
+            DATABASE_FIELDS.EMAIL,
+            DATABASE_FIELDS.FIRST_NAME,
+            DATABASE_FIELDS.LAST_NAME,
+            DATABASE_FIELDS.PROFILE_IMAGE,
+            DATABASE_FIELDS.IS_VERIFIED,
+            DATABASE_FIELDS.IS_ACTIVE,
+            DATABASE_FIELDS.IS_BLOCKED,
+            DATABASE_FIELDS.IS_ADMIN_VERIFIED,
+            DATABASE_FIELDS.EXPERTISE,
+            DATABASE_FIELDS.EXPERIENCE,
+        ].join(' '))
 
-        if(!tutorData || tutorData.length === 0) return res.status(404).json({message : 'user not found'})
+        if(!tutorData || tutorData.length === 0) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
 
-        return res.status(200).json(tutorData) 
+        return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, tutorData)
         
     } catch (error) {
-        console.log('Error viewing tutors profiles',error);
-        res.status(500).json({ message: 'Error viewing tutors profiles', error: error.message });
+        console.log(STRING_CONSTANTS.LOADING_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -74,15 +98,27 @@ export const loadTutorDetails = async (req,res) => {
     try {
         const tutor_ID = req.params.id
         const tutor = await Tutor.findById(tutor_ID)
-        .select('email firstName lastName profileImage isVerified isActive isBlocked isAdminVerified expertise experience earnings')
+        .select([
+            DATABASE_FIELDS.EMAIL,
+            DATABASE_FIELDS.FIRST_NAME,
+            DATABASE_FIELDS.LAST_NAME,
+            DATABASE_FIELDS.PROFILE_IMAGE,
+            DATABASE_FIELDS.IS_VERIFIED,
+            DATABASE_FIELDS.IS_ACTIVE,
+            DATABASE_FIELDS.IS_BLOCKED,
+            DATABASE_FIELDS.IS_ADMIN_VERIFIED,
+            DATABASE_FIELDS.EXPERTISE,
+            DATABASE_FIELDS.EXPERIENCE,
+        ].join(' '));
 
-        if(!tutor) return res.status(404).json({message : 'tutor not found'})
+        if(!tutor) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
             
-        return res.status(200).json(tutor)
+        return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, tutor)
 
     } catch (error) {
-        console.log('Error viewing tutor profile',error);
-        res.status(500).json({ message: 'Error viewing tutor profile', error: error.message });
+        console.log(STRING_CONSTANTS.LOADING_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 } 
@@ -94,8 +130,10 @@ export const updateTutorDetails = async (req,res) => {
     try {
         
         const tutor_ID = req.params.id;
+
         const tutorData = await Tutor.findById(tutor_ID);
-        if(!tutorData) return res.status(404).json({message : 'tutor not found'});
+        if(!tutorData) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
         const {firstName, lastName, profileImage, expertise, experience, earnings,
              isVerified, isActive, isBlocked, isAdminVerified } = req.body
@@ -112,18 +150,16 @@ export const updateTutorDetails = async (req,res) => {
 
         if(isAdminVerified !== undefined) updatedFields.isAdminVerified = isAdminVerified === 'true'
 
-        const updatedData = await Tutor.findByIdAndUpdate(
+        await Tutor.findByIdAndUpdate(
             tutor_ID, 
             updatedFields ,
-            {new : true})
-            .select(['firstName', 'lastName', 'profileImage', 'expertise', 'experience','earnings',
-                 'isVerified','isActive', 'isBlocked', 'isAdminVerified'])
+            )
              
-        return res.status(200).json(updatedData)
+        return ResponseHandler.success(res,STRING_CONSTANTS.UPDATION_SUCCESS, HttpStatus.OK)
 
     } catch (error) {
-        console.log('Error updating tutor profile',error);
-        res.status(500).json({ message: 'Error updating tutor profile', error: error.message });
+        console.log(STRING_CONSTANTS.UPDATION_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -137,15 +173,16 @@ export const deleteTutor = async (req,res) => {
         const tutor_ID = req.params.id
 
         const tutor = await Tutor.findById(tutor_ID)
-        if(!tutor) return res.status(404).json({message : 'tutor not found'})
+        if(!tutor) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
         
         await Tutor.findByIdAndDelete(tutor_ID)
 
-        return res.status(200).json({message : 'tutor deleted successfully'})
+        return ResponseHandler.success(res,STRING_CONSTANTS.DELETION_SUCCESS, HttpStatus.OK)
 
     } catch (error) {
-        console.log('Error deleting tutor profile',error);
-        return res.status(500).json({ message: 'Error deleting tutor profile', error: error.message });
+        console.log(STRING_CONSTANTS.DELETION_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.DELETION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -155,21 +192,28 @@ export const deleteTutor = async (req,res) => {
 export const loadRequests = async (req,res) => {
     
     try {
-        
-        const request = await Tutor.find({status : 'pending'}).select('_id email firstName status reason')
+        const request = await Tutor.find({status : 'pending'})
+        .select([
+            DATABASE_FIELDS.ID,
+            DATABASE_FIELDS.EMAIL,
+            DATABASE_FIELDS.FIRST_NAME,
+            DATABASE_FIELDS.STATUS,
+            DATABASE_FIELDS.REASON
+        ].join(' '));
 
-        if(!request) return res.status(404).json({message : 'No pending requests'})
+        if(!request || request.length===0) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
-        return res.status(200).json(request)
+        return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, request);
 
     } catch (error) {
-        console.log('Error loading verification request ',error);
-        return res.status(500).json({ message: 'Error loading verification request', error: error.message });
+        console.log(STRING_CONSTANTS.LOADING_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
 
-// approve verification requests 
+// approve or reject verification requests 
 
 export const approveOrRejectrequest = async (req,res) => {
     
@@ -178,11 +222,14 @@ export const approveOrRejectrequest = async (req,res) => {
 
         const tutor = await Tutor.findById(tutorId)
 
-        if(!tutor) return res.status(404).json({message : 'Verification request not found.'})
+        if(!tutor) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
-        if(tutor.status === 'approved' ) return res.status(409).json({message : 'Verification request is already approved'})
+        if(tutor.status === 'approved' ) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
         
-        if(tutor.status === 'rejected') return res.status(409).json({message : 'Verification request is already rejected'})
+        if(tutor.status === 'rejected') 
+            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
 
         if(input === 'approve'){
             await Tutor.findByIdAndUpdate(tutorId,{
@@ -190,17 +237,18 @@ export const approveOrRejectrequest = async (req,res) => {
                 reason,
                 isAdminVerified : true
             })
-            return res.status(200).json({message : `Verification approved for ${tutor?.firstName}`})
+
+            return ResponseHandler.success(res,`Verification approved for ${tutor?.firstName}`,HttpStatus.OK)
         } 
         else if(input === 'reject') {
-            await Tutor.findByIdAndUpdate(tutorId,{status : 'approved' , reason})
-            return res.status(200).json({message : `Verification rejected for ${tutor?.firstName}`})
+            await Tutor.findByIdAndUpdate(tutorId,{status : 'rejected' , reason})
+            return ResponseHandler.success(res,`Verification rejected for ${tutor?.firstName}`,HttpStatus.OK)
         }   
-        else return res.status(400).json({message : 'Invalid input' })
+        else return ResponseHandler.error(res, STRING_CONSTANTS.INVALID_INPUT, HttpStatus.BAD_REQUEST);
 
     } catch (error) {
-        console.log('Error approving tutor ',error);
-        return res.status(500).json({ message: 'Error approving tutor ', error: error.message });
+        console.log(STRING_CONSTANTS.UPDATION_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }

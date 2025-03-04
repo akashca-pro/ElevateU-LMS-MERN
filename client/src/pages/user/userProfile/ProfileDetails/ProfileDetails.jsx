@@ -8,17 +8,16 @@ import { ProfileDialog } from "./ProfileDialog";
 import useForm from "@/hooks/useForm";
 import { imageUpload } from "@/services/Cloudinary/imageUpload";
 import {useUserLoadProfileQuery, useUserUpdateProfileMutation} from '@/services/userApi/userProfileApi'
-import { useSelect } from "@/hooks/useSelect";
 import { formatDate } from "@/utils/dateToString";
 import {useUserAuthActions} from '@/hooks/useDispatch'
 import { toast } from "sonner";
 
 const ProfileDetails = () => {
   const {login} = useUserAuthActions()
-  const {user} = useSelect()
-  const {data : student , error, isLoading} = useUserLoadProfileQuery()
+  const {data : details , error, isLoading} = useUserLoadProfileQuery()
+  const student = details?.data
   const loadProfile = useUserLoadProfileQuery()
-  const [userLoadProfile] = useUserUpdateProfileMutation()
+  const [userUpdateProfile] = useUserUpdateProfileMutation()
 
   const [avatarPreview, setAvatarPreview] = useState(null);  
   const { formData, errors, handleChange ,setFormData} = useForm();
@@ -81,8 +80,7 @@ const ProfileDetails = () => {
     }
 
     try {
-      const response = await userLoadProfile(payload).unwrap()
-      login(response)
+      await userUpdateProfile(payload).unwrap()
       toast.success('Profile updated successfully',{ id: toastId })
     } catch (error) {
       console.log(error)

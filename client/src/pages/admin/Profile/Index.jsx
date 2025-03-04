@@ -12,7 +12,8 @@ import { toast } from "sonner";
 
 const Index = () => {
   const {login} = useAdminAuthActions()
-  const {data : adminDetails , error, isLoading} = useAdminLoadProfileQuery()
+  const {data : admin, error, isLoading} = useAdminLoadProfileQuery()
+  const adminDetails = admin?.data
   const loadProfile = useAdminLoadProfileQuery()
   const [updateProfile] = useAdminUpdateProfileMutation()
 
@@ -75,7 +76,7 @@ const Index = () => {
    
     try {
       const response = await updateProfile(formData).unwrap()
-      login(response)
+      login(response.data)
       toast.success('Profile updated successfully',{ id: toastId })
     } catch (error) {
       console.log(error)

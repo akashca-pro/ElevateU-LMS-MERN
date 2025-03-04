@@ -7,5 +7,4 @@ import {reSendOtp} from '../controllers/commonControllers.js'
 router.post('/resend-otp',reSendOtp)
 
 
-
 export default router

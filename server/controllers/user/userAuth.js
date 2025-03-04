@@ -6,6 +6,9 @@ import {sendToken,clearToken} from '../../utils/tokenManage.js'
 import {sendEmailOTP, sendEmailResetPassword} from '../../utils/sendEmail.js'
 import {randomInt} from 'node:crypto'
 import 'dotenv/config'
+import HttpStatus from '../../utils/statusCodes.js'
+import ResponseHandler from '../../utils/responseHandler.js'
+import { STRING_CONSTANTS , DATABASE_FIELDS} from '../../utils/stringConstants.js'
 
 // User Registration with OTP
 
@@ -18,7 +21,8 @@ export const registerUser = async (req,res) => {
     
         const userExists = await User.findOne({email : email});
     
-        if(userExists) return res.status(400).json({message : "User already exists"});
+        if(userExists) 
+            return ResponseHandler.error(res,STRING_CONSTANTS.EXIST ,HttpStatus.CONFLICT);
 
 
         const hashedPassword = await bcrypt.hash(password,10);
@@ -37,12 +41,11 @@ export const registerUser = async (req,res) => {
 
         await sendEmailOTP(email,firstName,otp)
 
-        return res.status(201).json({message : "otp sent to email"});
+        return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK);
 
     } catch (error) {
-        console.log(error);
-        if(error.message='Invalid Email') return res.status(400).json(error.message)
-        return res.status(400).json(error.message);
+        console.log(STRING_CONSTANTS.REGISTRATION_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.REGISTRATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -53,11 +56,11 @@ export const verifyOtp = async (req, res) => {
     try {
       const { otp } = req.body;
   
-      const user = await User.findOne({ otp, otpExpires: { $gt: Date.now() } }).select('-password')
+      const user = await User.findOne({ otp, otpExpires: { $gt: Date.now() } })
   
-      if (!user) {
-        return res.status(404).json({ message: "Invalid or expired OTP" });
-      }
+      if (!user) 
+        return ResponseHandler.error(res,STRING_CONSTANTS.OTP_ERROR ,HttpStatus.BAD_REQUEST);
+      
   
       user.isVerified = true
       user.otp = undefined
@@ -70,10 +73,11 @@ export const verifyOtp = async (req, res) => {
 
       sendToken(res,'userAccessToken',accessToken,1 * 24 * 60 * 60 * 1000)
 
-      return res.status(200).json({ message: "OTP verified successfully",data : user});
+      return ResponseHandler.success(res, STRING_CONSTANTS.VERIFICATION_SUCCESS, HttpStatus.OK);
+
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Internal Server Error" });
+      console.log(STRING_CONSTANTS.VERIFICATION_ERROR, error);
+      return ResponseHandler.error(res, STRING_CONSTANTS.VERIFICATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
   };
   
@@ -86,31 +90,42 @@ export const loginUser = async (req,res) => {
 
         const user = await User.findOne({email})
     
-        if(!user)return res.status(404).json({message : "Invalid credentials"});
+        if(!user) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.INVALID_CREDENTIALS, HttpStatus.BAD_REQUEST);
     
         
-        if(!(await bcrypt.compare(password,user.password))){
-            return res.status(404).json({message : "Incorrect password"});
-        }
+        if(!(await bcrypt.compare(password,user.password)))
+            return ResponseHandler.error(res, STRING_CONSTANTS.INVALID_PASSWORD, HttpStatus.BAD_REQUEST);
+        
 
-        if(!user.isVerified)return res.status(402).json({message : "User is not verified"})
+        if(!user.isVerified)
+            return ResponseHandler.error(res,STRING_CONSTANTS.VERIFICATION_ERROR ,HttpStatus.NOT_ACCEPTABLE);
         
        const accessToken = generateAccessToken(user._id);
        const refreshToken = generateRefreshToken(user._id);
     
         // Set access token as cookie (24 hour)
-        sendToken(res,'userAccessToken',accessToken,1 * 24 * 60 * 60 * 1000)
+        sendToken(res, process.env.USER_ACCESS_TOKEN_NAME,accessToken, 1 * 24 * 60 * 60 * 1000)
     
         // Set refresh token as cookie (only if "Remember Me" is checked)
-        if(rememberMe) sendToken(res,'userRefreshToken',refreshToken,7 * 24 * 60 * 60 * 1000);
+        if(rememberMe) sendToken(res, process.env.USER_REFRESH_TOKEN_NAME, refreshToken,7 * 24 * 60 * 60 * 1000);
 
-        const data = await User.findOne({email}).select('email firstName lastName profileImage bio socialLinks phone dob _id') 
+        const data = await User.findOne({email})
+        .select([
+            DATABASE_FIELDS.ID,
+            DATABASE_FIELDS.EMAIL,
+            DATABASE_FIELDS.FIRST_NAME,
+            DATABASE_FIELDS.LAST_NAME,
+            DATABASE_FIELDS.PROFILE_IMAGE,
+            DATABASE_FIELDS.BIO,
+            DATABASE_FIELDS.DOB
+        ].join(' '))
 
-        return res.status(200).json({message : "Login successfull",user : data});
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOGIN_SUCCESS, HttpStatus.OK, data)
 
     } catch (error) {
-        console.log(error)
-        res.status(500).json({message : "Error generating Token"})
+        console.log(STRING_CONSTANTS.LOGIN_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.LOGIN_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -123,7 +138,9 @@ export const forgotPassword = async (req,res) => {
         const {email} = req.body;
         const emailExist = await User.findOne({email})
 
-        if(!emailExist)return res.status(404).json({message : 'user not found'});
+        if(!emailExist)
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
+
 
         const resetToken = randomInt(100000, 999999).toString();
         const resetTokenExpires = Date.now() + 10 * 60 * 1000;
@@ -134,11 +151,11 @@ export const forgotPassword = async (req,res) => {
 
         await sendEmailResetPassword(user.email,user.firstName,resetToken);
 
-        return res.status(200).json({message : 'Password reset otp sent to your email'})
+        return ResponseHandler.success(res, STRING_CONSTANTS.RESET_OTP, HttpStatus.OK)
         
     } catch (error) {
-        console.log('from forgotpassword controller',error);
-        return res.status(500).json({ message: 'Error sending password reset code', error: error.message });
+        console.log(STRING_CONSTANTS.OTP_SENT_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR) 
     }
 
 }
@@ -155,7 +172,8 @@ export const verifyResetLink = async (req,res) => {
             otpExpires : { $gt : Date.now() }
         });
 
-        if(!user) return res.status(400).json({message : 'Invalid or expired token'})
+        if(!user) 
+            return ResponseHandler.error(res,STRING_CONSTANTS.OTP_ERROR ,HttpStatus.BAD_REQUEST);
 
         const hashedPassword = await bcrypt.hash(password,10);
 
@@ -166,11 +184,11 @@ export const verifyResetLink = async (req,res) => {
 
         await user.save();
 
-        return res.status(200).json({ message: 'Password reset successful' });
+        return ResponseHandler.success(res, STRING_CONSTANTS.PASSWORD_RESET_SUCCESS, HttpStatus.OK)
 
     } catch (error) {
-        console.log('from verifyResetLink',error);
-        res.status(500).json({message : 'Reset link verification failed'});
+        console.log(STRING_CONSTANTS.PASSWORD_RESET_ERROR, error);
+        return  ResponseHandler.error(res, STRING_CONSTANTS.PASSWORD_RESET_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -183,13 +201,13 @@ export const refreshToken = async (req,res) => {
         const {decoded} = req.user;
         const newAccessToken = generateAccessToken(decoded);
 
-        sendToken(res,'userAccessToken',newAccessToken,1 * 24 * 60 * 60 * 1000)
+        sendToken(res, process.env.USER_ACCESS_TOKEN_NAME, newAccessToken,1 * 24 * 60 * 60 * 1000)
     
-        return res.status(200).json({message : "Refresh Token Issued"})
+        return ResponseHandler.success(res, STRING_CONSTANTS.TOKEN_ISSUED, HttpStatus.OK)
 
     } catch (error) {
-        console.log(error);
-        res.status(500).json({message : "Error generating new token based on refresh token"})
+        console.log(STRING_CONSTANTS.TOKEN_ISSUE_ERROR, error);
+        return  ResponseHandler.error(res, STRING_CONSTANTS.TOKEN_ISSUE_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
     
 }
@@ -200,15 +218,13 @@ export const logoutUser = async (req,res) => {
 
     try {
 
-        clearToken(res,'userAccessToken','userRefreshToken');
-        console.log('hello')
-        return res.json({ message: "Logged out successfully" });
+        clearToken(res, process.env.USER_ACCESS_TOKEN_NAME, process.env.USER_REFRESH_TOKEN_NAME)
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOGOUT_SUCCESS, HttpStatus.OK)
 
     } catch (error) {
-        
-        console.log(error)
-        res.status(500).json("Error logging out")
-
+        console.log(STRING_CONSTANTS.LOGOUT_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.LOGOUT_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
     
 }
@@ -219,17 +235,18 @@ export const passportCallback = async (req,res) => {
     
     try {
 
-        if(!req.user) return res.status(404).json({message : 'Google authentication failed'});
+        if(!req.user)  
+            return ResponseHandler.error(res, STRING_CONSTANTS.GOOGLE_AUTH_ERROR, HttpStatus.NOT_FOUND)
 
         const {user,token} = req.user;
 
-        sendToken(res,'userAccessToken',token,1 * 24 * 60 * 60 * 1000);
+        sendToken(res, process.env.USER_ACCESS_TOKEN_NAME,token, 1 * 24 * 60 * 60 * 1000);
 
-        return res.redirect(`${process.env.CLIENT_URL}/user/auth-success`);
+        return res.status(HttpStatus.OK).redirect(`${process.env.CLIENT_URL}/user/auth-success`);
         
     } catch (error) {
-        console.error("Error during Google OAuth callback:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
+        console.log(STRING_CONSTANTS.GOOGLE_AUTH_ERROR, error);
+        return  ResponseHandler.error(res, STRING_CONSTANTS.GOOGLE_AUTH_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -238,7 +255,7 @@ export const passportCallback = async (req,res) => {
 
 export const authFailure = async (req,res) => {
 
-    res.status(404).json({ message: "Google authentication failed. Please try again." });
+    res.status(HttpStatus.NOT_FOUND).json({ message: "Google authentication failed. Please try again." });
     
 }
 
@@ -248,13 +265,14 @@ export const authLoad = async (req,res) => {
         const {id} = req.user
 
         const user = await User.findById(id)
-        if(!user) return res.status(404).json({message : "Google authentication failed. Please try again."})
+        if(!user) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.GOOGLE_AUTH_ERROR, HttpStatus.NOT_FOUND)
             
-        return res.status(200).json({message : 'Google Authentication success',user})
+        return ResponseHandler.success(res, STRING_CONSTANTS.GOOGLE_AUTH_SUCCESS, HttpStatus.OK,tutor)
         
     } catch (error) {
-        console.error("Error during Google OAuth callback:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
+        console.log(STRING_CONSTANTS.GOOGLE_AUTH_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.GOOGLE_AUTH_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }

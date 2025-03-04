@@ -5,8 +5,9 @@ import ConfirmDialog from "./ConfirmDialog";
 
 
 export function NotificationCard() {
-  const {data, refetch} = useAdminVerificationRequestQuery()
-  const [approveOrRequest,{error}] = useAdminApproveOrRequestMutation()
+  const {data : requests, refetch} = useAdminVerificationRequestQuery();
+  const data = requests?.data;
+  const [approveOrRequest,{error}] = useAdminApproveOrRequestMutation();
 
   return (
     <Card className="w-full p-6">

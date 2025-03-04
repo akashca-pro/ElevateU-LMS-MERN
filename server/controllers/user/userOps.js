@@ -1,4 +1,7 @@
 import User from '../../model/user.js'
+import ResponseHandler from '../../utils/responseHandler.js';
+import HttpStatus from '../../utils/statusCodes.js'
+import { DATABASE_FIELDS, STRING_CONSTANTS } from '../../utils/stringConstants.js';
 
 // View Profile
 
@@ -6,13 +9,26 @@ export const loadProfile = async (req,res) => {
     
     try {
         const user_ID = req.user.id
-        const userData = await User.findById(user_ID,'email firstName lastName profileImage bio socialLinks phone dob _id')
-        if(!userData)return res.status(404).json({message : 'user not found'})
-        return res.status(200).json(userData)
+        const userData = await User.findById(user_ID)
+        .select([
+            DATABASE_FIELDS.ID,
+            DATABASE_FIELDS.EMAIL,
+            DATABASE_FIELDS.FIRST_NAME,
+            DATABASE_FIELDS.LAST_NAME,
+            DATABASE_FIELDS.PROFILE_IMAGE,
+            DATABASE_FIELDS.BIO,
+            DATABASE_FIELDS.DOB,
+            DATABASE_FIELDS.PHONE,
+        ].join(' '));
+    
+        if(!userData)
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+        return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, userData)
 
     } catch (error) {
-        console.log('Error loading user profile');
-        return res.status(500).json({ message: 'Error loading user profile', error: error.message });
+        console.log(STRING_CONSTANTS.LOADING_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -24,26 +40,25 @@ export const updateProfile = async (req,res) => {
     try {
         const user_ID = req.params.id;
         const user = await User.findById(user_ID)
-        if(!user) return res.status(404).json({message : 'user not found'});
+        if(!user) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+        
+        const {firstName, lastName, profileImage, phone, bio, dob} = req.body;
 
-        const {firstName, lastName, profileImage, phone, bio, socialLinks, dob} = req.body;
-
-        const updatedData = await User.findByIdAndUpdate(user_ID , {
+        await User.findByIdAndUpdate(user_ID , {
             firstName,
             lastName,
             profileImage,
             phone,
             bio,
-            socialLinks,
             dob
-        } , {new : true })
-            .select('email firstName lastName profileImage bio socialLinks phone dob _id'); 
+        })
 
-        return res.status(200).json(updatedData)
+        return ResponseHandler.success(res,STRING_CONSTANTS.UPDATION_SUCCESS, HttpStatus.OK)
 
     } catch (error) {
-        console.log('Error updating user profile');
-        return res.status(500).json({ message: 'Error updating user profile', error: error.message });
+        console.log(STRING_CONSTANTS.UPDATION_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -55,15 +70,16 @@ export const deleteAccount = async (req,res) =>{
     try {
         const user_ID = req.params.id
         const user = await User.findById(user_ID)
-        if(!user) return res.status(404).json({message : 'user not found'})
+        if(!user) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
         await User.findByIdAndDelete(user_ID)
 
-        return res.status(200).json({message : 'user deleted successfully'})
+        return ResponseHandler.success(res,STRING_CONSTANTS.DELETION_SUCCESS, HttpStatus.OK)
 
     } catch (error) {
-        console.log('Error deleting user profile');
-        return res.status(500).json({ message: 'Error deleting user profile', error: error.message });
+        console.log(STRING_CONSTANTS.DELETION_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.DELETION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }

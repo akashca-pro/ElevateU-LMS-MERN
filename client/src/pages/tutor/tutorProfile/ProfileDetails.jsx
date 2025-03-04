@@ -10,7 +10,6 @@ import { imageUpload } from "@/services/Cloudinary/imageUpload";
 import {useTutorLoadProfileQuery , useTutorUpdateProfileMutation} from '@/services/TutorApi/tutorProfileApi'
 import { useSelect } from "@/hooks/useSelect";
 import { formatDate } from "@/utils/dateToString";
-import {useTutorAuthActions} from '@/hooks/useDispatch'
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { SelectExperience } from "./components/SelectExperience";
@@ -19,11 +18,11 @@ import {useTutorRequestVerificationMutation} from '@/services/TutorApi/tutorProf
 
 
 const ProfileDetails = () => {
-  const {login} = useTutorAuthActions()
   const {tutor} = useSelect()
 
-  const {data : teacher , error, isLoading} = useTutorLoadProfileQuery()
-  const [tutorLoadProfile] = useTutorUpdateProfileMutation()
+  const {data : details } = useTutorLoadProfileQuery()
+  const teacher = details?.data
+  const [tutorUpdateProfile] = useTutorUpdateProfileMutation()
   const [requestVerification,{}] = useTutorRequestVerificationMutation()
 
   const [expertise,setExpertise] = useState([])
@@ -108,6 +107,12 @@ const ProfileDetails = () => {
     ? !isEqualArray(formData[key],teacher[key])
     : formData[key] !== teacher[key]);
     
+    const isDataUpdated = teacher?.firstName 
+    && teacher?.lastName
+    && teacher?.phone 
+    && teacher?.dob 
+    && teacher?.experience
+    && teacher?.expertise
 
 
   const handleSubmit = async(e, closeDialog) => {
@@ -123,9 +128,7 @@ const ProfileDetails = () => {
     console.log(formData)
 
     try {
-      const response = await tutorLoadProfile(formData).unwrap()
-      console.log(response)
-      login(response)
+      await tutorUpdateProfile(formData).unwrap()
       toast.success('Profile updated successfully',{ id: toastId })
     } catch (error) {
       console.log(error)
@@ -141,10 +144,9 @@ const ProfileDetails = () => {
     e.preventDefault()
     const toastId = toast.loading('Please wait...')
         try {
-          const response = await requestVerification(tutor.tutorData._id).unwrap()
-          login(response?.updatedData)
-          toast.success(response?.message,{ id: toastId });
-          setTimeout(()=>{toast.info('Track verification status in notification section');},[4000])
+          await requestVerification(tutor.tutorData._id).unwrap()
+          toast.success('Verification request submited',{ id: toastId });
+          setTimeout(()=>{toast.info('Track verification status in notification section');},[2500])
         } catch (error) {
           toast.error(error?.data?.message || "Verification request failed try again later",{id : toastId})
         }
@@ -313,6 +315,7 @@ const ProfileDetails = () => {
           />
           {!tutor.tutorData?.isAdminVerified  && 
           <Button 
+          disabled = {!isDataUpdated}
           className='bg-blue-600 hover:bg-blue-700'
           onClick = {handleVerificationRequest}
           >

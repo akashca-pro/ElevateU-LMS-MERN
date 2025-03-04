@@ -2,6 +2,9 @@ import User from "../model/user.js"
 import Tutor from "../model/tutor.js"
 import { generateOtpCode, saveOtp } from "../utils/generateOtp.js"
 import { sendEmailOTP, sendEmailResetPassword } from "../utils/sendEmail.js"
+import HttpStatus from "../utils/statusCodes.js"
+import ResponseHandler from "../utils/responseHandler.js"
+import { STRING_CONSTANTS } from "../utils/stringConstants.js"
 
 //Update Email
 
@@ -16,10 +19,12 @@ export const updateEmail = (role) =>{
             const {email} = req.body
     
             const data = await db.findById(ID)
-            if(!data)return res.status(404).json({message : 'user not found'});
+            if(!data)
+                return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
     
             const emailExist = await db.findOne({email , _id : {$ne : ID}})
-            if(emailExist)return res.status(409).json({message : 'Email already exist'}) 
+            if(emailExist)
+                return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
             
             data.tempMail = email;
             await data.save();
@@ -28,13 +33,13 @@ export const updateEmail = (role) =>{
     
             await saveOtp(role,data.email,otp,otpExpires);
     
-            sendEmailOTP(email,data.firstName,otp);
+            await sendEmailOTP(email,data.firstName,otp);
     
-            res.status(200).json({message : 'OTP sent to your Email , verify on the next page'})
+            return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK)
             
         } catch (error) {
-            console.log('Error updating user Email');
-            res.status(500).json({ message: 'Error updating user Email', error: error.message });
+            console.log(STRING_CONSTANTS.UPDATION_ERROR, error);
+            return ResponseHandler.error(res,STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
         }
     
     }
@@ -55,7 +60,8 @@ export const verifyEmail = (role) =>{
                 otpExpires : { $gt : Date.now() }
             });
     
-            if(!data) return res.status(400).json({message : 'Invalid or expired otp'});
+            if(!data) 
+                return ResponseHandler.error(res,STRING_CONSTANTS.OTP_ERROR ,HttpStatus.BAD_REQUEST);
             
             data.email = data.tempMail;
             data.tempMail = undefined;
@@ -64,20 +70,14 @@ export const verifyEmail = (role) =>{
     
             await data.save()
     
-            res.status(200).json({message : 'Email verification successfull , email updated '});
+            return ResponseHandler.success(res, STRING_CONSTANTS.VERIFICATION_SUCCESS, HttpStatus.OK);
     
         } catch (error) {
-            console.log('Error verifying user Email');
-            res.status(500).json({ message: 'Error verifying user Email', error: error.message });
+            console.log(STRING_CONSTANTS.VERIFICATION_ERROR, error);
+            return ResponseHandler.error(res, STRING_CONSTANTS.VERIFICATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
         }
     
     }
-}
-
-export const forgotPassword = async (req,res) => {
-    
-    
-
 }
 
 // re-send otp
@@ -90,7 +90,7 @@ export const reSendOtp = async (req,res) => {
         const {otp,otpExpires} = generateOtpCode();
         const user = await db.findOne({email})
 
-        if(!user) return res.status(404).json({message : `${role} is not found`})
+        if(!user) return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
 
         user.otp = otp
         user.otpExpires = otpExpires
@@ -99,11 +99,11 @@ export const reSendOtp = async (req,res) => {
 
         await sendEmailResetPassword(email,user.firstName,otp)
 
-        return res.status(200).json({message : 'New OTP sent to your mail'})
+        return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK)
 
     } catch (error) {
-        console.log('Error Re-sending OTP');
-        res.status(500).json({ message: 'Error Re-sending OTP', error: error.message });
+        console.log(STRING_CONSTANTS.OTP_SENT_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR) 
     }
 
 }

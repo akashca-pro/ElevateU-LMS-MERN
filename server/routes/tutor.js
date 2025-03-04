@@ -13,7 +13,7 @@ import retryVerify from '../middleware/retryVerify.js';
 
 import { updateEmail, verifyEmail } from '../controllers/commonControllers.js';
 
-import {createCourse, updateCourse, publishCourse, deleteCourse, loadCourses, courseDetails
+import {createCourse, updateCourse, requestPublish, deleteCourse, loadCourses, courseDetails
 
 } from '../controllers/course/tutorOps.js'
 import passport from 'passport';
@@ -54,12 +54,12 @@ router.patch('/request-verification/:id',verifyAccessToken('tutor'),requestVerif
 
 // course manage
 
-router.post('/create-course/:id',verifyAccessToken('tutor'),createCourse)
+router.post('/create-course',verifyAccessToken('tutor'),createCourse)
 router.get('/courses',verifyAccessToken('tutor'),loadCourses)
-router.get('/view-course/:id',verifyAccessToken('tutor'),courseDetails)
-router.post('/update-course/:id',verifyAccessToken('tutor'),updateCourse)
-router.post('/publish-course/:id',verifyAccessToken('tutor'),publishCourse)
-router.delete('/delete-course/:id',verifyAccessToken('tutor'),deleteCourse)
+router.get('/view-course',verifyAccessToken('tutor'),courseDetails)
+router.post('/update-course',verifyAccessToken('tutor'),updateCourse)
+router.post('/publish-course',verifyAccessToken('tutor'),requestPublish)
+router.delete('/delete-course',verifyAccessToken('tutor'),deleteCourse)
 
 
 export default router

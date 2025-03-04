@@ -13,7 +13,7 @@ loadRequests,approveOrRejectrequest
 import {loadCategory, addCategory, updateCategory, deleteCategory , loadCategoryDetails
 } from '../controllers/admin/adminCategoryOps.js' // Admin - category CRUD
 
-import {loadPendingRequest, approvePublish, rejectPublish, deleteCourse, loadCourses, assignCategory
+import {loadPendingRequest, deleteCourse, loadCourses, assignCategory, approveOrRejectCourse
 } from '../controllers/course/adminOps.js' // Admin manage course approval and course Manage
 
 import {verifyAccessToken,verifyRefreshToken} from '../utils/verifyToken.js'
@@ -65,9 +65,7 @@ router.delete('/delete-category/:id',verifyAccessToken('admin'),deleteCategory)
 //course publish request manage
 
 router.get('/pending-request',verifyAccessToken('admin'),loadPendingRequest)
-router.post('/course-approve/:id',verifyAccessToken('admin'),approvePublish)
-router.post('/course-reject/:id',verifyAccessToken('admin'),rejectPublish)
-
+router.post('/verify-course',verifyAccessToken('admin'),approveOrRejectCourse)
 
 // course manage
 

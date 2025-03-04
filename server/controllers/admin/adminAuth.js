@@ -1,7 +1,12 @@
+import 'dotenv/config'
 import Admin from '../../model/admin.js'
 import bcrypt from 'bcryptjs'
 import { clearToken, sendToken } from '../../utils/tokenManage.js';
 import { generateAccessToken, generateRefreshToken } from '../../utils/generateToken.js';
+
+import HttpStatus from '../../utils/statusCodes.js';
+import ResponseHandler from '../../utils/responseHandler.js';
+import {STRING_CONSTANTS, DATABASE_FIELDS} from '../../utils/stringConstants.js';
 
 //Admin register
 
@@ -12,23 +17,18 @@ export const registerAdmin = async (req,res) => {
 
         const adminExist = await Admin.findOne({email});
 
-        if(adminExist) return res.status(400).json({message : "Admin already exists"});
+        if(adminExist) 
+            return ResponseHandler.error(res,STRING_CONSTANTS.EXIST ,HttpStatus.CONFLICT);
 
         const hashedPassword = await bcrypt.hash(password,10);
 
-        const admin = new Admin({
-            email,
-            password : hashedPassword,
-            firstName,
-        })
+        await Admin.create({ email, password: hashedPassword, firstName });
 
-        await admin.save();
-
-        return res.status(200).json({message : 'Admin registration successfull'});
+        return ResponseHandler.success(res, STRING_CONSTANTS.REGISTRATION_SUCCESS, HttpStatus.OK);
 
     } catch (error) {
-        console.log('Error registering admin ',error);
-        res.status(500).json({ message: 'Error registering admin', error: error.message });
+        console.log(STRING_CONSTANTS.REGISTRATION_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.REGISTRATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -38,32 +38,37 @@ export const registerAdmin = async (req,res) => {
 export const loginAdmin = async (req,res) => {
     
     try {
-        const {email,password,rememberMe} = req?.body
+        const {email,password,rememberMe} = req?.body;
 
-        const admin = await Admin.findOne({email})
+        const admin = await Admin.findOne({email});
 
-        console.log(req.body)
+        if(!admin) return ResponseHandler.error(res, STRING_CONSTANTS.INVALID_CREDENTIALS, HttpStatus.BAD_REQUEST);
 
-        if(!admin) return res.status(404).json({message : "Invalid credentials"});
+        if(!(await bcrypt.compare(password,admin.password)))
+            return ResponseHandler.error(res, STRING_CONSTANTS.INVALID_PASSWORD, HttpStatus.BAD_REQUEST);
 
-        if(!(await bcrypt.compare(password,admin.password))){
-            return res.status(401).json({message : "Incorrect password"});
-        }
 
         const accessToken = generateAccessToken(admin._id);
         const refreshToken = generateRefreshToken(admin._id);
 
-        sendToken(res,'adminAccessToken',accessToken,1 * 24 * 60 * 60 * 1000);
+        sendToken(res, process.env.ADMIN_ACCESS_TOKEN_NAME, accessToken, 1 * 24 * 60 * 60 * 1000);
 
-        if(rememberMe) sendToken(res,'adminRefreshToken',refreshToken,7 * 24 * 60 * 60 * 1000);
+        if(rememberMe) 
+            sendToken(res, process.env.ADMIN_REFRESH_TOKEN_NAME, refreshToken,7 * 24 * 60 * 60 * 1000);
 
-        const updatedData = await Admin.findOne({email}).select('firstName email lastName profileImage')
+        const updatedData = await Admin.findOne({email})
+        .select([
+            DATABASE_FIELDS.FIRST_NAME, 
+            DATABASE_FIELDS.LAST_NAME,
+            DATABASE_FIELDS.EMAIL, 
+            DATABASE_FIELDS.PROFILE_IMAGE
+        ].join(" "));
 
-        return res.status(200).json({message : 'admin login successfull',admin : updatedData});
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOGIN_SUCCESS, HttpStatus.OK, updatedData)
 
     } catch (error) {
-        console.log('Error logging in admin ',error);
-        res.status(500).json({ message: 'Error logging in admin', error: error.message });
+        console.log(STRING_CONSTANTS.LOGIN_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.LOGIN_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -74,14 +79,13 @@ export const logoutAdmin = async (req,res) => {
 
     try {
 
-        clearToken(res,'adminAccessToken','adminRefreshToken');
-        return res.json({ message: "Logged out successfully" });
+        clearToken(res, process.env.ADMIN_ACCESS_TOKEN_NAME, process.env.ADMIN_REFRESH_TOKEN_NAME);
 
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOGOUT_SUCCESS, HttpStatus.OK)
+      
     } catch (error) {
-        
-        console.log('Error logging out admin ',error);
-        res.status(500).json({ message: 'Error logging out admin', error: error.message });
-
+        console.log(STRING_CONSTANTS.LOGOUT_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.LOGOUT_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
     
 }
@@ -94,13 +98,13 @@ export const refreshToken = async (req,res) => {
         const {decoded} = req.admin;
         const newAccessToken = generateAccessToken(decoded);
 
-        sendToken(res,'adminAccessToken',newAccessToken,1 * 24 * 60 * 60 * 1000)
+        sendToken(res, process.env.ADMIN_ACCESS_TOKEN_NAME, newAccessToken,1 * 24 * 60 * 60 * 1000)
     
-        return res.status(200).json({message : "Refresh Token Issued"})
-
+        return ResponseHandler.success(res, STRING_CONSTANTS.TOKEN_ISSUED, HttpStatus.OK)
+       
     } catch (error) {
-        console.log('Error refreshing token for admin ',error);
-        res.status(500).json({ message: 'Error refreshing token for admin ', error: error.message });
+        console.log(STRING_CONSTANTS.TOKEN_ISSUE_ERROR, error);
+        return  ResponseHandler.error(res, STRING_CONSTANTS.TOKEN_ISSUE_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
     
 }
@@ -112,16 +116,21 @@ export const loadProfile = async (req,res) =>{
     try {
         const admin_ID = req.admin.id;
 
-        const adminData = await Admin.findById(admin_ID).select('email firstName lastName profileImage')
+        const adminData = await Admin.findById(admin_ID)
+        .select([
+            DATABASE_FIELDS.FIRST_NAME, 
+            DATABASE_FIELDS.LAST_NAME,
+            DATABASE_FIELDS.EMAIL, 
+            DATABASE_FIELDS.PROFILE_IMAGE
+        ].join(" "));
 
-        if(!adminData) return res.status(404).json({message : 'admin data is not found'})
-    
+        if(!adminData) return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
 
-        return res.status(200).json(adminData)
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, adminData)
         
     } catch (error) {
-        console.log('Error loading admin profile',error);
-        res.status(500).json({ message: 'Error loading admin profile', error: error.message });
+        console.log(STRING_CONSTANTS.LOADING_FAILED, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)  
     }    
 
 }
@@ -133,7 +142,8 @@ export const updateProfile = async (req,res) => {
     try {
         const admin_ID = req.admin.id
         const admin = await Admin.findById(admin_ID)
-        if(!admin)return res.status(404).json({message : 'admin details not found'});
+
+        if(!admin)return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
 
         const {email, firstName, lastName, profileImage} = req.body
 
@@ -142,13 +152,19 @@ export const updateProfile = async (req,res) => {
             firstName,
             lastName,
             profileImage
-        },{new : true}).select('email firstName lastName profileName')
+        },{new : true})
+        .select([
+            DATABASE_FIELDS.FIRST_NAME, 
+            DATABASE_FIELDS.LAST_NAME,
+            DATABASE_FIELDS.EMAIL, 
+            DATABASE_FIELDS.PROFILE_IMAGE
+        ].join(" "));
 
-        return res.status(200).json(updatedData)
+        return ResponseHandler.success(res, STRING_CONSTANTS.UPDATION_SUCCESS, HttpStatus.OK, updatedData)
 
     } catch (error) {
-        console.log('Error updating admin profile',error);
-        res.status(500).json({ message: 'Error updating admin profile', error: error.message });
+        console.log(STRING_CONSTANTS.UPDATION_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)  
     }
 
 }

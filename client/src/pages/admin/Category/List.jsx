@@ -19,12 +19,14 @@ const List = () => {
   const [filteredQuery,setFilteredQuery] = useState('latest')
   const limit = 7
   const navigate = useNavigate()
-  const {data , isLoading , error } = useAdminLoadCategoriesQuery({
+  const {data : category, isLoading , error } = useAdminLoadCategoriesQuery({
     page : currentPage,
     search : searchQuery,
     limit,
     filter : filteredQuery
   })
+  
+  const data = category?.data;
  
   return (
     <div className="container mx-auto p-6 max-w-full overflow-x-auto">

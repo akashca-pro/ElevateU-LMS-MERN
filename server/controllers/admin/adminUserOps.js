@@ -1,4 +1,7 @@
 import User from '../../model/user.js'
+import ResponseHandler from '../../utils/responseHandler.js';
+import HttpStatus from '../../utils/statusCodes.js';
+import { DATABASE_FIELDS, STRING_CONSTANTS } from '../../utils/stringConstants.js';
 
 // create user
 
@@ -9,23 +12,29 @@ export const addUser = async (req,res) => {
              bio, socialLinks, isVerified, isActive, isBlocked} = req.body;
 
         const emailExist = await User.findOne({email})
-        if(emailExist) return res.status(409).json({message : 'user already exist'})    
+        if(emailExist)
+             return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);   
 
-        const user = new User({
-            email, password , firstName, lastName, phone, profileImage, enrolledCourses,
-             bio, socialLinks,
-             isVerified : isVerified === 'true',
-             isActive : isActive === 'true' ,
-             isBlocked : isBlocked === 'true'
-        })
+        const user = await User.create({
+            email,
+            password,
+            firstName,
+            lastName,
+            phone,
+            profileImage,
+            enrolledCourses,
+            bio,
+            socialLinks,
+            isVerified: isVerified === 'true',
+            isActive: isActive === 'true',
+            isBlocked: isBlocked === 'true',
+        });
 
-        await user.save()
-
-        return res.status(200).json({message : 'user added successfully'})
+        return ResponseHandler.success(res, STRING_CONSTANTS.CREATION_SUCCESS, HttpStatus.CREATED,user)
 
     } catch (error) {
-        console.log('Error adding user profile',error);
-        res.status(500).json({ message: 'Error adding user profile', error: error.message });
+        console.log(STRING_CONSTANTS.CREATION_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.CREATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -49,17 +58,27 @@ export const loadUsers = async (req,res) => {
         }
 
         const userData = await User.find(search ? searchQuery : {})
-        .select('email firstName lastName profileImage isVerified isActive isBlocked enrolledCourses')
         .skip(skip)
         .limit(limit)
+        .select([
+            DATABASE_FIELDS.EMAIL,
+            DATABASE_FIELDS.FIRST_NAME,
+            DATABASE_FIELDS.LAST_NAME,
+            DATABASE_FIELDS.PROFILE_IMAGE,
+            DATABASE_FIELDS.IS_VERIFIED,
+            DATABASE_FIELDS.IS_ACTIVE,
+            DATABASE_FIELDS.IS_BLOCKED,
+            DATABASE_FIELDS.ENROLLED_COURSES
+        ].join(' '));
 
-        if(!userData || userData.length === 0) return res.status(404).json({message : 'user not found'})
+        if(!userData || userData.length === 0) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
-        return res.status(200).json(userData) 
+        return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, userData);
         
     } catch (error) {
-        console.log('Error viewing users profiles',error);
-        res.status(500).json({ message: 'Error viewing users profiles', error: error.message });
+        console.log(STRING_CONSTANTS.LOADING_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -71,15 +90,25 @@ export const loadUserDetails = async (req,res) => {
     try {
         const user_ID = req.params.id
         const user = await User.findById(user_ID)
-        .select('email firstName lastName profileImage isVerified isActive isBlocked enrolledCourses')
+        .select([
+            DATABASE_FIELDS.EMAIL,
+            DATABASE_FIELDS.FIRST_NAME,
+            DATABASE_FIELDS.LAST_NAME,
+            DATABASE_FIELDS.PROFILE_IMAGE,
+            DATABASE_FIELDS.IS_VERIFIED,
+            DATABASE_FIELDS.IS_ACTIVE,
+            DATABASE_FIELDS.IS_BLOCKED,
+            DATABASE_FIELDS.ENROLLED_COURSES
+        ].join(' '));
 
-        if(!user) return res.status(404).json({message : 'user not found'})
+        if(!user) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
             
-        return res.status(200).json(user)
+        return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, user)
 
     } catch (error) {
-        console.log('Error viewing user profile',error);
-        res.status(500).json({ message: 'Error viewing user profile', error: error.message });
+        console.log(STRING_CONSTANTS.LOADING_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 } 
@@ -92,7 +121,8 @@ export const updateUserDetails = async (req,res) => {
         
         const user_ID = req.params.id;
         const userData = await User.findById(user_ID);
-        if(!userData) return res.status(404).json({message : 'user not found'});
+        if(!userData) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
         const {firstName, lastName, profileImage, enrolledCourses,
              isVerified, isActive, isBlocked } = req.body
@@ -107,18 +137,15 @@ export const updateUserDetails = async (req,res) => {
 
         if(isBlocked !== undefined) updatedFields.isBlocked = isBlocked === 'true' 
 
-        const updatedData = await User.findByIdAndUpdate(
+        await User.findByIdAndUpdate(
             user_ID, 
-            updatedFields ,
-            {new : true})
-            .select(['firstName', 'lastName', 'profileImage', 'enrolledCourses', 'isVerified',
-             'isActive', 'isBlocked','bio', 'socialLinks'])
+            updatedFields)
              
-        return res.status(200).json(updatedData)
+        return ResponseHandler.success(res,STRING_CONSTANTS.UPDATION_SUCCESS, HttpStatus.OK)
 
     } catch (error) {
-        console.log('Error updating user profile',error);
-        res.status(500).json({ message: 'Error updating user profile', error: error.message });
+        console.log(STRING_CONSTANTS.UPDATION_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -132,15 +159,16 @@ export const deleteUser = async (req,res) => {
         const user_ID = req.params.id
 
         const user = await User.findById(user_ID)
-        if(!user) return res.status(404).json({message : 'user not found'})
+        if(!user) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
         
         await User.findByIdAndDelete(user_ID)
 
-        return res.status(200).json({message : 'user deleted successfully'})
+        return ResponseHandler.success(res,STRING_CONSTANTS.DELETION_SUCCESS, HttpStatus.OK)
 
     } catch (error) {
-        console.log('Error deleting user profile',error);
-        res.status(500).json({ message: 'Error deleting user profile', error: error.message });
+        console.log(STRING_CONSTANTS.DELETION_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.DELETION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }

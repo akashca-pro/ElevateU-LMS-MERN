@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import useForm from "@/hooks/useForm";
 import { toast } from "sonner";
-import React from "react";
-// import { toast } from "react-toastify";
+import React from "react"
 
 const SignUp = ({role,useSignup}) => {
   

@@ -15,21 +15,16 @@ const ForgotPassword = ({role,useForgotPassword , navigateTo }) => {
 
     if (Object.values(errors).some((err) => err)) return;
 
-    const promise = forgotPassword({ email: formData.email }).unwrap();
-
-    toast.promise(promise, {
-        loading: 'Sending OTP...',
-        success: () => {
-            navigate(navigateTo, { state: formData.email });
-            return 'OTP has been sent to your registered email.';
-        },
-        error: 'Failed to send OTP. Please try again.',
-    });
+    const toastId = toast.loading('Please wait . . .');
 
     try {
-        await promise;
+        const response = await forgotPassword({ email: formData.email }).unwrap();
+        toast.success(response?.message || 'Password reset OTP sent to mail',{id : toastId});
+        navigate(navigateTo, { state: formData.email });
+
     } catch (error) {
         console.error(error);
+        toast.error(error?.data?.message || 'Password reset OTP sent Failed',{id : toastId})
     }
 };
 

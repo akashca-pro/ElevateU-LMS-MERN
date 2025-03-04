@@ -1,34 +1,36 @@
 import Course from '../../model/course.js'
 import Tutor from '../../model/tutor.js'
+import ResponseHandler from '../../utils/responseHandler.js'
+import HttpStatus from '../../utils/statusCodes.js'
+import { STRING_CONSTANTS } from '../../utils/stringConstants.js'
 
 // create a course
 export const createCourse = async (req,res) => {
     
     try {
-        const tutorId = req.params.id
-        const {title, description, price, thumbnail} = req.body
+        const {title, description, price, thumbnail , tutorId} = req.body
 
         const tutorCheck = await Tutor.findById(tutorId)
-        if(!tutorCheck) return res.status(404).json({message : 'tutor not found'})
+        if(!tutorCheck) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
         const existingCourse = await Course.findOne({ title, tutor: tutorId });
-        if (existingCourse) {
-            return res.status(400).json({ message: "Course with this title already exists" });
-        }
+        if (existingCourse) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
 
-        const newCourse = new Course({
-            title , description ,
-            tutor : tutorId
-            , price , thumbnail
-        })
+        await Course.create({
+            title,
+            description,
+            tutor: tutorId,  
+            price,
+            thumbnail
+        });
 
-        await newCourse.save()
-
-        res.status(201).json({ message: "Course created successfully", newCourse });
+        return ResponseHandler.success(res, STRING_CONSTANTS.CREATION_SUCCESS, HttpStatus.CREATED)
 
     } catch (error) {
-        console.log('Error creating course');
-        return res.status(500).json({ message: 'Error creating  course', error: error.message });
+        console.log(STRING_CONSTANTS.CREATION_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.CREATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -50,13 +52,14 @@ export const loadCourses = async (req,res) => {
         .skip(skip)
         .limit(limit)
 
-        if(!course) return res.status(404).json({message : 'course not found'})
+        if(!course) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
 
-        return res.status(200).json(course)
+        return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, course)
             
     } catch (error) {
-        console.log('Error loading courses');
-        return res.status(500).json({ message: 'Error loading  courses', error: error.message });
+        console.log(STRING_CONSTANTS.LOADING_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -66,17 +69,17 @@ export const loadCourses = async (req,res) => {
 export const courseDetails = async (req,res) => {
     
     try {
-        const course_Id = req.params.id
-        const {tutorId} = req.body
+        const {tutorId , courseId} = req.body
 
-        const courseDetails = await Course.findOne({_id : course_Id , tutor : tutorId})
-        if(!courseDetails) return res.status(404).json({message : 'course not found'})
+        const courseDetails = await Course.findOne({_id : courseId , tutor : tutorId})
+        if(!courseDetails) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
-        return res.status(200).json(courseDetails)
+        return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, courseDetails)
 
     } catch (error) {
-        console.log('Error loading course details');
-        return res.status(500).json({ message: 'Error loading  course details', error: error.message });
+        console.log(STRING_CONSTANTS.LOADING_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -85,18 +88,15 @@ export const courseDetails = async (req,res) => {
 
 export const updateCourse = async (req, res) => {
     try {
-      const { title, description, price, thumbnail, tutorId } = req.body;
-      const course_Id = req.params.id;
+      const { title, description, price, thumbnail, tutorId ,courseId} = req.body;
 
-      const course = await Course.findOne({_id : course_Id , tutor : tutorId});
-      if (!course) {
-        return res.status(404).json({ message: 'Course not found' });
-      }
+      const course = await Course.findOne({_id : courseId , tutor : tutorId});
+      if (!course) 
+        return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
       
-      const existingCourse = await Course.findOne({ title, tutor: tutorId, _id: { $ne: course_Id } });
-      if (existingCourse) {
-        return res.status(409).json({ message: 'Another course with the same title and tutor already exists' });
-      }
+      const existingCourse = await Course.findOne({ title, tutor: tutorId, _id: { $ne: courseId } });
+      if (existingCourse) 
+        return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
   
       course.title = title;
       course.description = description;
@@ -105,36 +105,36 @@ export const updateCourse = async (req, res) => {
   
       await course.save();
   
-      return res.status(200).json({ message: 'Course updated successfully' });
+      return ResponseHandler.success(res,STRING_CONSTANTS.UPDATION_SUCCESS, HttpStatus.OK)
+
     } catch (error) {
-      console.error('Error updating course', error);
-      return res.status(500).json({ message: 'Error updating course', error: error.message });
+        console.log(STRING_CONSTANTS.UPDATION_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 };
   
 // publish course
 
-export const publishCourse = async (req,res) => {
+export const requestPublish = async (req,res) => {
     
     try {
-        const course_Id = req.params.id
-        const {tutorId} = req.body
-        const course = await Course.findOne({_id : course_Id , tutor : tutorId})
+        const {tutorId, courseId} = req.body
+        const course = await Course.findOne({_id : courseId , tutor : tutorId})
 
-        if (!course) return res.status(403).json({ message: 'Not authorized to publish this course' });
+        if (!course) return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
         if(course.isPublished || course.isApproved === "approved") 
-            return res.status(409).json({message : 'Course already published'});
+             return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
 
-        course.isApproved = 'pending'
+        course.isApproved = 'pending';
 
         await course.save();
 
-        return res.status(200).json({ message: "Course Approve requested , after verifying course will be published"});
+        return ResponseHandler.success(res,"Course Approve requested , after verifying course will be published", HttpStatus.OK)
 
     } catch (error) {
-        console.error('Error publishing course', error);
-        return res.status(500).json({ message: 'Error publishing course', error: error.message });
+        console.log(STRING_CONSTANTS.UPDATION_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -144,20 +144,20 @@ export const publishCourse = async (req,res) => {
 export const deleteCourse = async (req,res) => {
     
     try {
-        const course_Id = req.params.id
-        const {tutorId} = req.body
+        const {tutorId , courseId} = req.body
 
-        const course = await Course.findOne({_id : course_Id , tutor : tutorId})
+        const course = await Course.findOne({_id : courseId , tutor : tutorId})
 
-        if(!course) return res.status(404).json({message : 'course not found'})
+        if(!course) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
         
-        await Course.findOneAndDelete({_id : course_Id , tutor : tutorId})
+        await Course.findOneAndDelete({_id : courseId , tutor : tutorId})
 
-        return res.status(200).json({message : 'course deleted successfully'})
+        return ResponseHandler.success(res,STRING_CONSTANTS.DELETION_SUCCESS, HttpStatus.OK)
 
     } catch (error) {
-        console.error('Error deleting course', error);
-        return res.status(500).json({ message: 'Error deleting course', error: error.message });
+        console.log(STRING_CONSTANTS.DELETION_ERROR, error);
+        return ResponseHandler.error(res,STRING_CONSTANTS.DELETION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }

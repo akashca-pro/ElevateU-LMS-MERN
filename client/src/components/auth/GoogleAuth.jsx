@@ -7,8 +7,8 @@ const GoogleAuth = ({ role, useGoogleCalback, useAuthActions }) => {
   const navigate = useNavigate();
 
 
-  const { isLoading, data, error } = useGoogleCalback();
-
+  const { isLoading, data : details, error } = useGoogleCalback();
+  const data = details?.data
   useEffect(() => {
     if (isLoading) {
       return;
@@ -21,7 +21,7 @@ const GoogleAuth = ({ role, useGoogleCalback, useAuthActions }) => {
 
     if (data) {
       toast.success('Google authentication successful!');
-      login(data[role]); // Save user in Redux
+      login(data); // Save user in Redux
       navigate('/');
     }
   }, [data, error, isLoading, navigate, login, role]);

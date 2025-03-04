@@ -29,7 +29,7 @@ function Login({ role, useLogin, useAuthActions }) {
     const loginPromise = new Promise(async (resolve, reject) => {
       try {
         const response = await loginAuth(formData).unwrap();
-        login(response[role]);
+        login(response?.data);
         resolve("Login successful!");
         navigate("/");
       } catch (error) {

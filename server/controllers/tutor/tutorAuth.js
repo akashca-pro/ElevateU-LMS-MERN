@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import Tutor from '../../model/tutor.js'
 import bcrypt from 'bcryptjs'
 import {generateAccessToken,generateRefreshToken} from '../../utils/generateToken.js'
@@ -5,6 +6,9 @@ import { generateOtpCode, saveOtp } from '../../utils/generateOtp.js'
 import {sendToken,clearToken} from '../../utils/tokenManage.js'
 import {sendEmailOTP, sendEmailResetPassword} from '../../utils/sendEmail.js'
 import {randomInt} from 'node:crypto'
+import HttpStatus from '../../utils/statusCodes.js'
+import { DATABASE_FIELDS, STRING_CONSTANTS } from '../../utils/stringConstants.js'
+import ResponseHandler from '../../utils/responseHandler.js'
 
 // Tutor register with otp
 
@@ -17,7 +21,8 @@ export const registerTutor = async (req,res) => {
     
         const tutorExists = await Tutor.findOne({email : email});
     
-        if(tutorExists) return res.status(400).json({message : "User already exists"});
+        if(tutorExists) 
+            return ResponseHandler.error(res,STRING_CONSTANTS.EXIST ,HttpStatus.CONFLICT);
 
 
         const hashedPassword = await bcrypt.hash(password,10);
@@ -30,19 +35,17 @@ export const registerTutor = async (req,res) => {
     
         await tutor.save();
 
-        // await generateOtp('tutor',email);
         const {otp,otpExpires} = generateOtpCode();
 
         await saveOtp('tutor',email,otp,otpExpires);
 
         await sendEmailOTP(email,firstName,otp);
         
-        return res.status(201).json({message : "otp sent to email"});
+        return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK);
 
     } catch (error) {
-        console.log(error);
-        if(error.message='Invalid Email') return res.status(400).json(error.message)
-        return res.status(400).json(error.message);
+        console.log(STRING_CONSTANTS.REGISTRATION_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.REGISTRATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -59,7 +62,8 @@ export const verifyOtp = async (req,res) => {
             otpExpires : { $gt : Date.now() }
         });
 
-         if(!tutor) return res.status(400).json({message : "Invalid or Expired OTP"});
+         if(!tutor) 
+            return ResponseHandler.error(res,STRING_CONSTANTS.OTP_ERROR ,HttpStatus.BAD_REQUEST);
 
         tutor.isVerified = true;
         tutor.otp = undefined;
@@ -69,13 +73,13 @@ export const verifyOtp = async (req,res) => {
 
         const accessToken = generateAccessToken(tutor._id)
 
-        sendToken(res,'tutorAccessToken',accessToken,1 * 24 * 60 * 60 * 1000)
+        sendToken(res, process.env.TUTOR_ACCESS_TOKEN_NAME, accessToken, 1 * 24 * 60 * 60 * 1000);
 
-        return res.json({message : 'OTP verified successfully',data : tutor});
+        return ResponseHandler.success(res, STRING_CONSTANTS.VERIFICATION_SUCCESS, HttpStatus.OK);
 
     } catch (error) {
-        console.log(error)
-        res.status(500).json({message : "Internal Server error"})
+        console.log(STRING_CONSTANTS.VERIFICATION_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.VERIFICATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -89,30 +93,46 @@ export const loginTutor = async (req,res) => {
 
         const tutor = await Tutor.findOne({email});
     
-        if(!tutor)return res.status(401).json({message : "Invalid credentials"});
+        if(!tutor)
+            return ResponseHandler.error(res, STRING_CONSTANTS.INVALID_CREDENTIALS, HttpStatus.BAD_REQUEST);
     
-        if(!(await bcrypt.compare(password,tutor.password))){
-            return res.status(404).json({message : "Incorrect password"});
-        }
+        if(!(await bcrypt.compare(password,tutor.password)))
+            return ResponseHandler.error(res, STRING_CONSTANTS.INVALID_PASSWORD, HttpStatus.BAD_REQUEST);
 
-        if(!tutor.isVerified)return res.status(403).json({message : "User is not verified"})
+        if(!tutor.isVerified)
+            return ResponseHandler.error(res,STRING_CONSTANTS.VERIFICATION_ERROR ,HttpStatus.NOT_ACCEPTABLE);
         
        const accessToken = generateAccessToken(tutor._id);
        const refreshToken = generateRefreshToken(tutor._id);
     
         // Set access token as cookie (24 hour)
-        sendToken(res,'tutorAccessToken',accessToken,1 * 24 * 60 * 60 * 1000)
+        sendToken(res, process.env.TUTOR_ACCESS_TOKEN_NAME, accessToken, 1 * 24 * 60 * 60 * 1000)
     
         // Set refresh token as cookie (only if "Remember Me" is checked)
-        if(rememberMe) sendToken(res,'tutorRefreshToken',refreshToken,7 * 24 * 60 * 60 * 1000);
+        if(rememberMe) 
+            sendToken(res, process.env.TUTOR_REFRESH_TOKEN_NAME, refreshToken, 7 * 24 * 60 * 60 * 1000);
     
-        const data = await Tutor.findOne({email}).select('_id email firstName lastName profileImage bio dob socialLinks expertise experience isAdminVerified status reason ')
+        const data = await Tutor.findOne({email})
+        .select([
+            DATABASE_FIELDS.ID,
+            DATABASE_FIELDS.EMAIL,
+            DATABASE_FIELDS.FIRST_NAME,
+            DATABASE_FIELDS.LAST_NAME,
+            DATABASE_FIELDS.PROFILE_IMAGE,
+            DATABASE_FIELDS.BIO,
+            DATABASE_FIELDS.DOB,
+            DATABASE_FIELDS.IS_ADMIN_VERIFIED,
+            DATABASE_FIELDS.EXPERTISE,
+            DATABASE_FIELDS.EXPERIENCE,
+            DATABASE_FIELDS.STATUS,
+            DATABASE_FIELDS.REASON
+        ].join(' '))
     
-        return res.status(200).json({message : "Login successfull",tutor : data});
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOGIN_SUCCESS, HttpStatus.OK, data)
 
     } catch (error) {
-        console.log(error)
-        res.status(500).json({message : "Error generating Token"})
+        console.log(STRING_CONSTANTS.LOGIN_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.LOGIN_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -125,7 +145,8 @@ export const forgotPassword = async (req,res) => {
         const {email} = req.body;
         const emailExist = await Tutor.findOne({email})
 
-        if(!emailExist)return res.status(404).json({message : 'Tutor not found'});
+        if(!emailExist)
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
 
         const resetToken = randomInt(100000, 999999).toString();
         const resetTokenExpires = Date.now() + 10 * 60 * 1000;
@@ -136,11 +157,11 @@ export const forgotPassword = async (req,res) => {
 
         await sendEmailResetPassword(tutor.email,tutor.firstName,resetToken);
 
-        return res.status(200).json({message : 'Password reset otp sent to your email'})
+        return ResponseHandler.success(res, STRING_CONSTANTS.RESET_OTP, HttpStatus.OK)
         
     } catch (error) {
-        console.log('from forgotpassword tutor controller',error);
-        return res.status(500).json({ message: 'Error sending password reset code', error: error.message });
+        console.log(STRING_CONSTANTS.OTP_SENT_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR) 
     }
 
 }
@@ -156,7 +177,8 @@ export const verifyResetLink = async (req,res) => {
             otpExpires : { $gt : Date.now() }
         });
 
-        if(!tutor) return res.status(400).json({message : 'Invalid or expired token'})
+        if(!tutor) 
+            return ResponseHandler.error(res,STRING_CONSTANTS.OTP_ERROR ,HttpStatus.BAD_REQUEST);
 
         const hashedPassword = await bcrypt.hash(password,10);
 
@@ -167,11 +189,11 @@ export const verifyResetLink = async (req,res) => {
 
         await tutor.save();
 
-        return res.status(200).json({ message: 'Password reset successful' });
+        return ResponseHandler.success(res, STRING_CONSTANTS.PASSWORD_RESET_SUCCESS, HttpStatus.OK)
 
     } catch (error) {
-        console.log('from verifyResetLink',error);
-        res.status(500).json({message : 'Reset link verification failed'});
+        console.log(STRING_CONSTANTS.PASSWORD_RESET_ERROR, error);
+        return  ResponseHandler.error(res, STRING_CONSTANTS.PASSWORD_RESET_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -184,13 +206,13 @@ export const refreshToken = async (req,res) => {
         const {decoded} = req.tutor;
         const newAccessToken = generateAccessToken(decoded);
 
-        sendToken(res,'tutorAccessToken',newAccessToken,1 * 24 * 60 * 60 * 1000)
+        sendToken(res, process.env.TUTOR_ACCESS_TOKEN_NAME, newAccessToken, 1 * 24 * 60 * 60 * 1000)
     
-        return res.status(200).json({message : "Refresh Token Issued"})
+        return ResponseHandler.success(res, STRING_CONSTANTS.TOKEN_ISSUED, HttpStatus.OK)
 
     } catch (error) {
-        console.log(error);
-        res.status(500).json({message : "Error generating new token based on refresh token"})
+        console.log(STRING_CONSTANTS.TOKEN_ISSUE_ERROR, error);
+        return  ResponseHandler.error(res, STRING_CONSTANTS.TOKEN_ISSUE_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
     
 }
@@ -201,14 +223,13 @@ export const logoutTutor = async (req,res) => {
 
     try {
 
-        clearToken(res,'tutorAccessToken','tutorRefreshToken');
-        return res.json({ message: "Logged out successfully" });
+        clearToken(res, process.env.TUTOR_ACCESS_TOKEN_NAME, process.env.TUTOR_REFRESH_TOKEN_NAME);
+        
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOGOUT_SUCCESS, HttpStatus.OK)
 
     } catch (error) {
-        
-        console.log(error)
-        res.status(500).json("Error logging out")
-
+        console.log(STRING_CONSTANTS.LOGOUT_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.LOGOUT_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
     
 }
@@ -219,17 +240,18 @@ export const passportCallback = async (req,res) => {
     
     try {
 
-        if(!req.user) return res.status(404).json({message : 'Google authentication failed'});
+        if(!req.user) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.GOOGLE_AUTH_ERROR, HttpStatus.NOT_FOUND)
 
         const {tutor,token} = req.user;
 
-        sendToken(res,'tutorAccessToken',token,1 * 24 * 60 * 60 * 1000);
+        sendToken(res, process.env.TUTOR_ACCESS_TOKEN_NAME,token, 1 * 24 * 60 * 60 * 1000);
 
-        return res.redirect(`${process.env.CLIENT_URL}/tutor/auth-success`);
+        return res.status(HttpStatus.OK).redirect(`${process.env.CLIENT_URL}/tutor/auth-success`);
         
     } catch (error) {
-        console.error("Error during Google OAuth callback:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
+        console.log(STRING_CONSTANTS.GOOGLE_AUTH_ERROR, error);
+        return  ResponseHandler.error(res, STRING_CONSTANTS.GOOGLE_AUTH_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -249,13 +271,14 @@ export const authLoad = async (req,res) => {
         const {id} = req.tutor
 
         const tutor = await Tutor.findById(id)
-        if(!tutor) return res.status(404).json({message : "Google authentication failed. Please try again."})
+        if(!tutor) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.GOOGLE_AUTH_ERROR, HttpStatus.NOT_FOUND)
 
-        return res.status(200).json({message : 'Google Authentication success',tutor})
+        return ResponseHandler.success(res, STRING_CONSTANTS.GOOGLE_AUTH_SUCCESS, HttpStatus.OK,tutor)
         
     } catch (error) {
-        console.error("Error during Google OAuth callback:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
+        console.log(STRING_CONSTANTS.GOOGLE_AUTH_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.GOOGLE_AUTH_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }

@@ -11,7 +11,8 @@ import {useAdminLoadCategoryQuery} from '@/services/adminApi/adminCategoryApi'
 
 const FormModal = ({title, useCategory,style, type , name})=>{
     const [category] = useCategory()
-    const { data } = useAdminLoadCategoryQuery(name, { skip: type !== 'edit' })
+    const { data : categoryDetails } = useAdminLoadCategoryQuery(name, { skip: type !== 'edit' })
+    const data = categoryDetails?.data;
     const [isOpen, setIsOpen] = useState(false) 
     const [preview,setPreview] = useState(null)
     const [formData,setFormData] = useState({

@@ -1,4 +1,7 @@
 import Category from '../../model/category.js'
+import ResponseHandler from '../../utils/responseHandler.js'
+import HttpStatus from '../../utils/statusCodes.js'
+import { STRING_CONSTANTS } from '../../utils/stringConstants.js'
 
 // View category
 
@@ -31,17 +34,18 @@ export const loadCategory = async (req,res) => {
         const totalCategories = await Category.countDocuments(filterQuery);
         
         if(!categoryDetails || categoryDetails.length === 0) 
-            return res.status(404).json({message : 'category not found'});
-
-        return res.status(200).json({
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+            
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK,{
             categories: categoryDetails,
             total: totalCategories, 
             currentPage: page,
             totalPages: Math.ceil(totalCategories / limit),
-          });
+        });
+
     } catch (error) {
-        console.log('Error loading categories',error);
-        return res.status(500).json({ message: 'Error loading categories', error: error.message });
+        console.log(STRING_CONSTANTS.LOADING_ERROR ,error);
+        ResponseHandler.error(res, STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }
@@ -55,13 +59,14 @@ export const loadCategoryDetails = async (req,res) => {
 
         const categoryDetails = await Category.findOne({name})
 
-        if(!categoryDetails) return res.status(404).json({message : 'Category not found'})
+        if(!categoryDetails) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
         
-        return res.status(200).json(categoryDetails)
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, categoryDetails)
 
     } catch (error) {
-        console.log('Error loading category details',error);
-        return res.status(500).json({ message: 'Error loading category details', error: error.message });
+        console.log(STRING_CONSTANTS.LOADING_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }
@@ -71,21 +76,24 @@ export const loadCategoryDetails = async (req,res) => {
 export const addCategory = async (req,res) => {
     
     try {
-        const {name,description,icon,isActive} = req.body
-        const existCategory = await Category.findOne({name})
-        if(existCategory) return res.status(409).json({message : 'Category already exists'})
-    
-        const newCategory = new Category({
-           name,description,icon,isActive
-        })
+        const {name,description,icon,isActive} = req.body;
+        const existCategory = await Category.findOne({name});
 
-        await newCategory.save()
+        if(existCategory) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT)
 
-        return res.status(200).json({message : 'Category created successfully', newCategory})
+        await Category.create({
+            name, 
+            description, 
+            icon, 
+            isActive
+        });
+
+        return  ResponseHandler.success(res, STRING_CONSTANTS.CREATION_SUCCESS, HttpStatus.OK)
 
     } catch (error) {
-        console.log('Error adding category',error);
-        return res.status(500).json({ message: 'Error adding category', error: error.message });
+        console.log( STRING_CONSTANTS.CREATED_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.CREATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }
@@ -98,24 +106,22 @@ export const updateCategory = async (req,res) => {
 
         const {id,name,description,icon,isActive} = req.body
         const category = await Category.findById(id)
-        if(!category) return res.status(404).json({message : 'category not found'})
+        if(!category)
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
         const nameConflict = await Category.findOne({ name, _id: { $ne: id } });
-        if (nameConflict) {
-            return res.status(409).json({ message: 'Category with the same name already exists' });
-        }
+        if (nameConflict) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
 
-
-        const newData = await Category.findByIdAndUpdate(id ,{
+        await Category.findByIdAndUpdate(id ,{
             name,description,icon,isActive
         },{new : true})
 
-        return res.status(200).json({message : 'Category updated successfully ',newData})
-
+        return  ResponseHandler.success(res, STRING_CONSTANTS.UPDATION_SUCCESS, HttpStatus.OK)
         
     } catch (error) {
-        console.log('Error updating category',error);
-        return res.status(500).json({ message: 'Error updating category', error: error.message });
+        console.log(STRING_CONSTANTS.UPDATION_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }
@@ -125,17 +131,19 @@ export const updateCategory = async (req,res) => {
 export const deleteCategory = async (req,res) => {
     
     try {
-        const category_ID = req.params.id
+        const category_ID = req.params.id;
+
         const category = await Category.findById(category_ID)
-        if(!category) return res.status(404).json({message : 'category not found'})
+        if(!category) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
         
         await Category.findByIdAndDelete(category_ID);
 
-        return res.status(200).json({message : 'category deleted successfully'})
+        return  ResponseHandler.success(res, STRING_CONSTANTS.DELETION_SUCCESS, HttpStatus.OK)
 
     } catch (error) {
-        console.log('Error deleting category',error);
-        return res.status(500).json({ message: 'Error deleting category', error: error.message });
+        console.log(STRING_CONSTANTS.DELETION_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.DELETION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }
