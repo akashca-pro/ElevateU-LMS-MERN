@@ -56,6 +56,12 @@ const adminTutorApi = apiSlice.injectEndpoints({
             body : credentials
         })
        }),
+       adminToggleTutorBlock : builder.mutation({
+        query : (id) =>({
+            url : `admin/toggle-tutor-block/${id}`,
+            method :'PATCH'
+        })
+       })
     })
 })
 
@@ -68,6 +74,7 @@ export const {
     useAdminLoadTutorDetailsQuery,
     useAdminUpdateTutorMutation,
     useAdminDeleteTutorMutation,
+    useAdminToggleTutorBlockMutation,
 
     // notification from tutor verification request
 

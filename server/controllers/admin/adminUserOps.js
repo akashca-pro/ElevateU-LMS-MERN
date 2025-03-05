@@ -41,47 +41,69 @@ export const addUser = async (req,res) => {
 
 // view users details
 
-export const loadUsers = async (req,res) => {
-    
+export const loadUsers = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1
-        const limit = parseInt(req.query.limit) || 5
-        const skip = (page-1) * limit
-        const search = req.query.search
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 7;
+        const skip = (page - 1) * limit;
+        const { search, filter } = req.query;
 
-        const searchQuery = {
-            $or : [
-                {firstName : {$regex : search, $options : 'i'} },
-                {lastName : {$regex : search, $options : 'i'} },
-                {email : {$regex : search, $options : 'i'} }
-            ]
+        let sort = { createdAt: -1 }; // Default sorting (Newest first)
+        let filterQuery = {}; 
+
+        // Handle filter conditions
+        if (filter === "oldest") {
+            sort = { createdAt: 1 }; // Oldest first
+        } else if (filter === "active") {
+            filterQuery.isActive = true;
+        } else if (filter === "notActive") {
+            filterQuery.isActive = false;
         }
 
-        const userData = await User.find(search ? searchQuery : {})
-        .skip(skip)
-        .limit(limit)
-        .select([
-            DATABASE_FIELDS.EMAIL,
-            DATABASE_FIELDS.FIRST_NAME,
-            DATABASE_FIELDS.LAST_NAME,
-            DATABASE_FIELDS.PROFILE_IMAGE,
-            DATABASE_FIELDS.IS_VERIFIED,
-            DATABASE_FIELDS.IS_ACTIVE,
-            DATABASE_FIELDS.IS_BLOCKED,
-            DATABASE_FIELDS.ENROLLED_COURSES
-        ].join(' '));
+        // Apply search on both name & email
+        if (search) {
+            filterQuery.$or = [
+                { firstName: { $regex: search, $options: "i" } },
+                { email: { $regex: search, $options: "i" } },
+            ];
+        }
 
-        if(!userData || userData.length === 0) 
+        // Fetch paginated users
+        const userData = await User.find(filterQuery)
+            .skip(skip)
+            .limit(limit)
+            .sort(sort)
+            .select([
+                DATABASE_FIELDS.ID,
+                DATABASE_FIELDS.EMAIL,
+                DATABASE_FIELDS.FIRST_NAME,
+                DATABASE_FIELDS.IS_ACTIVE,
+                DATABASE_FIELDS.IS_BLOCKED,
+                DATABASE_FIELDS.PROFILE_IMAGE,
+                DATABASE_FIELDS.PHONE
+            ].join(' '));
+
+        // Count total matching users
+        const totalStudents = await User.countDocuments(filterQuery);
+
+        // If no data found
+        if (!userData || userData.length === 0) {
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
 
-        return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, userData);
-        
+        // Success response
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, {
+            users: userData,
+            total: totalStudents,
+            currentPage: page,
+            totalPages: Math.ceil(totalStudents / limit),
+        });
+
     } catch (error) {
-        console.log(STRING_CONSTANTS.LOADING_ERROR, error);
-        return ResponseHandler.error(res,STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
+        console.error(STRING_CONSTANTS.LOADING_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-}
+};
 
 // view specific user details
 
@@ -91,11 +113,14 @@ export const loadUserDetails = async (req,res) => {
         const user_ID = req.params.id
         const user = await User.findById(user_ID)
         .select([
+            DATABASE_FIELDS.ID,
             DATABASE_FIELDS.EMAIL,
             DATABASE_FIELDS.FIRST_NAME,
             DATABASE_FIELDS.LAST_NAME,
             DATABASE_FIELDS.PROFILE_IMAGE,
-            DATABASE_FIELDS.IS_VERIFIED,
+            DATABASE_FIELDS.BIO,
+            DATABASE_FIELDS.DOB,
+            DATABASE_FIELDS.PHONE,
             DATABASE_FIELDS.IS_ACTIVE,
             DATABASE_FIELDS.IS_BLOCKED,
             DATABASE_FIELDS.ENROLLED_COURSES
@@ -146,6 +171,31 @@ export const updateUserDetails = async (req,res) => {
     } catch (error) {
         console.log(STRING_CONSTANTS.UPDATION_ERROR, error);
         return ResponseHandler.error(res,STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// block or unblock user
+
+export const toggleUserBlock = async (req,res) => {
+    
+    try {
+        const userId = req.params.id;
+
+        const user = await User.findById(userId);
+
+        if(!user) return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+        user.isBlocked = !user.isBlocked;
+        await user.save();
+
+        const message = user.isBlocked ? STRING_CONSTANTS.BLOCKED : STRING_CONSTANTS.UNBLOCKED;
+        return ResponseHandler.success(res, message, HttpStatus.OK);
+
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.UPDATION_ERROR,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

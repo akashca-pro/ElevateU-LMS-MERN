@@ -1,5 +1,6 @@
 import User from "../model/user.js"
 import Tutor from "../model/tutor.js"
+import OTP from "../model/otp.js"
 import { generateOtpCode, saveOtp } from "../utils/generateOtp.js"
 import { sendEmailOTP, sendEmailResetPassword } from "../utils/sendEmail.js"
 import HttpStatus from "../utils/statusCodes.js"
@@ -80,30 +81,74 @@ export const verifyEmail = (role) =>{
     }
 }
 
-// re-send otp
+// // re-send otp
 
-export const reSendOtp = async (req,res) => {
+// export const reSendOtp = async (req,res) => {
         
+//     try {
+//         const {firstName, email, role, otpType} = req.body
+
+
+
+
+//         await sendEmailResetPassword(email,firstName,otp)
+
+//         return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK)
+
+//     } catch (error) {
+//         console.log(STRING_CONSTANTS.OTP_SENT_ERROR, error);
+//         return ResponseHandler.error(res, STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR) 
+//     }
+
+// }
+
+// Send otp 
+
+export const sendOtp = async(req,res) =>{
+    
     try {
-        const {email ,role} = req.body
-        const db = role === 'user' ? User : Tutor
-        const {otp,otpExpires} = generateOtpCode();
-        const user = await db.findOne({email})
+        const {role, firstName, email, otpType } = req.body;
 
-        if(!user) return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
+        const {otp} = generateOtpCode();
 
-        user.otp = otp
-        user.otpExpires = otpExpires
+        await OTP.create({
+            email,
+            role,
+            otp,
+            otpType,
+            otpExpires : new Date(Date.now() + 5 * 60 * 1000)
+        });
 
-        await user.save()
-
-        await sendEmailResetPassword(email,user.firstName,otp)
+        await sendEmailOTP(email, firstName, otp)
 
         return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK)
 
     } catch (error) {
-        console.log(STRING_CONSTANTS.OTP_SENT_ERROR, error);
-        return ResponseHandler.error(res, STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR) 
+        console.log(STRING_CONSTANTS.OTP_SENT_ERROR, error)
+        return ResponseHandler.error(res, STRING_CONSTANTS.OTP_SENT_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
+
+// verify otp 
+
+export const verifyOtp = async (req,res) => {
+    
+    try {
+        const {role, email, otp , otpType} = req.body;
+
+        const otpRecord = await OTP.findOne({role , email , otp, otpType })
+        
+        if(!otpRecord) return ResponseHandler.error(res, STRING_CONSTANTS.OTP_ERROR, HttpStatus.BAD_REQUEST)
+        
+        await OTP.findByIdAndDelete(otpRecord._id)
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.VERIFICATION_SUCCESS, HttpStatus.OK)
+        
+    } catch (error) {
+        console.log(STRING_CONSTANTS.VERIFICATION_ERROR, error)
+        return ResponseHandler.error(res, STRING_CONSTANTS.VERIFICATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+

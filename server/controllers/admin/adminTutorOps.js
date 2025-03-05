@@ -50,28 +50,44 @@ export const addTutor = async (req,res) => {
 export const loadTutors = async (req,res) => {
     
     try {
-        const page = parseInt(req.query.page) || 1
-        const limit = parseInt(req.query.limit) || 5
-        const skip = (page-1) * limit
-        const search = req.query.search
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 7;
+        const skip = (page - 1) * limit;
+        const { search, filter } = req.query;
 
-        const searchQuery = {
-            $or : [
-                {firstName : {$regex : search, $options : 'i'} },
-                {lastName : {$regex : search, $options : 'i'} },
-                {email : {$regex : search, $options : 'i'} }
-            ]
+        let sort = { createdAt: -1 }; // Default sorting (Newest first)
+        let filterQuery = {}; 
+
+        // Handle filter conditions
+        if (filter === "oldest") {
+            sort = { createdAt: 1 }; // Oldest first
+        } else if (filter === "active") {
+            filterQuery.isActive = true;
+        } else if (filter === "notActive") {
+            filterQuery.isActive = false;
         }
 
-        const tutorData = await Tutor.find(search ? searchQuery : {})
+        // Apply search on both name & email
+        if (search) {
+            filterQuery.$or = [
+                { firstName: { $regex: search, $options: "i" } },
+                { email: { $regex: search, $options: "i" } },
+            ];
+        }
+
+
+        const tutorData = await Tutor.find(search ? filterQuery : {})
         .skip(skip)
         .limit(limit)
         .select([
+            DATABASE_FIELDS.ID,
             DATABASE_FIELDS.EMAIL,
             DATABASE_FIELDS.FIRST_NAME,
             DATABASE_FIELDS.LAST_NAME,
             DATABASE_FIELDS.PROFILE_IMAGE,
-            DATABASE_FIELDS.IS_VERIFIED,
+            DATABASE_FIELDS.DOB,
+            DATABASE_FIELDS.PHONE,
+            DATABASE_FIELDS.BIO,
             DATABASE_FIELDS.IS_ACTIVE,
             DATABASE_FIELDS.IS_BLOCKED,
             DATABASE_FIELDS.IS_ADMIN_VERIFIED,
@@ -79,10 +95,17 @@ export const loadTutors = async (req,res) => {
             DATABASE_FIELDS.EXPERIENCE,
         ].join(' '))
 
+        const totalTutors = await Tutor.countDocuments(filterQuery);
+
         if(!tutorData || tutorData.length === 0) 
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
 
-        return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, tutorData)
+        return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, {
+            tutors: tutorData,
+            total: totalTutors,
+            currentPage: page,
+            totalPages: Math.ceil(totalTutors / limit),
+        });
         
     } catch (error) {
         console.log(STRING_CONSTANTS.LOADING_ERROR, error);
@@ -99,11 +122,14 @@ export const loadTutorDetails = async (req,res) => {
         const tutor_ID = req.params.id
         const tutor = await Tutor.findById(tutor_ID)
         .select([
+            DATABASE_FIELDS.ID,
             DATABASE_FIELDS.EMAIL,
             DATABASE_FIELDS.FIRST_NAME,
             DATABASE_FIELDS.LAST_NAME,
             DATABASE_FIELDS.PROFILE_IMAGE,
-            DATABASE_FIELDS.IS_VERIFIED,
+            DATABASE_FIELDS.DOB,
+            DATABASE_FIELDS.PHONE,
+            DATABASE_FIELDS.BIO,
             DATABASE_FIELDS.IS_ACTIVE,
             DATABASE_FIELDS.IS_BLOCKED,
             DATABASE_FIELDS.IS_ADMIN_VERIFIED,
@@ -249,6 +275,31 @@ export const approveOrRejectrequest = async (req,res) => {
     } catch (error) {
         console.log(STRING_CONSTANTS.UPDATION_ERROR, error);
         return ResponseHandler.error(res,STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// block or unblock tutor
+
+export const toggleTutorBlock = async (req,res) => {
+    
+    try {
+        const tutorId = req.params.id;
+
+        const tutor = await Tutor.findById(tutorId);
+
+        if(!tutor) return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+        tutor.isBlocked = !tutor.isBlocked;
+        await tutor.save();
+
+        const message = tutor.isBlocked ? STRING_CONSTANTS.BLOCKED : STRING_CONSTANTS.UNBLOCKED;
+        return ResponseHandler.success(res, message, HttpStatus.OK);
+
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.UPDATION_ERROR,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

@@ -30,6 +30,9 @@ export const STRING_CONSTANTS = {
     PASSWORD_RESET_ERROR : 'Password reset failed',
     GOOGLE_AUTH_SUCCESS : 'Google authentication successfull',
     GOOGLE_AUTH_ERROR : 'Google authentication failed',
+    STATUS_PENDING : 'Verification status pending',
+    BLOCKED : 'User blocked',
+    UNBLOCKED :'User unblocked'
 
 }
 

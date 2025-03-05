@@ -17,20 +17,26 @@ import ProtectAuthPage from '@/protectors/ProtectAuthPage'
 import NotFound from '@/pages/NotFound'
 import Layout from '@/components/Drawer/Layout'
 
-
 //protected routes
 import Profile from './Profile/Index'
 import Dashboard from './Dashboard/Index'
 import Orders from './Orders/Index'
 import Setting from './Settings/Index'
-import Students from './Students/Index'
-import Tutors from './Tutors/Index'
 import Notification from './Notification/Index'
+
+import StudentsLayout from './Students/Index'
+import StudentList from './Students/StudentList'
+import StudentDetails from './Students/StudentDetails'
+
+import TutorsLayout from './Tutors/Index'
+import TutorsList from './Tutors/TutorsList'
+import TutorsDetails from './Tutors/TutorsDetails'
 
 import CategoryLayout from './Category/Index'
 import List from './Category/List'
 import CategoryList from './Category/CategoryList'
 import CourseDetails from './Category/CourseDetails'
+
 
 const AdminIndex = () => {
   return (
@@ -89,8 +95,14 @@ const AdminRoutes = ()=>{
           </Route>
           <Route path='orders' element={<Orders/>}/>
           <Route path='notification' element={<Notification/>}/>
-          <Route path='students' element={<Students/>}/>
-          <Route path='tutors' element={<Tutors/>}/>
+          <Route path='students' element={<StudentsLayout/>}>
+            <Route index element={<StudentList/>}/>
+            <Route path=':studentId'element={<StudentDetails/>}/> 
+          </Route>
+          <Route path='tutors' element={<TutorsLayout/>}>
+            <Route index element={<TutorsList/>}/>
+            <Route path = ':tutorId' element={<TutorsDetails/>}/>
+          </Route>
           <Route path='settings' element={<Setting/>}/>
         </Route>
         <Route path='*' element={<NotFound/>}/>

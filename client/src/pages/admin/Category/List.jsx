@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react"
-import { Search, Filter, ChevronLeft, ChevronRight ,Trash2 , Plus} from "lucide-react"
+import {  useState } from "react"
+import { Search, ChevronLeft, ChevronRight ,Trash2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import {
   Table, TableBody,TableCaption,TableCell, TableHead,TableHeader,TableRow,
@@ -10,7 +10,7 @@ import {useAdminLoadCategoriesQuery, useAdminAddCategoryMutation,
   useAdminDeleteCategoryMutation, useAdminUpdateCategoryMutation} from '@/services/adminApi/adminCategoryApi'
 import { AlertDialogDelete } from "@/components/AlertDialog"
 import { Badge } from "@/components/ui/badge"
-import { FilterBox } from "./components/FilterBox"
+import { FilterBox } from "@/components/FilterBox"
 
 const List = () => {
   
@@ -19,13 +19,12 @@ const List = () => {
   const [filteredQuery,setFilteredQuery] = useState('latest')
   const limit = 7
   const navigate = useNavigate()
-  const {data : category, isLoading , error } = useAdminLoadCategoriesQuery({
+  const {data : category, isLoading , error ,refetch} = useAdminLoadCategoriesQuery({
     page : currentPage,
     search : searchQuery,
     limit,
     filter : filteredQuery
   })
-  
   const data = category?.data;
  
   return (
@@ -37,7 +36,7 @@ const List = () => {
         <div className="relative w-full md:w-96">
           <input
             type="text"
-            placeholder="Search Categories"
+            placeholder="Search by name and description"
             className="w-full rounded-lg border border-gray-300 px-4 py-2 pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -67,7 +66,10 @@ const List = () => {
           {data?.categories?.map((category, index) => (
             <TableRow key={index} className="hover:bg-gray-50">
               <TableCell>{(currentPage - 1) * limit + index + 1}</TableCell>
-              <TableCell className="font-semibold">{category.name}</TableCell>
+              <TableCell 
+              onClick={() => navigate(`/admin/profile/category/${category.name.toLowerCase()}`)}
+              className="font-semibold">
+                {category.name} </TableCell>
               <TableCell>{category.description}</TableCell>
               <TableCell className="flex flex-col md:flex-row items-center justify-end gap-2">
                 <Badge 
@@ -81,13 +83,8 @@ const List = () => {
                 name={category.name}
                 type={'edit'} 
                 style={"bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"}/>
-                <Button
-                  className="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-secondary"
-                  onClick={() => navigate(`/admin/profile/category/${category.name.toLowerCase()}`)}
-                >
-                  View Courses
-                </Button>
                 <AlertDialogDelete 
+                onSuccess={refetch}
                 id={category._id}
                 btnName={  <Trash2 />} 
                 btnClass={"bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"}

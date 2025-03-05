@@ -4,7 +4,7 @@ import { toast } from "sonner"
 import React from "react"
 
 
-const ForgotPassword = ({role,useForgotPassword , navigateTo }) => {
+const ForgotPassword = ({role, useForgotPassword, navigateTo }) => {
   const navigate = useNavigate()
   const [forgotPassword,{isLoading}] = useForgotPassword()
   const {formData, handleChange, errors} = useForm()
@@ -17,8 +17,14 @@ const ForgotPassword = ({role,useForgotPassword , navigateTo }) => {
 
     const toastId = toast.loading('Please wait . . .');
 
+    const credentials = {
+      role ,
+      otpType : 'resetPassword',
+      email : formData.email
+    }
+
     try {
-        const response = await forgotPassword({ email: formData.email }).unwrap();
+        const response = await forgotPassword(credentials).unwrap();
         toast.success(response?.message || 'Password reset OTP sent to mail',{id : toastId});
         navigate(navigateTo, { state: formData.email });
 

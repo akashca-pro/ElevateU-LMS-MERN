@@ -2,13 +2,13 @@ import 'dotenv/config'
 import Tutor from '../../model/tutor.js'
 import bcrypt from 'bcryptjs'
 import {generateAccessToken,generateRefreshToken} from '../../utils/generateToken.js'
-import { generateOtpCode, saveOtp } from '../../utils/generateOtp.js'
+import { generateOtpCode } from '../../utils/generateOtp.js'
 import {sendToken,clearToken} from '../../utils/tokenManage.js'
-import {sendEmailOTP, sendEmailResetPassword} from '../../utils/sendEmail.js'
-import {randomInt} from 'node:crypto'
+import {sendEmailResetPassword} from '../../utils/sendEmail.js'
 import HttpStatus from '../../utils/statusCodes.js'
 import { DATABASE_FIELDS, STRING_CONSTANTS } from '../../utils/stringConstants.js'
 import ResponseHandler from '../../utils/responseHandler.js'
+import OTP from '../../model/otp.js'
 
 // Tutor register with otp
 
@@ -17,7 +17,7 @@ export const registerTutor = async (req,res) => {
     try {
 
         const { email , password ,
-            firstName  } = req.body;
+            firstName, rememberMe  } = req.body;
     
         const tutorExists = await Tutor.findOne({email : email});
     
@@ -31,55 +31,42 @@ export const registerTutor = async (req,res) => {
             email,
             password : hashedPassword, 
             firstName,
+            isVerified : true
         });
     
         await tutor.save();
 
-        const {otp,otpExpires} = generateOtpCode();
-
-        await saveOtp('tutor',email,otp,otpExpires);
-
-        await sendEmailOTP(email,firstName,otp);
+        const accessToken = generateAccessToken(tutor._id);
+        const refreshToken = generateRefreshToken(tutor._id);
+    
+        // Set access token as cookie (24 hour)
+        sendToken(res, process.env.TUTOR_ACCESS_TOKEN_NAME, accessToken, 1 * 24 * 60 * 60 * 1000)
+    
+        // Set refresh token as cookie (only if "Remember Me" is checked)
+        if(rememberMe) 
+            sendToken(res, process.env.TUTOR_REFRESH_TOKEN_NAME, refreshToken, 7 * 24 * 60 * 60 * 1000);
+    
+        const data = await Tutor.findOne({email})
+        .select([
+            DATABASE_FIELDS.ID,
+            DATABASE_FIELDS.EMAIL,
+            DATABASE_FIELDS.FIRST_NAME,
+            DATABASE_FIELDS.LAST_NAME,
+            DATABASE_FIELDS.PROFILE_IMAGE,
+            DATABASE_FIELDS.BIO,
+            DATABASE_FIELDS.DOB,
+            DATABASE_FIELDS.IS_ADMIN_VERIFIED,
+            DATABASE_FIELDS.EXPERTISE,
+            DATABASE_FIELDS.EXPERIENCE,
+            DATABASE_FIELDS.STATUS,
+            DATABASE_FIELDS.REASON
+        ].join(' '))
         
-        return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK);
+        return ResponseHandler.success(res, STRING_CONSTANTS.REGISTRATION_SUCCESS, HttpStatus.OK,data);
 
     } catch (error) {
         console.log(STRING_CONSTANTS.REGISTRATION_ERROR, error);
         return ResponseHandler.error(res, STRING_CONSTANTS.REGISTRATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-
-}
-
-// verify otp
-
-export const verifyOtp = async (req,res) => {
-    
-    try {
-        const {otp} = req.body;
-    
-        const tutor = await Tutor.findOne({
-            otp , 
-            otpExpires : { $gt : Date.now() }
-        });
-
-         if(!tutor) 
-            return ResponseHandler.error(res,STRING_CONSTANTS.OTP_ERROR ,HttpStatus.BAD_REQUEST);
-
-        tutor.isVerified = true;
-        tutor.otp = undefined;
-        tutor.otpExpires = undefined;
-        tutor.verificationExpires = undefined;
-        await tutor.save();
-
-        const accessToken = generateAccessToken(tutor._id)
-
-        sendToken(res, process.env.TUTOR_ACCESS_TOKEN_NAME, accessToken, 1 * 24 * 60 * 60 * 1000);
-
-        return ResponseHandler.success(res, STRING_CONSTANTS.VERIFICATION_SUCCESS, HttpStatus.OK);
-
-    } catch (error) {
-        console.log(STRING_CONSTANTS.VERIFICATION_ERROR, error);
-        return ResponseHandler.error(res, STRING_CONSTANTS.VERIFICATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -142,20 +129,23 @@ export const loginTutor = async (req,res) => {
 export const forgotPassword = async (req,res) => {
     
     try {
-        const {email} = req.body;
-        const emailExist = await Tutor.findOne({email})
+        const {role, otpType, email} = req.body;
+        const tutor = await Tutor.findOne({email})
 
-        if(!emailExist)
+        if(!tutor)
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
 
-        const resetToken = randomInt(100000, 999999).toString();
-        const resetTokenExpires = Date.now() + 10 * 60 * 1000;
+        const {otp} = generateOtpCode();
 
-        const tutor = await Tutor.findOneAndUpdate({email}, 
-            {otp : resetToken,
-            otpExpires : resetTokenExpires} ,{new : true})
+        await OTP.create({
+            email,
+            role,
+            otp,
+            otpType ,
+            otpExpires : new Date(Date.now() + 5 * 60 * 1000)
+        });
 
-        await sendEmailResetPassword(tutor.email,tutor.firstName,resetToken);
+        await sendEmailResetPassword(email, tutor.firstName, otp)
 
         return ResponseHandler.success(res, STRING_CONSTANTS.RESET_OTP, HttpStatus.OK)
         
@@ -170,15 +160,18 @@ export const forgotPassword = async (req,res) => {
 export const verifyResetLink = async (req,res) => {
     
     try {
-        const { password ,token } = req.body;
+        const {role, email, password ,otp ,otpType} = req.body;
 
-        const tutor = await Tutor.findOne({
-            otp : token , 
-            otpExpires : { $gt : Date.now() }
-        });
+        const tutor = await Tutor.findOne({email});
 
         if(!tutor) 
             return ResponseHandler.error(res,STRING_CONSTANTS.OTP_ERROR ,HttpStatus.BAD_REQUEST);
+
+        const otpRecord = await OTP.findOne({role , email , otp , otpType })
+        
+        if(!otpRecord) return ResponseHandler.error(res, STRING_CONSTANTS.OTP_ERROR, HttpStatus.BAD_REQUEST)
+        
+        await OTP.findByIdAndDelete(otpRecord._id)
 
         const hashedPassword = await bcrypt.hash(password,10);
 

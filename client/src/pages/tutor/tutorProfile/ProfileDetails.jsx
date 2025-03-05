@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { SelectExperience } from "./components/SelectExperience";
 import Tooltip from "./components/Tooltip";
 import {useTutorRequestVerificationMutation} from '@/services/TutorApi/tutorProfileApi'
+import { Card } from "@/components/ui/card";
 
 
 const ProfileDetails = () => {
@@ -23,7 +24,7 @@ const ProfileDetails = () => {
   const {data : details } = useTutorLoadProfileQuery()
   const teacher = details?.data
   const [tutorUpdateProfile] = useTutorUpdateProfileMutation()
-  const [requestVerification,{}] = useTutorRequestVerificationMutation()
+  const [requestVerification] = useTutorRequestVerificationMutation()
 
   const [expertise,setExpertise] = useState([])
   const [input,setInput] = useState('');
@@ -153,7 +154,8 @@ const ProfileDetails = () => {
   }
  
   return (
-    <div className="max-w-4xl p-6">
+   <div className="flex justify-center p-4">
+      <Card className="w-full max-w-6xl p-8 bg-white shadow-lg rounded-lg">
       <div className="space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6" id="profile-form">
           {/* Avatar Section */}
@@ -324,7 +326,8 @@ const ProfileDetails = () => {
           </div>
         </form>
       </div>
-    </div>
+    </Card>
+  </div>
   );
 };
 

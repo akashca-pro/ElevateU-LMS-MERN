@@ -2,14 +2,13 @@ import { Eye, EyeOff } from "lucide-react";
 import Footer from "@/components/Footer.jsx"
 import useForm from "@/hooks/useForm"
 import useOtp from "@/hooks/useOtp";
-import {useReSendOtpMutation} from '@/services/commonApi.js'
 import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const ResetPassword = ({role, useResetPassword, navigateTo}) => {
+const ResetPassword = ({role, useResetPassword, navigateTo, useReSend}) => {
     
     const location = useLocation()
-    const [resendOtp] = useReSendOtpMutation()
+    const [resendOtp] = useReSend()
     const navigate = useNavigate()
     const [resetPassword,{isLoading}] = useResetPassword()
  
@@ -17,7 +16,7 @@ const ResetPassword = ({role, useResetPassword, navigateTo}) => {
         ,togglePasswordVisibility
     } = useForm()
     
-    const {handleChange : handleOtp ,handleKeyDown,inputs,otp, handleResend : reset, timer} = useOtp()
+    const {handleChange : handleOtp ,handleKeyDown,inputs,otp, handleResend : reset, timer} = useOtp(6,300)
     
     const isFormValid = Object.values(errors).some((err) => err) || 
     !formData.password || 
@@ -25,10 +24,16 @@ const ResetPassword = ({role, useResetPassword, navigateTo}) => {
 
     const handleResend = async () => {
       const toastId = toast.loading("Loading...");
-    
+
+        const credentials = {
+          role ,
+          otpType : 'resetPassword',
+          email : location.state
+        }
+
       try {
         reset();
-        const response = await resendOtp({ role, email: location.state }).unwrap();
+        const response = await resendOtp(credentials).unwrap();
         toast.success(response?.message, { id: toastId, duration: 3000 });
       } catch (error) {
         toast.error(error?.data?.message || error?.error || "Reset password Failed, try again later", {
@@ -46,11 +51,18 @@ const ResetPassword = ({role, useResetPassword, navigateTo}) => {
       if (Object.values(errors).some((err) => err)) return;
     
       const toastId = toast.loading("Loading...");
+
+      const credentials = {
+        role,
+        email : location.state,
+        password : formData.password,
+        otp : otpCode,
+        otpType : 'resetPassword'
+      }
     
       try {
-        const response = await resetPassword({ password: formData.password, token: otpCode }).unwrap();
+        const response = await resetPassword(credentials).unwrap();
         toast.success(response?.message, { id: toastId, duration: 3000 });
-    
         navigate(navigateTo);
       } catch (error) {
         console.log(error);

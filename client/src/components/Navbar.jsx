@@ -17,7 +17,7 @@ const Navbar = () => {
   const { logout: tutorLogout } = useTutorAuthActions();
   const { logout: adminLogout } = useAdminAuthActions();
 
-  const [logout,{}] = role === 'user' 
+  const [logout] = role === 'user' 
   ? useUserLogoutMutation() 
   : role === 'tutor'
   ? useTutorLogoutMutation()

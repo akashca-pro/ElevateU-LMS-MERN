@@ -1,26 +1,34 @@
 import useOTP from "@/hooks/useOtp.js";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useReSendOtpMutation } from "@/services/commonApi.js";
+import {useSendOtpMutation, useVerifyOtpMutation} from '@/services/commonApi'
 
-const OTPVerification = ({ role, useVerifyOtp, useAuthActions }) => {
+const OTPVerification = ({ role, useSignup, useAuthActions }) => {
   const location = useLocation();
   const { login } = useAuthActions();
-  const [resendOtp] = useReSendOtpMutation();
-  const email = location.state;
-  const { otp, inputs, timer, handleChange, handleKeyDown, handleResend: reset } = useOTP();
+  const [sendOtp] = useSendOtpMutation()
+  const [verifyOtp,{isLoading1}] = useVerifyOtpMutation();
+  const [signup,{isLoading2}] = useSignup();
+  const formData = location.state;
+  const { otp, inputs, timer, handleChange, handleKeyDown, handleResend: reset } = useOTP(6,300);
 
   const isOtpValid = otp.includes("");
 
-  const [verifyOtp, { isLoading }] = useVerifyOtp();
   const navigate = useNavigate();
 
   const handleResend = async () => {
     const toastId = toast.loading("Loading");
 
+    const credentials = {
+      role,
+      firstName : formData.firstName,
+      email : formData.email,
+      otpType : 'signIn'
+    }
+
     try {
       reset();
-      const response = await resendOtp({ role, email: location.state }).unwrap();
+      const response = await sendOtp(credentials).unwrap();
       toast.success(response?.message);
       toast.dismiss(toastId);
     } catch (error) {
@@ -31,24 +39,34 @@ const OTPVerification = ({ role, useVerifyOtp, useAuthActions }) => {
 
   const handleVerify = async (e) => {
     e.preventDefault();
-
+  
     const otpCode = otp.join("");
-
+  
     if (otpCode.length !== 6) {
       toast.error("Please enter a valid 6-digit OTP.");
       return;
     }
-
-    const toastId = toast.loading("Verifying OTP");
-
+  
+    const toastId = toast.loading("Verifying OTP...");
+  
+    const credentials = {
+      role,
+      email: formData.email,
+      otp: otpCode,
+      otpType: "signIn",
+    };
+  
     try {
-      const response = await verifyOtp({ otp: otpCode }).unwrap();
-      toast.success(response.message,{id : toastId});
-      login(response.data)
-      navigate('/');
+      // Verify OTP
+      const response = await verifyOtp(credentials).unwrap();
+    
+      const responseSignup = await signup(formData).unwrap()
+      toast.success(responseSignup?.message || "Signup successful", { id: toastId });
+      login(responseSignup?.data)
+      navigate(`/${role}/profile`)
+
     } catch (error) {
-      toast.error(error?.data?.message || "OTP verification failed!");
-      toast.dismiss(toastId);
+      toast.error(error?.data?.message || "OTP verification failed!", { id: toastId });
     }
   };
 
@@ -75,7 +93,7 @@ const OTPVerification = ({ role, useVerifyOtp, useAuthActions }) => {
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold">Email OTP Verification</h1>
           <p className="text-gray-500">
-            Enter the verification code we just sent to your email {email || "name@example.com"}
+            Enter the verification code we just sent to your email {formData.email || "name@example.com"}
           </p>
         </div>
         <form onSubmit={handleVerify} className="space-y-6">
@@ -96,9 +114,9 @@ const OTPVerification = ({ role, useVerifyOtp, useAuthActions }) => {
           <div className="text-center">
             <button 
               type="submit"
-              disabled={isOtpValid}
+              disabled={isOtpValid || isLoading1}
               className={`w-full rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 
-                ${isLoading || isOtpValid ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-secondary"}
+                ${isLoading1 || isOtpValid ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-secondary"}
               `}
             >
               Verify
@@ -108,7 +126,7 @@ const OTPVerification = ({ role, useVerifyOtp, useAuthActions }) => {
               <button
                 type="button"
                 className={`font-medium ${timer === 0 ? "text-primary" : "text-gray-400"}`}
-                disabled={timer > 0 || isLoading === true}
+                disabled={timer > 0 || isLoading1 || isLoading2 }
                 onClick={handleResend}
               >
                 Resend

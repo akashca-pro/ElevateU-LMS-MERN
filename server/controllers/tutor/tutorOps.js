@@ -107,7 +107,7 @@ export const requestVerification = async (req,res) => {
         const existingRequest = await Tutor.findOne({ _id : tutorID , status : 'pending' })
 
         if(existingRequest) 
-            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
+            return ResponseHandler.error(res, STRING_CONSTANTS.STATUS_PENDING, HttpStatus.CONFLICT);
 
         await Tutor.findByIdAndUpdate(tutorID,{
             status : 'pending'

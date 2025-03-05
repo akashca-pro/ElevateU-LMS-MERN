@@ -13,18 +13,25 @@ export const loadCategory = async (req,res) => {
         const skip = (page-1) * limit
         const {search, filter} = req.query
 
-        let sort = {createdAt : -1}; 
+        let sort = { createdAt: -1 }; // Default sorting (Newest first)
         let filterQuery = {}; 
 
-         if (filter === "oldest") {
-            sort = { createdAt: 1 };
+        // Handle filter conditions
+        if (filter === "oldest") {
+            sort = { createdAt: 1 }; // Oldest first
         } else if (filter === "active") {
-            filterQuery = { isActive: true };
-        } else if(filter === 'notActive') {
-            filterQuery = {isActive : false}
+            filterQuery.isActive = true;
+        } else if (filter === "notActive") {
+            filterQuery.isActive = false;
         }
 
-        if(search) filterQuery.name = {$regex : search, $options : 'i'}
+        // Apply search on both name & email
+        if (search) {
+            filterQuery.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } },
+            ];
+        }      
          
         const categoryDetails = await Category.find(filterQuery)
         .skip(skip)
@@ -132,6 +139,7 @@ export const deleteCategory = async (req,res) => {
     
     try {
         const category_ID = req.params.id;
+       
 
         const category = await Category.findById(category_ID)
         if(!category) 

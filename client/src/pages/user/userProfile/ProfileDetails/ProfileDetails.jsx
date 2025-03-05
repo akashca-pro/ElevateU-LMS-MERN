@@ -9,11 +9,10 @@ import useForm from "@/hooks/useForm";
 import { imageUpload } from "@/services/Cloudinary/imageUpload";
 import {useUserLoadProfileQuery, useUserUpdateProfileMutation} from '@/services/userApi/userProfileApi'
 import { formatDate } from "@/utils/dateToString";
-import {useUserAuthActions} from '@/hooks/useDispatch'
 import { toast } from "sonner";
+import { Card } from "@/components/ui/card";
 
 const ProfileDetails = () => {
-  const {login} = useUserAuthActions()
   const {data : details , error, isLoading} = useUserLoadProfileQuery()
   const student = details?.data
   const loadProfile = useUserLoadProfileQuery()
@@ -93,7 +92,8 @@ const ProfileDetails = () => {
   };
 
   return (
-    <div className="max-w-4xl p-6">
+    <div className="flex justify-center p-4">
+      <Card className="w-full max-w-6xl p-8 bg-white shadow-lg rounded-lg">
       <div className="space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6" id="profile-form">
           {/* Avatar Section */}
@@ -217,7 +217,9 @@ const ProfileDetails = () => {
           </div>
         </form>
       </div>
+    </Card>
     </div>
+    
   );
 };
 

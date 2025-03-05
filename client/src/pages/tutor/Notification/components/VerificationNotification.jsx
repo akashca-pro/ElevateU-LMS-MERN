@@ -7,8 +7,8 @@ import { useSelect } from "@/hooks/useSelect";
 
 const VerificationNotification = ({markRead}) => {
     const {tutor} = useSelect()
-    const {data} = useTutorLoadProfileQuery()
-
+    const {data : details} = useTutorLoadProfileQuery()
+    const data = details?.data;
   return (
     <Card className="w-[380px]">
   <CardHeader>

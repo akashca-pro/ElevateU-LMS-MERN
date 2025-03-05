@@ -1,10 +1,10 @@
 import User from '../../model/user.js'
+import OTP from '../../model/otp.js'
 import bcrypt from 'bcryptjs'
 import {generateAccessToken,generateRefreshToken} from '../../utils/generateToken.js'
-import { generateOtpCode, saveOtp } from '../../utils/generateOtp.js'
+import { generateOtpCode } from '../../utils/generateOtp.js'
 import {sendToken,clearToken} from '../../utils/tokenManage.js'
-import {sendEmailOTP, sendEmailResetPassword} from '../../utils/sendEmail.js'
-import {randomInt} from 'node:crypto'
+import {sendEmailResetPassword} from '../../utils/sendEmail.js'
 import 'dotenv/config'
 import HttpStatus from '../../utils/statusCodes.js'
 import ResponseHandler from '../../utils/responseHandler.js'
@@ -17,7 +17,7 @@ export const registerUser = async (req,res) => {
     try {
 
         const { email, password ,
-            firstName  } = req.body;
+            firstName, rememberMe  } = req.body;
     
         const userExists = await User.findOne({email : email});
     
@@ -31,17 +31,32 @@ export const registerUser = async (req,res) => {
             email,
             password : hashedPassword, 
             firstName,
+            isVerified : true
         });
     
         await user.save();
 
-        const {otp,otpExpires} = generateOtpCode();
+        const userData = await User.findOne({email})
+        .select([
+            DATABASE_FIELDS.ID,
+            DATABASE_FIELDS.EMAIL,
+            DATABASE_FIELDS.FIRST_NAME,
+            DATABASE_FIELDS.LAST_NAME,
+            DATABASE_FIELDS.PROFILE_IMAGE,
+            DATABASE_FIELDS.BIO,
+            DATABASE_FIELDS.DOB
+        ].join(' '))
 
-        await saveOtp('user',email,otp,otpExpires);
+        const accessToken = generateAccessToken(user._id);
+        const refreshToken = generateRefreshToken(user._id);
+    
+        // Set access token as cookie (24 hour)
+        sendToken(res, process.env.USER_ACCESS_TOKEN_NAME,accessToken, 1 * 24 * 60 * 60 * 1000)
+    
+        // Set refresh token as cookie (only if "Remember Me" is checked)
+        if(rememberMe) sendToken(res, process.env.USER_REFRESH_TOKEN_NAME, refreshToken,7 * 24 * 60 * 60 * 1000);
 
-        await sendEmailOTP(email,firstName,otp)
-
-        return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK);
+        return ResponseHandler.success(res, STRING_CONSTANTS.REGISTRATION_SUCCESS, HttpStatus.OK,userData);
 
     } catch (error) {
         console.log(STRING_CONSTANTS.REGISTRATION_ERROR, error);
@@ -50,37 +65,6 @@ export const registerUser = async (req,res) => {
 
 }
 
-// verify otp
-
-export const verifyOtp = async (req, res) => {
-    try {
-      const { otp } = req.body;
-  
-      const user = await User.findOne({ otp, otpExpires: { $gt: Date.now() } })
-  
-      if (!user) 
-        return ResponseHandler.error(res,STRING_CONSTANTS.OTP_ERROR ,HttpStatus.BAD_REQUEST);
-      
-  
-      user.isVerified = true
-      user.otp = undefined
-      user.otpExpires = undefined
-      user.verificationExpires = undefined
-
-      await user.save()
-
-      const accessToken = generateAccessToken(user._id);
-
-      sendToken(res,'userAccessToken',accessToken,1 * 24 * 60 * 60 * 1000)
-
-      return ResponseHandler.success(res, STRING_CONSTANTS.VERIFICATION_SUCCESS, HttpStatus.OK);
-
-    } catch (error) {
-      console.log(STRING_CONSTANTS.VERIFICATION_ERROR, error);
-      return ResponseHandler.error(res, STRING_CONSTANTS.VERIFICATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-  };
-  
 //Login with JWT
 
 export const loginUser = async (req,res) => {
@@ -135,21 +119,23 @@ export const loginUser = async (req,res) => {
 export const forgotPassword = async (req,res) => {
     
     try {
-        const {email} = req.body;
-        const emailExist = await User.findOne({email})
+        const {role, otpType, email} = req.body;
+        const user = await User.findOne({email})
 
-        if(!emailExist)
+        if(!user)
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
 
+        const {otp} = generateOtpCode();
 
-        const resetToken = randomInt(100000, 999999).toString();
-        const resetTokenExpires = Date.now() + 10 * 60 * 1000;
+        await OTP.create({
+            email,
+            role,
+            otp,
+            otpType ,
+            otpExpires : new Date(Date.now() + 5 * 60 * 1000)
+        });
 
-        const user = await User.findOneAndUpdate({email}, 
-            {otp : resetToken,
-            otpExpires : resetTokenExpires} ,{new : true})
-
-        await sendEmailResetPassword(user.email,user.firstName,resetToken);
+        await sendEmailResetPassword(email, user.firstName, otp)
 
         return ResponseHandler.success(res, STRING_CONSTANTS.RESET_OTP, HttpStatus.OK)
         
@@ -165,15 +151,18 @@ export const forgotPassword = async (req,res) => {
 export const verifyResetLink = async (req,res) => {
     
     try {
-        const { password ,token } = req.body;
+        const {role, email, password ,otp ,otpType} = req.body;
 
-        const user = await User.findOne({
-            otp : token , 
-            otpExpires : { $gt : Date.now() }
-        });
+        const user = await User.findOne({email});
 
         if(!user) 
             return ResponseHandler.error(res,STRING_CONSTANTS.OTP_ERROR ,HttpStatus.BAD_REQUEST);
+
+        const otpRecord = await OTP.findOne({role , email , otp , otpType })
+        
+        if(!otpRecord) return ResponseHandler.error(res, STRING_CONSTANTS.OTP_ERROR, HttpStatus.BAD_REQUEST)
+        
+        await OTP.findByIdAndDelete(otpRecord._id)
 
         const hashedPassword = await bcrypt.hash(password,10);
 

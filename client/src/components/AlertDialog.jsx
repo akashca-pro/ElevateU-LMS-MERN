@@ -12,13 +12,14 @@ import {
   import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
   
-  export function AlertDialogDelete({btnName, btnClass ,id, deleteApi}) {
+  export function AlertDialogDelete({btnName, btnClass ,id, deleteApi,onSuccess}) {
     const [deleteData] = deleteApi()
     const handleDelete = async(id) =>{
         const toastId = toast.loading('Please wait . . .')
         try {
             const response = await deleteData(id).unwrap()
-            toast.success(response?.message || 'Data deleted successfully',{id : toastId})
+            toast.success(response?.message || 'Data deleted successfully',{id : toastId});
+            onSuccess()
         } catch (error) {
             toast.error(error?.data?.message || 'Error deleting data, try again later',{id : toastId})
         }
@@ -38,7 +39,7 @@ import { toast } from "sonner"
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={()=>handleDelete(id)} >Continue</AlertDialogAction>
+            <AlertDialogAction className={'bg-red-700 hover:bg-red-800'} onClick={()=>handleDelete(id)} >Continue</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

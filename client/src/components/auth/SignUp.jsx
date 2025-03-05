@@ -3,12 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import useForm from "@/hooks/useForm";
 import { toast } from "sonner";
+import {useSendOtpMutation} from '@/services/commonApi'
 import React from "react"
 
-const SignUp = ({role,useSignup}) => {
+const SignUp = ({role}) => {
   
   const navigate = useNavigate();
-  const [signup,{isLoading}] = useSignup();
+  const [sendOtp,{isLoading}] = useSendOtpMutation();
   const {
     formData, errors, showPassword, showConfirmPassword, handleChange, 
     toggleConfirmPasswordVisibility, togglePasswordVisibility
@@ -35,20 +36,26 @@ const SignUp = ({role,useSignup}) => {
 
     const toastId = toast.loading("Signing up...");
 
+    const credentials = {
+      role,
+      firstName : formData.firstName,
+      email : formData.email,
+      otpType : 'signIn'
+    }
+
     try {
-      const response = await signup(formData).unwrap();
+      await sendOtp(credentials).unwrap()
       toast.success(
-        role !== "admin"
-          ? "An OTP has been sent to your registered email address."
-          : "Signup successful",
+        role === "admin"
+          ? "Signup successful"
+          : "An OTP has been sent to your registered email address",
         { id: toastId }
       );
       
-      if (role !== "admin") {
-        navigate(`/${role}/verify-otp`, { state: formData.email });
-      } else {
-        navigate("/admin/login");
-      }
+       if(role === 'admin') navigate("/admin/login");
+
+        navigate(`/${role}/verify-otp`, { state: formData });
+      
     } catch (error) {
       toast.error(error?.data?.message || "Signup failed. Try again.", { id: toastId });
     }

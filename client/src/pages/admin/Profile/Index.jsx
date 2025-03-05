@@ -9,6 +9,7 @@ import { imageUpload } from "@/services/Cloudinary/imageUpload";
 import {useAdminLoadProfileQuery, useAdminUpdateProfileMutation} from '@/services/adminApi/adminProfileApi'
 import {useAdminAuthActions} from '@/hooks/useDispatch'
 import { toast } from "sonner";
+import { Card } from "@/components/ui/card";
 
 const Index = () => {
   const {login} = useAdminAuthActions()
@@ -89,7 +90,8 @@ const Index = () => {
   };
 
   return (
-    <div className="max-w-4xl p-6">
+     <div className="flex justify-center p-4">
+      <Card className="w-full max-w-6xl p-8 bg-white shadow-lg rounded-lg">
       <div className="space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6" id="profile-form">
           {/* Avatar Section */}
@@ -185,6 +187,7 @@ const Index = () => {
           </div>
         </form>
       </div>
+      </Card>
     </div>
   );
 };

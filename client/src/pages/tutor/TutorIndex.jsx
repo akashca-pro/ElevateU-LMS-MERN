@@ -78,12 +78,12 @@ return (
   
         <Route path="sign-up" element={
           <ProtectAuthPage>
-          <SignUp role={'tutor'} useSignup={useTutorSignupMutation}/>
+          <SignUp role={'tutor'} />
           </ProtectAuthPage>
           } />
         <Route path="verify-otp" element={
           <ProtectAuthPage>
-          <OTPVerification role={'tutor'} useVerifyOtp={useTutorVerifyOtpMutation} useAuthActions={useTutorAuthActions}/>
+          <OTPVerification role={'tutor'} useSignup={useTutorSignupMutation} useAuthActions={useTutorAuthActions}/>
           </ProtectAuthPage>
           } />
         <Route path="login" element={
@@ -98,7 +98,7 @@ return (
           } />
         <Route path='reset-password'element={
           <ProtectAuthPage>
-          <ResetPassword role={'tutor'} useResetPassword={useTutorResetPasswordMutation} navigateTo={'/tutor/login'}/>
+          <ResetPassword role={'tutor'} useResetPassword={useTutorResetPasswordMutation} navigateTo={'/tutor/login'} useReSend={useTutorForgotPasswordMutation}/>
           </ProtectAuthPage>
           }/>
         <Route path='auth-success' element={

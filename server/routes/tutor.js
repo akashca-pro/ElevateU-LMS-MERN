@@ -1,6 +1,6 @@
 import express from 'express'
 
-import {registerTutor, verifyOtp, loginTutor, forgotPassword, verifyResetLink, logoutTutor, refreshToken ,
+import {registerTutor, loginTutor, forgotPassword, verifyResetLink, logoutTutor, refreshToken ,
     passportCallback,authFailure,authLoad
 } from '../controllers/tutor/tutorAuth.js'
 
@@ -9,7 +9,6 @@ import {loadProfile,updateProfile,deleteAccount,requestVerification
 
 import {verifyAccessToken, verifyRefreshToken} from '../utils/verifyToken.js'
 import {otpLimiter} from '../middleware/rateLimiting.js';
-import retryVerify from '../middleware/retryVerify.js';
 
 import { updateEmail, verifyEmail } from '../controllers/commonControllers.js';
 
@@ -23,8 +22,7 @@ const router = express.Router()
 // Auth routes
 
 router.post('/signup',registerTutor)
-router.post('/verify-otp',otpLimiter,verifyOtp)
-router.post('/login',retryVerify('tutor'),loginTutor)
+router.post('/login',loginTutor)
 router.post('/forgot-password',otpLimiter,forgotPassword)
 router.post('/reset-password',verifyResetLink)
 router.delete('/logout',logoutTutor)

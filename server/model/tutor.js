@@ -77,16 +77,6 @@ const tutorSchema = mongoose.Schema({
         type : String,
         expires : 600
     },
-    otp : {
-        type : String
-    },
-    otpExpires :{
-        type : Date
-    },
-    verificationExpires : {
-        type : Date,
-        default : ()=> Date.now() + 10 * 60 * 1000 
-    },
     status : {
         type : String,
         enum : ['pending','approved','rejected','none'],

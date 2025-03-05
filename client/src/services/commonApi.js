@@ -4,9 +4,16 @@ import apiSlice from "./apiSlice";
 
 const commonApi = apiSlice.injectEndpoints({
     endpoints : (builder) =>({
-        reSendOtp : builder.mutation({
+        sendOtp : builder.mutation({
             query : (credentials) => ({
-                url : `resend-otp`,
+                url : `generate-otp`,
+                method : 'POST',
+                body :credentials
+            })
+        }),
+        verifyOtp : builder.mutation({
+            query : (credentials) => ({
+                url : `verify-otp`,
                 method : 'POST',
                 body : credentials
             })
@@ -17,6 +24,7 @@ const commonApi = apiSlice.injectEndpoints({
 
 export const {
 
-    useReSendOtpMutation
+    useSendOtpMutation,
+    useVerifyOtpMutation
 
 } = commonApi

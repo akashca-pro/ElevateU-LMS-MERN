@@ -1,6 +1,6 @@
 import express from 'express'
 
-import {registerUser,verifyOtp,loginUser,refreshToken,logoutUser,forgotPassword,verifyResetLink,
+import {registerUser,loginUser,refreshToken,logoutUser,forgotPassword,verifyResetLink,
     passportCallback, authFailure ,authLoad
 } from '../controllers/user/userAuth.js'
 
@@ -11,9 +11,8 @@ import {enrollInCourse, loadEnrolledCourses} from '../controllers/enrolledCourse
 
 import {verifyAccessToken,verifyRefreshToken} from '../utils/verifyToken.js'
 import {otpLimiter} from '../middleware/rateLimiting.js';
-import retryVerify from '../middleware/retryVerify.js';
 
-import { updateEmail, verifyEmail } from '../controllers/commonControllers.js';
+import { updateEmail, verifyEmail} from '../controllers/commonControllers.js';
 
 import passport from 'passport'
 
@@ -22,8 +21,8 @@ const router =  express.Router();
 // Auth routes
 
 router.post('/signup',registerUser)
-router.post('/verify-otp',otpLimiter,verifyOtp)
-router.post('/login',retryVerify('user'),loginUser)
+// router.post('/verify-otp',otpLimiter,verifyOtp)
+router.post('/login',loginUser)
 router.post('/forgot-password',forgotPassword)
 router.post('/reset-password',verifyResetLink)
 router.delete('/logout',logoutUser)

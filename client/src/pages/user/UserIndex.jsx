@@ -84,12 +84,12 @@ const UserRoutes = () => {
       <Route path="/" element={<UserIndex />}>
         <Route path="sign-up" element={
           <ProtectAuthPage>
-          <SignUp role={'user'} useSignup={useUserSignupMutation} />
+          <SignUp role={'user'}  />
           </ProtectAuthPage>
           } />
         <Route path="verify-otp" element={
           <ProtectAuthPage>
-          <OTPVerification role={'user'} useVerifyOtp={useUserVerifyOtpMutation} useAuthActions={useUserAuthActions}/>
+          <OTPVerification role={'user'} useSignup={useUserSignupMutation} useAuthActions={useUserAuthActions}/>
           </ProtectAuthPage>
           } />
         <Route path="login" element={
@@ -99,12 +99,12 @@ const UserRoutes = () => {
           } />
         <Route path="forgot-password" element={
           <ProtectAuthPage>
-          <ForgotPassword role={'user'} useForgotPassword={useUserForgotPasswordMutation} navigateTo = {'/user/reset-password'}/>
+          <ForgotPassword role={'user'} useForgotPassword={useUserForgotPasswordMutation} navigateTo = {'/user/reset-password'} />
           </ProtectAuthPage>
           } />
         <Route path='reset-password' element={
            <ProtectAuthPage>
-          <ResetPassword role={'user'} useResetPassword={useUserResetPasswordMutation} navigateTo={'/user/login'} />
+          <ResetPassword role={'user'} useResetPassword={useUserResetPasswordMutation} navigateTo={'/user/login'} useReSendotp={useUserForgotPasswordMutation}/>
           </ProtectAuthPage>
           }/>
         <Route path='auth-success' element={

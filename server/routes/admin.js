@@ -3,11 +3,11 @@ import express from 'express'
 import {registerAdmin, loginAdmin, logoutAdmin, refreshToken, loadProfile, updateProfile
 } from '../controllers/admin/adminAuth.js'   // Admin Auth
 
-import {addUser,loadUsers,loadUserDetails,updateUserDetails,deleteUser    
+import {addUser,loadUsers,loadUserDetails,updateUserDetails,deleteUser,toggleUserBlock    
 } from '../controllers/admin/adminUserOps.js' // Admin - User CRUD
 
 import {addTutor,loadTutors,loadTutorDetails,updateTutorDetails,deleteTutor,
-loadRequests,approveOrRejectrequest
+loadRequests,approveOrRejectrequest,toggleTutorBlock
 } from '../controllers/admin/adminTutorOps.js' // Admin - Tutor CRUD
 
 import {loadCategory, addCategory, updateCategory, deleteCategory , loadCategoryDetails
@@ -38,6 +38,7 @@ router.post('/add-user',verifyAccessToken('admin'),addUser)
 router.get('/users-details',verifyAccessToken('admin'),loadUsers)
 router.get('/user-details/:id',verifyAccessToken('admin'),loadUserDetails)
 router.post('/update-user-details/:id',verifyAccessToken('admin'),updateUserDetails)
+router.patch('/toggle-user-block/:id',verifyAccessToken('admin'),toggleUserBlock)
 router.delete('/delete-user/:id',verifyAccessToken('admin'),deleteUser)
 
 // Admin - Tutor CRUD
@@ -46,6 +47,7 @@ router.post('/add-tutor',verifyAccessToken('admin'),addTutor)
 router.get('/tutors-details',verifyAccessToken('admin'),loadTutors)
 router.get('/tutor-details/:id',verifyAccessToken('admin'),loadTutorDetails)
 router.post('/update-tutor-details/:id',verifyAccessToken('admin'),updateTutorDetails)
+router.patch('/toggle-tutor-block/:id',verifyAccessToken('admin'),toggleTutorBlock)
 router.delete('/delete-tutor/:id',verifyAccessToken('admin'),deleteTutor)
 
 // notification from tutor verification request

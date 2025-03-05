@@ -14,8 +14,8 @@ const adminUserApi = apiSlice.injectEndpoints({
             invalidatesTags : ['Admin']
         }),
         adminLoadUsers : builder.query({
-            query : ({page,limit,search})=>({
-                url : `admin/users-details?page=${page}&limit=${limit}&search=${search}`,
+            query : ({page,limit,search,filter})=>({
+                url : `admin/users-details?page=${page}&limit=${limit}&search=${search}&filter=${filter}`,
                 method : 'GET',
             }),
             providesTags : ['Admin']
@@ -43,6 +43,12 @@ const adminUserApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags : ['Admin']
         }),
+        adminToggleUserBlock : builder.mutation({
+            query : (id) =>({
+                url : `admin/toggle-user-block/${id}`,
+                method : 'PATCH'
+            })
+        })
     })
 })
 
@@ -53,5 +59,6 @@ export const {
     useAdminAddUserMutation,
     useAdminUpdateUserDetailsMutation,
     useAdminDeleteUserMutation,
+    useAdminToggleUserBlockMutation
 
 } = adminUserApi
