@@ -5,7 +5,8 @@ import { generateOtpCode, saveOtp } from "../utils/generateOtp.js"
 import { sendEmailOTP, sendEmailResetPassword } from "../utils/sendEmail.js"
 import HttpStatus from "../utils/statusCodes.js"
 import ResponseHandler from "../utils/responseHandler.js"
-import { STRING_CONSTANTS } from "../utils/stringConstants.js"
+import { DATABASE_FIELDS, STRING_CONSTANTS } from "../utils/stringConstants.js"
+import Category from "../model/category.js"
 
 //Update Email
 
@@ -81,27 +82,6 @@ export const verifyEmail = (role) =>{
     }
 }
 
-// // re-send otp
-
-// export const reSendOtp = async (req,res) => {
-        
-//     try {
-//         const {firstName, email, role, otpType} = req.body
-
-
-
-
-//         await sendEmailResetPassword(email,firstName,otp)
-
-//         return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK)
-
-//     } catch (error) {
-//         console.log(STRING_CONSTANTS.OTP_SENT_ERROR, error);
-//         return ResponseHandler.error(res, STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR) 
-//     }
-
-// }
-
 // Send otp 
 
 export const sendOtp = async(req,res) =>{
@@ -152,3 +132,24 @@ export const verifyOtp = async (req,res) => {
 
 }
 
+// Load categories 
+
+export const loadCategories = async (req,res) => {
+        
+    try {
+        const categories = await Category.find().select([
+            DATABASE_FIELDS.ID,
+            DATABASE_FIELDS.NAME
+        ])
+
+        if(!categories) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, categories);
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.LOADING_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}

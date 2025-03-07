@@ -92,7 +92,8 @@ const ProfileDetails = () => {
   };
 
   return (
-    <div className="flex justify-center p-4">
+    <>
+    <div className="flex justify-center p-4 gap-2">
       <Card className="w-full max-w-6xl p-8 bg-white shadow-lg rounded-lg">
       <div className="space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6" id="profile-form">
@@ -218,7 +219,28 @@ const ProfileDetails = () => {
         </form>
       </div>
     </Card>
+
+    <Card className="w-full md:w-1/3 p-8 bg-white/60 backdrop-blur-md border bg-white shadow-lg rounded-lg">
+          <h3 className="text-lg font-semibold mb-4">Account Information</h3>
+          <div className="space-y-4">
+            <div className="p-4 bg-primary/5 rounded-lg">
+              <p className="text-sm text-muted-foreground">Member Since</p>
+              <p className="font-medium">January 2024</p>
+            </div>
+            <div className="p-4 bg-primary/5 rounded-lg">
+              <p className="text-sm text-muted-foreground">Last Login</p>
+              <p className="font-medium">2 hours ago</p>
+            </div>
+            <div className="p-4 bg-primary/5 rounded-lg">
+              <p className="text-sm text-muted-foreground">Account Status</p>
+              <p className="font-medium text-green-500">Active</p>
+            </div>
+          </div>
+        </Card>
+    
     </div>
+   
+    </>
     
   );
 };

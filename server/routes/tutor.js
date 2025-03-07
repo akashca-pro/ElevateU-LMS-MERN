@@ -12,8 +12,8 @@ import {otpLimiter} from '../middleware/rateLimiting.js';
 
 import { updateEmail, verifyEmail } from '../controllers/commonControllers.js';
 
-import {createCourse, updateCourse, requestPublish, deleteCourse, loadCourses, courseDetails
-
+import {createCourse, updateCourse, requestPublish, deleteCourse, loadCourses, courseDetails,
+courseTitleExist,
 } from '../controllers/course/tutorOps.js'
 import passport from 'passport';
 
@@ -57,7 +57,8 @@ router.get('/courses',verifyAccessToken('tutor'),loadCourses)
 router.get('/view-course',verifyAccessToken('tutor'),courseDetails)
 router.post('/update-course',verifyAccessToken('tutor'),updateCourse)
 router.post('/publish-course',verifyAccessToken('tutor'),requestPublish)
-router.delete('/delete-course',verifyAccessToken('tutor'),deleteCourse)
+router.post('/delete-course',verifyAccessToken('tutor'),deleteCourse)
+router.get('/check-title/:title',verifyAccessToken('tutor'),courseTitleExist)
 
 
 export default router

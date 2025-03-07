@@ -8,22 +8,17 @@ import { STRING_CONSTANTS } from '../../utils/stringConstants.js'
 export const createCourse = async (req,res) => {
     
     try {
-        const {title, description, price, thumbnail , tutorId} = req.body
+        const formData = req.body
+        const tutorId = req.tutor.id
 
         const tutorCheck = await Tutor.findById(tutorId)
         if(!tutorCheck) 
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
-        const existingCourse = await Course.findOne({ title, tutor: tutorId });
-        if (existingCourse) 
-            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
-
         await Course.create({
-            title,
-            description,
-            tutor: tutorId,  
-            price,
-            thumbnail
+            ...formData,
+            title : formData.title.trim(),
+            tutor : tutorId
         });
 
         return ResponseHandler.success(res, STRING_CONSTANTS.CREATION_SUCCESS, HttpStatus.CREATED)
@@ -144,7 +139,7 @@ export const requestPublish = async (req,res) => {
 export const deleteCourse = async (req,res) => {
     
     try {
-        const {tutorId , courseId} = req.body
+        const {tutorId , courseId} = req.body;
 
         const course = await Course.findOne({_id : courseId , tutor : tutorId})
 
@@ -158,6 +153,27 @@ export const deleteCourse = async (req,res) => {
     } catch (error) {
         console.log(STRING_CONSTANTS.DELETION_ERROR, error);
         return ResponseHandler.error(res,STRING_CONSTANTS.DELETION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// Title already exist 
+
+export const courseTitleExist = async (req,res) => {
+    
+    try {
+        const tutorId = req.tutor.id;
+        const title = req.params.title;
+
+        const titleExist = await Course.findOne({title : title , tutor : tutorId})
+        if(titleExist)
+            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT)
+
+        return ResponseHandler.success(res, undefined, HttpStatus.OK)
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.EXIST, error)
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }

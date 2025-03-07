@@ -4,7 +4,7 @@ export const imageUpload = async(file) =>{
     data.append('upload_preset',import.meta.env.VITE_CLOUDINARY_PRESET_CODE)
     data.append('cloud_name',import.meta.env.VITE_CLOUDINARY_CLOUD_NAME)
 
-        const res = await fetch(import.meta.env.VITE_CLOUDINARY_BASE_API_URL,{
+        const res = await fetch(import.meta.env.VITE_CLOUDINARY_BASE_API_IMAGE_URL,{
             method : 'POST',
             body : data
         })

@@ -60,7 +60,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 export const apiSlice = createApi({
     reducerPath : 'api',
     baseQuery : baseQueryWithReauth, // Use modified base query with re-auth
-    tagTypes : ['Admin', 'User', 'Tutor'],
+    tagTypes : ['Admin', 'User', 'Tutor','Common'],
     endpoints: () => ({}), // Will be extended by other API files
 })
 

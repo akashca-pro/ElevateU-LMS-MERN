@@ -32,12 +32,15 @@ export const STRING_CONSTANTS = {
     GOOGLE_AUTH_ERROR : 'Google authentication failed',
     STATUS_PENDING : 'Verification status pending',
     BLOCKED : 'User blocked',
-    UNBLOCKED :'User unblocked'
+    UNBLOCKED :'User unblocked',
+    SUCCESS : 'Success',
+    SERVER : 'Server error'
 
 }
 
 export const DATABASE_FIELDS = {
     ID:'_id',
+    NAME : 'name',
     FIRST_NAME : 'firstName',
     LAST_NAME : 'lastName',
     PASSWORD : 'password',

@@ -5,13 +5,13 @@ import {SquareUser, BookOpen, LibraryBig, MessagesSquare, BellRing, Handshake, P
   Trophy, Settings
 } from 'lucide-react'
 
-import ProfileDetails from './userProfile/ProfileDetails/ProfileDetails';
+import ProfileDetails from './ProfileDetails/ProfileDetails';
 import CourseDetails from './my-course/CourseDetails';
-import UserLoginProtect from '@/protectors/user/UserLoginProtect';
+
 
 
 import {useUserForgotPasswordMutation,useUserResetPasswordMutation,useUserGoogleCallbackQuery,
-  useUserVerifyOtpMutation,useUserSignupMutation,useUserLoginMutation
+  useUserSignupMutation,useUserLoginMutation
 } from '@/services/userApi/userAuthApi.js'
 
 
@@ -29,6 +29,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Layout from '@/components/Drawer/Layout';
 
+import Profile from '@/pages/user/ProfileDetails/Index'
 
 import EnrolledCourses from './enrolledCourses/Index';
 import Notification from './notification/Index';
@@ -114,7 +115,7 @@ const UserRoutes = () => {
           }/>
 
         <Route path='profile' element={<ProtectedLayout/>}>
-          <Route index element={<ProfileDetails />}/>
+          <Route index element={<Profile />}/>
           <Route path='my-courses' element={<CourseDetails/>}/>
           <Route path='enrolled-courses' element={<EnrolledCourses/>}/>
           <Route path='messages' element={<Messages/>}/>

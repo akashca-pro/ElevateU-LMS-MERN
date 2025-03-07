@@ -155,7 +155,7 @@ const ProfileDetails = () => {
  
   return (
    <div className="flex justify-center p-4">
-      <Card className="w-full max-w-6xl p-8 bg-white shadow-lg rounded-lg">
+      <Card className="w-full max-w-7xl p-8 bg-white shadow-lg rounded-lg">
       <div className="space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6" id="profile-form">
           {/* Avatar Section */}

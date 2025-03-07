@@ -5,7 +5,7 @@ BellRing, SquareUser, BookOpen, MessagesSquare, IndianRupee, ChartNoAxesCombined
 
 import {Routes , Route, Outlet} from 'react-router-dom'
 
-import {useTutorSignupMutation, useTutorVerifyOtpMutation, useTutorLoginMutation,
+import {useTutorSignupMutation, useTutorLoginMutation,
    useTutorForgotPasswordMutation, useTutorResetPasswordMutation ,useTutorGoogleCallbackQuery
 } from '@/services/TutorApi/tutorAuthApi.js'
 
@@ -28,8 +28,8 @@ import NotFound from '@/pages/NotFound'
 
 // Tutor Profile
 
-import ProfileDetails from './tutorProfile/ProfileDetails.jsx'
-import Courses from './courseManagement/Courses.jsx'
+import ProfileDetails from './tutorProfile/Index'
+
 import Messages from './Messages/Messages.jsx'
 import Revenue from './revenue/Revenue.jsx'
 import Analytics from './analytics/Analytics.jsx'
@@ -38,6 +38,9 @@ import Setting from './settings/Settings.jsx'
 
 import ProtectAuthPage from '@/protectors/ProtectAuthPage.jsx';
 import ProtectedRoute from '@/protectors/ProtectedRoute.jsx';
+
+import CourseDashboard from './courseManagement/Index.jsx'
+import CourseDetails from './courseManagement/CourseDetails';
 
 const TutorIndex = () => {
   return (
@@ -109,7 +112,9 @@ return (
 
         <Route path='profile' element={<ProtectedLayout/>}>
           <Route index element={<ProfileDetails/>}/>
-          <Route path='course-management' element={<Courses/>}/>
+          <Route path='course-management' element={<CourseDashboard/>}>
+            <Route path=':courseName' element={<CourseDetails/>}/>
+          </Route>
           <Route path='messages' element={<Messages/>}/>
           <Route path='revenue' element={<Revenue/>}/>
           <Route path='analytics' element={<Analytics/>}/>
