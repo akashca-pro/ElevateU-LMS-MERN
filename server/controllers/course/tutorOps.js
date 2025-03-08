@@ -8,24 +8,32 @@ import { STRING_CONSTANTS } from '../../utils/stringConstants.js'
 export const createCourse = async (req,res) => {
     
     try {
-        const formData = req.body
+        const {formData, draft} = req.body
         const tutorId = req.tutor.id
 
         const tutorCheck = await Tutor.findById(tutorId)
         if(!tutorCheck) 
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
+        const titleExist = await Course.findOne({title : formData.title , tutor : tutorId})
+        if(titleExist)
+            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT)
+
+        if(tutorCheck.draftCount >= 3 && draft)
+            return ResponseHandler.error(res, STRING_CONSTANTS.DRAFT_LIMIT, HttpStatus.FORBIDDEN);
+
         await Course.create({
             ...formData,
             title : formData.title.trim(),
-            tutor : tutorId
+            tutor : tutorId,
+            draft : draft ? true : false
         });
 
         return ResponseHandler.success(res, STRING_CONSTANTS.CREATION_SUCCESS, HttpStatus.CREATED)
 
     } catch (error) {
         console.log(STRING_CONSTANTS.CREATION_ERROR, error);
-        return ResponseHandler.error(res, STRING_CONSTANTS.CREATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseHandler.error(res, STRING_CONSTANTS.CREATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR, error)
     }
 
 }
@@ -35,22 +43,43 @@ export const createCourse = async (req,res) => {
 export const loadCourses = async (req,res) => {
     
     try {
-        const {tutorId} = req.body
+        const tutorId = req.tutor.id
         const page = parseInt(req.query.page) || 1
         const limit = parseInt(req.query.limit) || 5
         const skip = (page-1) * limit
-        const search = req.query.search
+        const {search, filter} = req.query
 
-        const searchQuery = {title : {$regex : search , $options : 'i'} , tutor : tutorId}
+        let sort = { createdAt: -1 }; // Default sorting (Newest first)
+        let filterQuery = {tutor : tutorId}; 
 
-        const course = await Course.find(search ? searchQuery : {tutor : tutorId})
+        if (filter === "oldest") {
+            sort = { createdAt: 1 }; // Oldest first
+        } else if (filter === "Draft") {
+            filterQuery.status = 'draft'
+        } else if (filter === "active") {
+            filterQuery.status = 'approved';
+        }
+
+        if (search) {
+            filterQuery.title =  { $regex: search, $options: "i" } 
+        }   
+
+        const totalCourse = await Course.countDocuments(filterQuery);
+
+        const course = await Course.find(filterQuery)
         .skip(skip)
         .limit(limit)
+        .sort(sort)
 
-        if(!course) 
+        if(!course || course.length === 0) 
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
 
-        return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, course)
+        return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, {
+            courses : course,
+            total: totalCourse, 
+            currentPage: page,
+            totalPages: Math.ceil(totalCourse / limit),
+        })
             
     } catch (error) {
         console.log(STRING_CONSTANTS.LOADING_ERROR, error);
@@ -64,7 +93,8 @@ export const loadCourses = async (req,res) => {
 export const courseDetails = async (req,res) => {
     
     try {
-        const {tutorId , courseId} = req.body
+        const courseId = req.params.id
+        const tutorId = req.tutor.id
 
         const courseDetails = await Course.findOne({_id : courseId , tutor : tutorId})
         if(!courseDetails) 
@@ -177,3 +207,4 @@ export const courseTitleExist = async (req,res) => {
     }
 
 }
+

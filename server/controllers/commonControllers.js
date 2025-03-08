@@ -8,6 +8,7 @@ import ResponseHandler from "../utils/responseHandler.js"
 import { DATABASE_FIELDS, STRING_CONSTANTS } from "../utils/stringConstants.js"
 import Category from "../model/category.js"
 
+
 //Update Email
 
 export const updateEmail = (role) =>{

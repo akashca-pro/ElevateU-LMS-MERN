@@ -9,4 +9,5 @@ router.post('/generate-otp',sendOtp)
 router.post('/verify-otp',verifyOtp)
 router.get('/load-categories',loadCategories)
 
+
 export default router

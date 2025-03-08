@@ -13,15 +13,15 @@ const tutorCourseApi = apiSlice.injectEndpoints({
             invalidatesTags : ['Tutor']
         }),
         tutorLoadCourses : builder.query({
-            query : ({page,limit,search}) => ({
-                url : `tutor/courses?page=${page}&limit=${limit}&search=${search}`,
+            query : ({page, limit, search, filter}) => ({
+                url : `tutor/courses?page=${page}&limit=${limit}&search=${search}&filter=${filter}`,
                 method : 'GET'
             }),
             providesTags : ['Tutor']
         }),
         tutorLoadCourse : builder.query({
-            query : () => ({
-                url : `tutor/view-course`,
+            query : (id) => ({
+                url : `tutor/view-course/${id}`,
                 method : 'GET'
             }),
             providesTags : ['Tutor']

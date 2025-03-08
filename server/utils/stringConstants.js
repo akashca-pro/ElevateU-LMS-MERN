@@ -17,7 +17,7 @@ export const STRING_CONSTANTS = {
     UPDATION_SUCCESS : 'Updated data successfully',
     UPDATION_ERROR :'Updating data failed',
     CREATION_SUCCESS :'Created succesfully',
-    CREATION_ERROR : 'Creation failed',
+    CREATION_ERROR : 'Error saving data',
     DELETION_SUCCESS : 'Deleted successfully',
     DELETION_ERROR : 'Deletion failed',
     OTP_SENT : 'OTP sent to mail',
@@ -34,7 +34,8 @@ export const STRING_CONSTANTS = {
     BLOCKED : 'User blocked',
     UNBLOCKED :'User unblocked',
     SUCCESS : 'Success',
-    SERVER : 'Server error'
+    SERVER : 'Server error',
+    DRAFT_LIMIT : 'Draft limit exceeded'
 
 }
 

@@ -26,7 +26,7 @@ const commonApi = apiSlice.injectEndpoints({
                 method : 'GET'
             }),
             providesTags : ['Common']
-        })
+        }),
     })
 })
 
@@ -35,6 +35,6 @@ export const {
 
     useSendOtpMutation,
     useVerifyOtpMutation,
-    useLoadCategoriesQuery
+    useLoadCategoriesQuery,
 
 } = commonApi

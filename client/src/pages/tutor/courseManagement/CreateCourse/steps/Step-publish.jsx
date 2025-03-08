@@ -5,13 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { AlertCircle, CheckCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
-/**
- * @param {Object} props
- * @param {import('react-hook-form').UseFormReturn} props.form
- * @param {() => void} props.prevStep
- * @param {() => void} props.onSubmit
- */
-export function StepPublish({ form, prevStep, onSubmit }) {
+export function StepPublish({ form, prevStep, onSubmit, categoryName}) {
   const formValues = form.getValues()
   const isFree = formValues.isFree
 
@@ -34,7 +28,7 @@ export function StepPublish({ form, prevStep, onSubmit }) {
                 </div>
                 <div>
                   <p className="text-sm font-medium">Category</p>
-                  <p className="text-sm text-muted-foreground">{formValues.category}</p>
+                  <p className="text-sm text-muted-foreground">{categoryName}</p>
                 </div>
               </div>
               <div className="mt-2">

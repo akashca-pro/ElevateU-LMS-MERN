@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog"
 import { StepBasicDetails } from "./steps/Step-basic-details"
 import { StepContent } from "./steps/Step-content"
 import { StepPricing } from "./steps/Step-pricing"
@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Form } from "@/components/ui/form"
 import { toast } from "sonner"
 import { useTutorCreateCourseMutation } from '@/services/TutorApi/tutorCourseApi'
+import { Button } from "@/components/ui/button"
 
 
 const courseFormSchema = z.object({
@@ -39,39 +40,56 @@ const courseFormSchema = z.object({
   requirements: z.array(z.string()).default([]),
 })
 
-const defaultValues = {
-  title: "",
-  description: "",
-  category: "",
-  thumbnail: "",
-  modules: [{ title: "", lessons: [{ title: "", videoUrl: "", attachments: [] }] }],
-  price: 0,
-  isFree: false,
-  discount: 0,
-  level: "Beginner",
-  requirements: [""],
-}
 
 
 export function CourseCreationModal({ isOpen, onClose }) {
+  const [categoryName,setCategoryName] = useState(null)
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [createCourse] = useTutorCreateCourseMutation()
   const [step, setStep] = useState(1)
   const totalSteps = 4
 
   const form = useForm({
     resolver: zodResolver(courseFormSchema),
-    defaultValues,
+    defaultValues : {
+      title: "",
+      description: "",
+      category: "",
+      thumbnail: "",
+      modules: [{ title: "", lessons: [{ title: "", videoUrl: "", attachments: [] }] }],
+      price: 0,
+      isFree: false,
+      discount: 0,
+      level: "Beginner",
+      requirements: [""],
+    },
     mode: "onChange",
     shouldFocusError: false
   })
 
-  const {reset} = form
+  const {reset, formState} = form
+
+  const isDirty = formState.isDirty;
+
+  const handleModalClose = () =>{
+      if(isDirty){
+        setShowConfirmModal(true);
+      }else{
+        onClose()
+      }
+  }
+
+  const handleCancel = () =>{
+    reset();
+    setShowConfirmModal(false);
+    onClose()
+  }
 
   const onSubmit = async (data) => {
     const toastId = toast.loading('Please wait . . . ');
     try {
       console.log("Form submitted:", data)
-      await createCourse(data).unwrap()
+      await createCourse({formData : data , draft : false}).unwrap()
       reset(defaultValues);
       toast.success("Course created successfully! Awaiting approval.",{id : toastId})
       onClose()
@@ -93,8 +111,25 @@ export function CourseCreationModal({ isOpen, onClose }) {
     }
   }
 
+  const handleDraft = async () => {
+    const toastId = toast.loading('Saving current data . . .')
+    try {
+      const data = form.getValues();
+      await createCourse({formData : data, draft : true }).unwrap()
+      toast.success('Data saved as draft',{id : toastId})
+      reset();
+      setShowConfirmModal(false);
+      onClose();
+    } catch (error) {
+      console.log(error)
+      toast.error(error?.data?.message || 'Error saving data, try again later',{id : toastId})
+    }
+  }
+
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <>
+    <Dialog open={isOpen} onOpenChange={handleModalClose}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogTitle></DialogTitle>
         <div className="py-2">
@@ -102,15 +137,35 @@ export function CourseCreationModal({ isOpen, onClose }) {
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-6">
-              {step === 1 && <StepBasicDetails form={form} nextStep={nextStep} />}
+              {step === 1 && <StepBasicDetails form={form} nextStep={nextStep} setCategoryName={setCategoryName}/>}
               {step === 2 && <StepContent form={form} nextStep={nextStep} prevStep={prevStep} />}
               {step === 3 && <StepPricing form={form} nextStep={nextStep} prevStep={prevStep} />}
-              {step === 4 && <StepPublish form={form} prevStep={prevStep} onSubmit={form.handleSubmit(onSubmit)} />}
+              {step === 4 && <StepPublish form={form} prevStep={prevStep} onSubmit={form.handleSubmit(onSubmit)} categoryName={categoryName}/>}
             </form>
           </Form>
         </div>
+        <Button variant = 'outline' onClick ={handleDraft} >
+          Save as Draft
+        </Button>
       </DialogContent>
     </Dialog>
+
+    {/* Confirmation modal */}
+    <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
+    <DialogContent className="sm:max-w-[400px]">
+      <DialogTitle>Unsaved Changes</DialogTitle>
+      <p>Do you want to save your progress as a draft before exiting?</p>
+      <div className="flex justify-end gap-3 mt-4">
+          <Button className=" bg-red-700 hover:bg-red-800 " onClick={handleCancel}>
+              Cancel
+          </Button>
+          <Button  onClick={handleDraft}>
+              Save as Draft
+          </Button>
+      </div>
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }
 

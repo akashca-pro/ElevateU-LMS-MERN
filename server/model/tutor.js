@@ -87,6 +87,10 @@ const tutorSchema = mongoose.Schema({
     },
     isBlocked : {
         type : Boolean,
+    },
+    draftCount : {
+        type : Number,
+        default : 0
     }
 },{timestamps : true});
 

@@ -21,7 +21,7 @@ export const loadCategory = async (req,res) => {
             sort = { createdAt: 1 }; // Oldest first
         } else if (filter === "active") {
             filterQuery.isActive = true;
-        } else if (filter === "notActive") {
+        } else if (filter === "Not-Active") {
             filterQuery.isActive = false;
         }
 
@@ -29,7 +29,7 @@ export const loadCategory = async (req,res) => {
         if (search) {
             filterQuery.$or = [
                 { name: { $regex: search, $options: "i" } },
-                { description: { $regex: search, $options: "i" } },
+                { category: { $regex: search, $options: "i" } },
             ];
         }      
          

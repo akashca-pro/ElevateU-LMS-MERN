@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 export const VideoUpload = ({ value, onChange, onRemove }) => {
   const [preview, setPreview] = useState("");
+  const [isUploaded,setIsUploaded] = useState(false)
   const [videoFile,setVideoFile] = useState(null)
   const fileInputRef = useRef(null); // Reference to the hidden file input
 
@@ -16,11 +17,13 @@ export const VideoUpload = ({ value, onChange, onRemove }) => {
 
     const videoUrl = URL.createObjectURL(file);
     setPreview(videoUrl);
+    setIsUploaded(false)
   };
 
   const handleRemove = () => {
     setPreview("");
     onRemove();
+    setIsUploaded(false)
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -36,6 +39,7 @@ export const VideoUpload = ({ value, onChange, onRemove }) => {
       toast.success('Video uploaded',{id : toastId})
       setPreview(uploadedVideoeUrl)
       onChange(uploadedVideoeUrl)
+      setIsUploaded(true)
 
     } catch (error) {
       console.error("Upload failed", error);
@@ -90,7 +94,7 @@ export const VideoUpload = ({ value, onChange, onRemove }) => {
           variant="outline"
           className="shrink-0"
           onClick={handleUpload}
-          disabled={!preview} // Disable upload button if no video selected
+          disabled={!preview || isUploaded} 
         >
           <Upload className="h-4 w-4 mr-2" />
           Upload

@@ -12,7 +12,7 @@ export function CreateCourseButton() {
         <PlusCircle className="h-4 w-4" />
         Create Course
       </Button>
-      <CourseCreationModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <CourseCreationModal isOpen={isOpen} onClose={() => setIsOpen(false)}  />
     </>
   )
 }

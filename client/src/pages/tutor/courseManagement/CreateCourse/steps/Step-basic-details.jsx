@@ -8,19 +8,13 @@ import { useLoadCategoriesQuery } from '@/services/commonApi'
 import { useTutorCheckTitleCourseQuery } from '@/services/TutorApi/tutorCourseApi'
 import { useEffect, useState } from "react"
 
-
-/**
- * @param {Object} props
- * @param {import('react-hook-form').UseFormReturn} props.form
- * @param {() => void} props.nextStep
- */
-export function StepBasicDetails({ form, nextStep }) {
+export function StepBasicDetails({ form, nextStep ,setCategoryName}) {
   const { data : details } = useLoadCategoriesQuery()
   const categories = details?.data;
 
   const title = form.watch('title');
 
-  const { error : titleCheck , isFetching} = useTutorCheckTitleCourseQuery(
+  const { error : titleCheck } = useTutorCheckTitleCourseQuery(
     title?.length > 2 ? title : '',
     {skip : !title || title.length < 3}
   )
@@ -38,7 +32,7 @@ export function StepBasicDetails({ form, nextStep }) {
 
   const handleNext = () => {
     form.trigger(["title", "description", "category", "thumbnail"]).then((isValid) => {
-      if (isValid) {
+      if (isValid && !titleError) {
         nextStep()
       }
     })
@@ -88,7 +82,13 @@ export function StepBasicDetails({ form, nextStep }) {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Category</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select
+            onValueChange={(value) => {
+            field.onChange(value); 
+            setCategoryName(categories.find(category => category._id === value)?.name || ""); 
+             }}
+             defaultValue={field.value}
+              >
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />

@@ -7,12 +7,6 @@ import { Plus, Trash2, Upload, X } from "lucide-react"
 import { FileUpload } from "../FileUpload"
 import { VideoUpload } from "../VideoUpload"
 
-/**
- * @param {Object} props
- * @param {import('react-hook-form').UseFormReturn} props.form
- * @param {() => void} props.nextStep
- * @param {() => void} props.prevStep
- */
 export function StepContent({ form, nextStep, prevStep }) {
   const {
     fields: moduleFields,
@@ -106,11 +100,7 @@ export function StepContent({ form, nextStep, prevStep }) {
   )
 }
 
-/**
- * @param {Object} props
- * @param {import('react-hook-form').UseFormReturn} props.form
- * @param {number} props.moduleIndex
- */
+
 function ModuleLessons({ form, moduleIndex }) {
   const {
     fields: lessonFields,
@@ -162,15 +152,11 @@ function ModuleLessons({ form, moduleIndex }) {
                 <FormItem>
                   <FormLabel>Video URL</FormLabel>
                   <FormControl>
-                    <div className="flex gap-2">
-                      {/* <Input placeholder="Enter video URL or upload" {...field} className="flex-1" />
-                      <Button type="button" variant="outline" size="icon" className="shrink-0">
-                        <Upload className="h-4 w-4" />
-                      </Button> */}
-                      <VideoUpload value={field.value} onChange={field.onChange} onRemove={() => field.onChange("")} />
+                    <div className="flex gap-2"> 
+                     <VideoUpload value={field.value} onChange={field.onChange} onRemove={() => field.onChange("")} />
                     </div>
                   </FormControl>
-                  <FormDescription>Paste a video URL or upload a new video</FormDescription>
+                  <FormDescription>Upload a new video</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
