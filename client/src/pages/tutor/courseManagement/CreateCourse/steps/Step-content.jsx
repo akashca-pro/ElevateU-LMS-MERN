@@ -176,6 +176,27 @@ function ModuleLessons({ form, moduleIndex }) {
                 </FormItem>
               )}
             />
+
+          <FormField
+              control={form.control}
+              name="duration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Duration</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Enter Lesson Duration"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormDescription>Set the duration in minutes</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
           </CardContent>
         </Card>
       ))}

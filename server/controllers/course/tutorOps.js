@@ -26,7 +26,8 @@ export const createCourse = async (req,res) => {
             ...formData,
             title : formData.title.trim(),
             tutor : tutorId,
-            draft : draft ? true : false
+            draft : draft ? true : false,
+            status : !draft ? 'pending' : 'draft' 
         });
 
         return ResponseHandler.success(res, STRING_CONSTANTS.CREATION_SUCCESS, HttpStatus.CREATED)
@@ -95,6 +96,7 @@ export const courseDetails = async (req,res) => {
     try {
         const courseId = req.params.id
         const tutorId = req.tutor.id
+     
 
         const courseDetails = await Course.findOne({_id : courseId , tutor : tutorId})
         if(!courseDetails) 

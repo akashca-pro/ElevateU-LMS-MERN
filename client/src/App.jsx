@@ -6,7 +6,7 @@ import UserRoutes from '@/pages/user/UserIndex'
 import TutorRoutes from '@/pages/tutor/TutorIndex'
 import AdminRoutes from '@/pages/admin/AdminIndex'
 import Index from '@/pages/Home/Index'
-import NotFound from '@/pages/NotFound';
+import NotFound from '@/components/FallbackUI/NotFound';
 
 const App = () => {
   return (

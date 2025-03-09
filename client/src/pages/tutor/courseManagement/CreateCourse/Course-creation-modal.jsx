@@ -49,20 +49,22 @@ export function CourseCreationModal({ isOpen, onClose }) {
   const [step, setStep] = useState(1)
   const totalSteps = 4
 
+  const defaultValues = {
+    title: "",
+    description: "",
+    category: "",
+    thumbnail: "",
+    modules: [{ title: "", lessons: [{ title: "", videoUrl: "", attachments: [] }] }],
+    price: 0,
+    isFree: false,
+    discount: 0,
+    level: "Beginner",
+    requirements: [""],
+  }
+
   const form = useForm({
     resolver: zodResolver(courseFormSchema),
-    defaultValues : {
-      title: "",
-      description: "",
-      category: "",
-      thumbnail: "",
-      modules: [{ title: "", lessons: [{ title: "", videoUrl: "", attachments: [] }] }],
-      price: 0,
-      isFree: false,
-      discount: 0,
-      level: "Beginner",
-      requirements: [""],
-    },
+    defaultValues,
     mode: "onChange",
     shouldFocusError: false
   })

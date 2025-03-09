@@ -14,7 +14,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import ProtectedRoute from '@/protectors/ProtectedRoute'
 import ProtectAuthPage from '@/protectors/ProtectAuthPage'
-import NotFound from '@/pages/NotFound'
+import NotFound from '@/components/FallbackUI/NotFound'
 import Layout from '@/components/Drawer/Layout'
 
 //protected routes

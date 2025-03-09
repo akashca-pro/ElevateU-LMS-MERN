@@ -6,12 +6,7 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, X } from "lucide-react"
 
-/**
- * @param {Object} props
- * @param {import('react-hook-form').UseFormReturn} props.form
- * @param {() => void} props.nextStep
- * @param {() => void} props.prevStep
- */
+
 export function StepPricing({ form, nextStep, prevStep }) {
   const {
     fields: requirementFields,
@@ -81,7 +76,7 @@ export function StepPricing({ form, nextStep, prevStep }) {
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
                   </FormControl>
-                  <FormDescription>Set the price for your course in USD</FormDescription>
+                  <FormDescription>Set the price for your course in INR</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

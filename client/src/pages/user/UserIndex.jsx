@@ -43,7 +43,7 @@ import Setting from './settings/Index';
 import ProtectAuthPage from '@/protectors/ProtectAuthPage';
 import ProtectedRoute from '@/protectors/ProtectedRoute';
 
-import NotFound from '@/pages/NotFound';
+import NotFound from '@/components/FallbackUI/NotFound';
 
 const UserIndex = () => {
   return (

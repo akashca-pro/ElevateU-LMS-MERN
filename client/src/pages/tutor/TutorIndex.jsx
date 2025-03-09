@@ -22,7 +22,7 @@ import GoogleAuth from '@/components/auth/GoogleAuth'
 import Navbar from '@/components/Navbar.jsx'
 import Layout from '@/components/Drawer/Layout.jsx'
 import Footer from '@/components/Footer.jsx'
-import NotFound from '@/pages/NotFound'
+import NotFound from '@/components/FallbackUI/NotFound'
 
 
 
@@ -39,7 +39,8 @@ import Setting from './settings/Settings.jsx'
 import ProtectAuthPage from '@/protectors/ProtectAuthPage.jsx';
 import ProtectedRoute from '@/protectors/ProtectedRoute.jsx';
 
-import CourseDashboard from './courseManagement/Index.jsx'
+import CourseLayout from '@/pages/tutor/courseManagement/Index.jsx'
+import CourseDashboard from './courseManagement/CourseDashboard.jsx'
 import CourseDetails from './courseManagement/CourseDetails';
 
 const TutorIndex = () => {
@@ -112,8 +113,9 @@ return (
 
         <Route path='profile' element={<ProtectedLayout/>}>
           <Route index element={<ProfileDetails/>}/>
-          <Route path='course-management' element={<CourseDashboard/>}>
-            <Route path=':courseName' element={<CourseDetails/>}/>
+          <Route path='course-management' element={<CourseLayout/>}>
+            <Route index element={<CourseDashboard/>}/>
+            <Route path=':courseId' element={<CourseDetails/>}/>
           </Route>
           <Route path='messages' element={<Messages/>}/>
           <Route path='revenue' element={<Revenue/>}/>
