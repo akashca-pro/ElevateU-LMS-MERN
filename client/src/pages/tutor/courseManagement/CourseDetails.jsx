@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -9,18 +9,25 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AlertCircle, Edit2, Plus, Clock, Users, BookOpen, Award, Copy } from "lucide-react"
+import { AlertCircle, Edit2, Plus, Clock, Users, BookOpen, Award, Copy, Car, X } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { useTutorLoadCourseQuery } from "@/services/TutorApi/tutorCourseApi"
+import { useTutorLoadCourseQuery, useTutorUpdateCourseMutation, useTutorDeleteCourseMutation } from "@/services/TutorApi/tutorCourseApi"
 import { useLoadCategoriesQuery } from '@/services/commonApi'
 import { format } from "date-fns"
 import LoadingSpinner from "@/components/FallbackUI/LoadingSpinner"
 import ErrorComponent from "@/components/FallbackUI/ErrorComponent"
 import { VideoUpload } from "./CreateCourse/VideoUpload"
+import { ImageUpload } from "./CreateCourse/ImageUpload"
+import { FileUpload } from "./CreateCourse/FileUpload"
+import { toast } from "sonner"
+import DeleteCourseCard from "./CreateCourse/DeleteCourseCard"
 
 const CourseDetails = () => {
   const { courseId } = useParams()
+  const navigate = useNavigate();
+  const [updateCourse,{isLoading : isUpdating}] = useTutorUpdateCourseMutation()
+  const [deleteCourse] = useTutorDeleteCourseMutation()
   const [course, setCourse] = useState(null)
   const [categories,setCategories] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
@@ -43,17 +50,42 @@ const CourseDetails = () => {
   }
 
   const handleSave = async () => {
+    const toastId = toast.loading('Updating data . . . ')
     try {
-      console.log(course)
+      await updateCourse({formData : course}).unwrap()
+      toast.success('Data updated successfully',{id : toastId});
       setIsEditing(false)
     } catch (error) {
       console.error("Error saving course:", error)
+      toast.error('Data updation failed, please try again later',{id : toastId});
     }
+  }
+
+  const handleImageChange = (uploadedImageUrl = null)=>{
+    setCourse({ ...course, thumbnail : uploadedImageUrl });
   }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setCourse({ ...course, [name]: value })
+  }
+
+  const handleInputArrayChange = (field, index, value) => {
+    setCourse({...course, 
+      [field] : course[field].map((item,i)=> i===index ? value : item )
+     });
+  }
+
+  const handleRemoveArrayItems = (field, index) =>{
+      setCourse({ ...course,
+        [field] : course[field].filter((_,i)=> i!==index )
+      })
+  }
+
+  const handleInputAddItemsToArray = (field) =>{
+    setCourse({...course,
+      [field] : [...course[field], '']
+    })
   }
 
   const handleSwitchChange = (name) => {
@@ -91,6 +123,18 @@ const CourseDetails = () => {
     const courseCopy = JSON.parse(JSON.stringify(course))
     courseCopy.modules[moduleIndex].lessons[lessonIndex][field] = value;
     setCourse(courseCopy);
+  }
+  
+  const handleDeleteCourse = async() =>{
+    const toastId = toast.loading('Deleting course . . .');
+      try {
+        await deleteCourse(course._id).unwrap();
+        toast.success('Course deleted successfully',{id : toastId});
+        navigate(-1)
+      } catch (error) {
+        console.log(error)
+        toast.error('Course deletion failed',{id : toastId});
+      }
   }
 
   const getStatusBadge = (status) => {
@@ -275,6 +319,7 @@ const CourseDetails = () => {
           <TabsTrigger value="content">Content</TabsTrigger>
           <TabsTrigger value="pricing">Pricing</TabsTrigger>
           <TabsTrigger value="reviews">Reviews</TabsTrigger>
+          <TabsTrigger value="delete">Delete Course</TabsTrigger>
         </TabsList>
 
         <TabsContent value="details">
@@ -346,6 +391,15 @@ const CourseDetails = () => {
                       <SelectItem value="Advanced">Advanced</SelectItem>
                     </SelectContent>
                   </Select>
+
+                 <div className="w-1/2  mt-4" >
+                  <Label>Thumbnail</Label>
+                  <ImageUpload 
+                  onChange={handleImageChange}
+                   onRemove={handleImageChange}
+                    value={course.thumbnail}
+                    disabled={!isEditing} />
+                 </div>
                 </div>
                 {isEditing && ( <div className="flex gap-2" >
                   <Button onClick={handleSave}>Save Changes</Button>
@@ -359,7 +413,14 @@ const CourseDetails = () => {
         <TabsContent value="content">
           <Card>
             <CardHeader>
-              <CardTitle>Course Content</CardTitle>
+            <CardTitle className="flex justify-between items-center">
+                Course Content
+                {!isEditing && (
+                  <Button onClick={handleEdit}>
+                    <Edit2 className="mr-2 h-4 w-4" /> Edit
+                  </Button>
+                )}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <Accordion type="single" collapsible className="w-full">
@@ -369,6 +430,7 @@ const CourseDetails = () => {
                       {isEditing ? (
                         <Input
                           value={module.title || ''}
+                          placeholder = 'Enter Module Title'
                           onChange={(e) => {
                             e.stopPropagation();
                             // console.log(e.target.value)
@@ -399,21 +461,31 @@ const CourseDetails = () => {
                               <Label>Lesson Title</Label>
                               <Input
                                 value={lesson.title}
+                                placeholder = 'Enter Lesson Title'
                                 onChange={(e) => handleLessonChange(moduleIndex, lessonIndex, "title", e.target.value)}
                                 disabled={!isEditing}
                               />
                             </div>
-                            <div>
-                              <Label>Video URL</Label>
-                              <Input
-                              
-                                value={lesson.videoUrl}
-                                onChange={(e) =>
-                                  handleLessonChange(moduleIndex, lessonIndex, "videoUrl", e.target.value)
-                                }
-                                disabled={!isEditing}
-                              />
-                            </div>
+
+                          <div className="w-1/2">
+                            <Label>Video URL</Label>
+                            <VideoUpload 
+                            value={lesson.videoUrl}
+                            onChange={(videoUrl)=> handleLessonChange(moduleIndex, lessonIndex, "videoUrl", videoUrl)}
+                            onRemove={()=> handleLessonChange(moduleIndex, lessonIndex, "videoUrl", "")}
+                            disabled={!isEditing ? true : false}
+                            />
+                          </div>
+
+                          <div>
+                            <Label>Attachments</Label>
+                            <FileUpload
+                             value={lesson.attachments || []}
+                              onChange={(urls)=> handleLessonChange(moduleIndex, lessonIndex, 'attachments' , urls)}
+                              disabled={!isEditing ? true : false}
+                            />
+                          </div>
+
                             <div>
                               <Label>Duration (minutes)</Label>
                               <Input
@@ -454,7 +526,14 @@ const CourseDetails = () => {
         <TabsContent value="pricing">
           <Card>
             <CardHeader>
-              <CardTitle>Pricing</CardTitle>
+            <CardTitle className="flex justify-between items-center">
+                Pricing
+                {!isEditing && (
+                  <Button onClick={handleEdit}>
+                    <Edit2 className="mr-2 h-4 w-4" /> Edit
+                  </Button>
+                )}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -494,6 +573,43 @@ const CourseDetails = () => {
                   </>
                 )}
               </div>
+
+              <div className="space-y-2 mt-4 md:mt-6 lg:mt-8">
+                <Label>Requirements</Label>
+                {course?.requirements.map((field,index) => (
+                 <div key={index} className="flex items-center gap-2">
+                    <Input type = 'text'
+                      name= 'requirements'
+                      value = {field}
+                      placeholder = {`Requirement ${index + 1}`}
+                      onChange={(e)=>handleInputArrayChange(e.target.name, index, e.target.value)}
+                      disabled={!isEditing}
+                    />
+                    <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleRemoveArrayItems('requirements',index)}
+                    className="h-8 w-8 text-destructive"
+                    disabled={!isEditing}
+                >
+                  <X className="h-4 w-4" 
+                   />
+                </Button>
+                  </div>
+                ))}
+
+            <Button type="button" variant="outline" size="sm" 
+            onClick={() => handleInputAddItemsToArray('requirements')}
+             className="mt-2"
+             disabled={!isEditing}
+             >
+            <Plus className="mr-2 h-3 w-3" />
+            Add Requirement
+          </Button>
+
+              </div>
+
             </CardContent>
           </Card>
         </TabsContent>
@@ -568,6 +684,9 @@ const CourseDetails = () => {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+        <TabsContent value="delete">
+          <DeleteCourseCard courseTitle={course.title} onDelete={handleDeleteCourse} />
         </TabsContent>
       </Tabs>
     </div>

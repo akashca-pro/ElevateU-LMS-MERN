@@ -91,16 +91,20 @@ const courseSchema = new mongoose.Schema(
     }
   });
 
-  courseSchema.pre('deleteOne',async (next) => {
+  courseSchema.pre('findOneAndDelete', async function (next) {
     try {
-        if(this.status === 'draft'){
-            await Tutor.findByIdAndUpdate(this.tutor, { $inc: { draftCount: -1 } });
+        const query = this.getQuery(); 
+        const course = await Course.findOne(query);
+
+        if (course?.draft) {
+            await Tutor.findByIdAndUpdate(course.tutor, { $inc: { draftCount: -1 } });
         }
+
         next();
     } catch (error) {
-        next(error)
+        next(error);
     }
-  })
+});
 
   courseSchema.pre("validate", function (next) {
     try {

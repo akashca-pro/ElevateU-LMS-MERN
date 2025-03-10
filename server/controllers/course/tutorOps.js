@@ -115,24 +115,19 @@ export const courseDetails = async (req,res) => {
 
 export const updateCourse = async (req, res) => {
     try {
-      const { title, description, price, thumbnail, tutorId ,courseId} = req.body;
+      const { formData } = req.body;
+      const tutorId = req.tutor.id
+      const courseId = formData._id
 
       const course = await Course.findOne({_id : courseId , tutor : tutorId});
       if (!course) 
         return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
-      
-      const existingCourse = await Course.findOne({ title, tutor: tutorId, _id: { $ne: courseId } });
-      if (existingCourse) 
-        return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
+
+      formData.draft = false
+
+      await Course.findByIdAndUpdate(courseId,formData);
   
-      course.title = title;
-      course.description = description;
-      course.price = price;
-      course.thumbnail = thumbnail;
-  
-      await course.save();
-  
-      return ResponseHandler.success(res,STRING_CONSTANTS.UPDATION_SUCCESS, HttpStatus.OK)
+      return ResponseHandler.success(res,STRING_CONSTANTS.UPDATION_SUCCESS, HttpStatus.OK);
 
     } catch (error) {
         console.log(STRING_CONSTANTS.UPDATION_ERROR, error);
@@ -171,9 +166,10 @@ export const requestPublish = async (req,res) => {
 export const deleteCourse = async (req,res) => {
     
     try {
-        const {tutorId , courseId} = req.body;
+        const tutorId = req.tutor.id
+        const courseId = req.params.id
 
-        const course = await Course.findOne({_id : courseId , tutor : tutorId})
+        const course = await Course.findOne({_id : courseId , tutor : tutorId});
 
         if(!course) 
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);

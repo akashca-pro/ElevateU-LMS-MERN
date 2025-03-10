@@ -12,6 +12,13 @@ export const fileUpload = async(file) =>{
 
         const uploadedFileUrl = await res.json()
 
-        return {uploadedFileUrl : uploadedFileUrl.url}
+        return {
+            uploadedFileUrl : uploadedFileUrl.url,
+            public_id : uploadedFileUrl.public_id
+        }
 
 }
+
+export const generateFileUrl = (publicId) => {
+    return `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/raw/upload/${publicId}`;
+  };

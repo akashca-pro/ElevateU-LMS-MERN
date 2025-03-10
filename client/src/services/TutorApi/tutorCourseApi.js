@@ -43,10 +43,9 @@ const tutorCourseApi = apiSlice.injectEndpoints({
             invalidatesTags : ['Tutor']
         }),
         tutorDeleteCourse : builder.mutation({
-            query : () => ({
-                url : `tutor/delete-course`,
-                method : 'POST',
-                body : credentials
+            query : (id) => ({
+                url : `tutor/delete-course/${id}`,
+                method : 'DELETE'
             }),
             invalidatesTags : ['Tutor']
         }),

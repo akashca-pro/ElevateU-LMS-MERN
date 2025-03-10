@@ -6,7 +6,8 @@ import { ImageIcon, Trash2, Upload, Crop, Check } from "lucide-react"
 import { imageUpload } from "@/services/Cloudinary/imageUpload"
 import { toast } from "sonner"
 
-export function ImageUpload({ value, onChange, onRemove }) {
+export function ImageUpload({ value, onChange, onRemove, disabled = false }) {
+  console.log(value)
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [imageElement, setImageElement] = useState(null);
@@ -184,7 +185,8 @@ export function ImageUpload({ value, onChange, onRemove }) {
             variant="destructive" 
             size="sm" 
             className="absolute bottom-2 right-2"
-            onClick={onRemove}
+            onClick={()=>onRemove()}
+            disabled={disabled}
           >
             <Trash2 className="h-4 w-4 mr-1" />
             Remove

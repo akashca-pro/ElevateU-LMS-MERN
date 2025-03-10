@@ -82,7 +82,7 @@ export function CourseCreationModal({ isOpen, onClose }) {
   }
 
   const handleCancel = () =>{
-    reset();
+    reset(defaultValues);
     setShowConfirmModal(false);
     onClose()
   }
@@ -117,9 +117,13 @@ export function CourseCreationModal({ isOpen, onClose }) {
     const toastId = toast.loading('Saving current data . . .')
     try {
       const data = form.getValues();
+      if(!data.title){
+        toast.error('Atleast Course Title required to make a draft',{id : toastId})
+        return
+      }
       await createCourse({formData : data, draft : true }).unwrap()
       toast.success('Data saved as draft',{id : toastId})
-      reset();
+      reset(defaultValues);
       setShowConfirmModal(false);
       onClose();
     } catch (error) {

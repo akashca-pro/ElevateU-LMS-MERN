@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
+import VideoPlayer from "@/services/Cloudinary/VideoPlayer";
 import { videoUpload } from "@/services/Cloudinary/videoUpload";
 import { X, FileVideo, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
-export const VideoUpload = ({ value, onChange, onRemove }) => {
+export const VideoUpload = ({ value, onChange, onRemove ,disabled = false}) => {
   const [preview, setPreview] = useState("");
   const [isUploaded,setIsUploaded] = useState(false)
   const [videoFile,setVideoFile] = useState(null)
@@ -36,7 +37,7 @@ export const VideoUpload = ({ value, onChange, onRemove }) => {
 
     try {
       const { uploadedVideoeUrl } = await videoUpload(videoFile)
-      toast.success('Video uploaded',{id : toastId})
+      toast.success('Video uploaded',{id : toastId});
       setPreview(uploadedVideoeUrl)
       onChange(uploadedVideoeUrl)
       setIsUploaded(true)
@@ -47,19 +48,23 @@ export const VideoUpload = ({ value, onChange, onRemove }) => {
       toast.error('Video upload failed',{id : toastId})
     }
   };
+  console.log(preview)
 
   return (
     <div className="flex flex-col gap-2">
       {/* Video preview (if available) */}
-      {preview && (
+      {(preview || value) && (
         <div className="relative">
-          <video src={preview} controls className="w-full rounded-md object-cover" />
+
+          {/* <VideoPlayer preview={preview} videoUrl={value} /> */}
+          <video src={preview ? preview : value} controls className="w-full rounded-md object-cover" />
           <Button
             type="button"
             variant="destructive"
             size="icon"
             className="absolute top-2 right-2"
             onClick={handleRemove}
+            disabled={disabled}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -83,9 +88,10 @@ export const VideoUpload = ({ value, onChange, onRemove }) => {
           variant="outline"
           className="shrink-0"
           onClick={() => fileInputRef.current?.click()}
+          disabled = {disabled ? true : false}
         >
           <FileVideo className="h-4 w-4 mr-2" />
-          {!preview ? 'Add ' : 'Change '}
+          {!preview && !value ? 'Add ' : 'Change '}
         </Button>
 
         {/* Upload Button */}

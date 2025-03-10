@@ -35,7 +35,7 @@ export const STRING_CONSTANTS = {
     UNBLOCKED :'User unblocked',
     SUCCESS : 'Success',
     SERVER : 'Server error',
-    DRAFT_LIMIT : 'Draft limit exceeded'
+    DRAFT_LIMIT : 'Draft limit exceeded',
 
 }
 

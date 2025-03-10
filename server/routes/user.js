@@ -16,6 +16,8 @@ import { updateEmail, verifyEmail} from '../controllers/commonControllers.js';
 
 import passport from 'passport'
 
+import { isBlock } from '../middleware/isBlock.js'
+
 const router =  express.Router();
 
 // Auth routes
@@ -38,7 +40,7 @@ router.get('/auth-load',verifyAccessToken('user'),authLoad)
 
 // CRUD routes
 
-router.get('/profile',verifyAccessToken('user'),loadProfile)
+router.get('/profile',verifyAccessToken('user'),isBlock('user'),loadProfile)
 router.post('/update-email/:id',otpLimiter,verifyAccessToken('user'),updateEmail('user'))
 router.post('/verify-email',verifyAccessToken('user'),verifyEmail('user'))
 router.post('/update-profile/:id',verifyAccessToken('user'),updateProfile)

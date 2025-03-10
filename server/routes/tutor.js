@@ -57,7 +57,7 @@ router.get('/courses',verifyAccessToken('tutor'),loadCourses)
 router.get('/view-course/:id',verifyAccessToken('tutor'),courseDetails)
 router.post('/update-course',verifyAccessToken('tutor'),updateCourse)
 router.post('/publish-course',verifyAccessToken('tutor'),requestPublish)
-router.post('/delete-course',verifyAccessToken('tutor'),deleteCourse)
+router.delete('/delete-course/:id',verifyAccessToken('tutor'),deleteCourse)
 router.get('/check-title/:title',verifyAccessToken('tutor'),courseTitleExist)
 
 
