@@ -22,6 +22,7 @@ import { ImageUpload } from "./CreateCourse/ImageUpload"
 import { FileUpload } from "./CreateCourse/FileUpload"
 import { toast } from "sonner"
 import DeleteCourseCard from "./CreateCourse/DeleteCourseCard"
+import validateUpdatedData from "./CreateCourse/validateUpdatedData"
 
 const CourseDetails = () => {
   const { courseId } = useParams()
@@ -52,6 +53,16 @@ const CourseDetails = () => {
   const handleSave = async () => {
     const toastId = toast.loading('Updating data . . . ')
     try {
+
+      const errors = validateUpdatedData(course)
+      console.log(errors)
+
+      if(errors.length > 0){
+        toast.dismiss(toastId)
+        errors.forEach(error => toast.error(error));
+        return
+      }
+
       await updateCourse({formData : course}).unwrap()
       toast.success('Data updated successfully',{id : toastId});
       setIsEditing(false)
@@ -135,6 +146,15 @@ const CourseDetails = () => {
         console.log(error)
         toast.error('Course deletion failed',{id : toastId});
       }
+  }
+
+  const handleSubmitApproval = async() =>{
+    const toastId = toast.loading('Please Wait . . . ')
+    try {
+      
+    } catch (error) {
+      
+    }
   }
 
   const getStatusBadge = (status) => {
@@ -303,7 +323,9 @@ const CourseDetails = () => {
                 <Award className="mr-2 h-4 w-4" /> View Analytics
               </Button>
               {course.status !== "approved" && (
-                <Button className="w-full justify-start" variant="default">
+                <Button 
+                onClick={handleSubmitApproval}
+                className="w-full justify-start" variant="default">
                   <Clock className="mr-2 h-4 w-4" /> Submit for Approval
                 </Button>
               )}
@@ -357,6 +379,43 @@ const CourseDetails = () => {
                     className="min-h-[150px]"
                   />
                 </div>
+
+                <div className="space-y-2 mt-4 md:mt-6 lg:mt-8">
+                <Label>What you learn (Description) </Label>
+                {course?.whatYouLearn.map((field,index) => (
+                 <div key={index} className="flex items-center gap-2">
+                    <Input type = 'text'
+                      name= 'whatYouLearn'
+                      value = {field}
+                      placeholder = {`Description ${index + 1}`}
+                      onChange={(e)=>handleInputArrayChange(e.target.name, index, e.target.value)}
+                      disabled={!isEditing}
+                    />
+                    <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleRemoveArrayItems('whatYouLearn',index)}
+                    className="h-8 w-8 text-destructive"
+                    disabled={!isEditing}
+                >
+                  <X className="h-4 w-4" 
+                   />
+                </Button>
+                  </div>
+                ))}
+              <br/>
+            <Button type="button" variant="outline" size="sm" 
+            onClick={() => handleInputAddItemsToArray('whatYouLearn')}
+             className="mt-2"
+             disabled={!isEditing}
+             >
+            <Plus className="mr-2 h-3 w-3" />
+            Add Description
+          </Button>
+
+              </div>
+
                 <div>
                   <Label htmlFor="category">Category</Label>
                   <Select
@@ -619,7 +678,7 @@ const CourseDetails = () => {
             <CardHeader>
               <CardTitle className="flex justify-between items-center">
                 <span>Reviews</span>
-                {course?.reviews.length > 0 && (
+                {course?.reviews?.length > 0 && (
                   <div className="flex items-center gap-2">
                     <div className="flex">
                       {[1, 2, 3, 4, 5].map((star) => (
@@ -641,9 +700,9 @@ const CourseDetails = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {course?.reviews.length > 0 ? (
+              {course?.reviews?.length > 0 ? (
                 <div className="space-y-4">
-                  {course?.reviews.map((review, index) => (
+                  {course?.reviews?.map((review, index) => (
                     <div key={index} className="p-4 border rounded-lg">
                       <div className="flex justify-between items-start mb-2">
                         <div>

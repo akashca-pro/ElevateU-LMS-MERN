@@ -5,8 +5,7 @@ import {SquareUser, BookOpen, LibraryBig, MessagesSquare, BellRing, Handshake, P
   Trophy, Settings
 } from 'lucide-react'
 
-import ProfileDetails from './ProfileDetails/ProfileDetails';
-import CourseDetails from './my-course/CourseDetails';
+
 
 
 
@@ -31,7 +30,6 @@ import Layout from '@/components/Drawer/Layout';
 
 import Profile from '@/pages/user/ProfileDetails/Index'
 
-import EnrolledCourses from './enrolledCourses/Index';
 import Notification from './notification/Index';
 import Assignments from './assignments/Index';
 import Messages from './messages/Index';
@@ -40,10 +38,16 @@ import Certificates from './certificates/Index';
 import Quiz from './quiz/Index';
 import Setting from './settings/Index';
 
+// My course 
+import CourseLayout from '@/pages/user/myCourse/Index.jsx'
+import CourseDashboard from './myCourse/CourseDashboard';
+import CourseDetails from './myCourse/CourseDetails';
+
 import ProtectAuthPage from '@/protectors/ProtectAuthPage';
 import ProtectedRoute from '@/protectors/ProtectedRoute';
 
 import NotFound from '@/components/FallbackUI/NotFound';
+import BlockedUI from '@/protectors/BlockedUI';
 
 const UserIndex = () => {
   return (
@@ -56,7 +60,6 @@ const UserIndex = () => {
 const menuItems = [
   { id: 1, title: "Profile", icon: SquareUser, path: "/user/profile" },
   { id: 2, title: "My Courses", icon: BookOpen, path: "/user/profile/my-courses" },
-  { id: 3, title: "Enrolled courses", icon: LibraryBig, path: "/user/profile/enrolled-courses" },
   { id: 4, title: "Messages", icon: MessagesSquare, path: "/user/profile/messages" },
   { id: 5, title: "Notifications", icon: BellRing, path: "/user/profile/notification" },
   { id: 6, title: "Community", icon: Handshake, path: "/user/profile/community" },
@@ -69,13 +72,14 @@ const menuItems = [
 
 const ProtectedLayout = () => (
   <ProtectedRoute role={'user'}>
+    <BlockedUI role={'user'}>
     <Navbar/>
     <Layout menuItems = {menuItems}  >
       <Outlet/>
     </Layout>
     <Footer/>
+    </BlockedUI>
     </ProtectedRoute>
-   
 );
 
 
@@ -116,8 +120,10 @@ const UserRoutes = () => {
 
         <Route path='profile' element={<ProtectedLayout/>}>
           <Route index element={<Profile />}/>
-          <Route path='my-courses' element={<CourseDetails/>}/>
-          <Route path='enrolled-courses' element={<EnrolledCourses/>}/>
+          <Route path='my-courses' element={<CourseLayout/>}>
+            <Route index element={<CourseDashboard/>}/>
+            <Route path=':courseName' element={<CourseDetails/>}/>
+          </Route>
           <Route path='messages' element={<Messages/>}/>
           <Route path='notification' element={<Notification/>}/>
           <Route path='community' element={<Community/>}/>

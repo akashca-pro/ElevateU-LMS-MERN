@@ -39,7 +39,7 @@ export function FileUpload({ value = [], onChange, multiple = false , disabled =
       if (newFiles.length > 0) {
         const uploadedFiles = await Promise.all(newFiles.map((file) => fileUpload(file)));
         const uploadedUrls = uploadedFiles.map((result) => result.public_id);
-        onChange([...value, ...uploadedUrls]); // Keep previous URLs + new ones
+        onChange([...value, ...uploadedUrls]); 
       }
       toast.success("All attachments uploaded", { id: toastId });
       setIsUploaded(true);

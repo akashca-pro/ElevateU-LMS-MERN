@@ -42,6 +42,7 @@ import ProtectedRoute from '@/protectors/ProtectedRoute.jsx';
 import CourseLayout from '@/pages/tutor/courseManagement/Index.jsx'
 import CourseDashboard from './courseManagement/CourseDashboard.jsx'
 import CourseDetails from './courseManagement/CourseDetails';
+import BlockedUI from '@/protectors/BlockedUI';
 
 const TutorIndex = () => {
   return (
@@ -64,11 +65,13 @@ const menuItems = [
 const ProtectedLayout = ()=>{
   return (
     <ProtectedRoute role={'tutor'}>
+      <BlockedUI role={'tutor'}>
       <Navbar/>
       <Layout menuItems = {menuItems}>
       <Outlet/>
       </Layout>
       <Footer/>
+      </BlockedUI>
     </ProtectedRoute>
   )
 }

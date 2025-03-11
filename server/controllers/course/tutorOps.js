@@ -97,7 +97,6 @@ export const courseDetails = async (req,res) => {
         const courseId = req.params.id
         const tutorId = req.tutor.id
      
-
         const courseDetails = await Course.findOne({_id : courseId , tutor : tutorId})
         if(!courseDetails) 
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -123,15 +122,13 @@ export const updateCourse = async (req, res) => {
       if (!course) 
         return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
-      formData.draft = false
-
-      await Course.findByIdAndUpdate(courseId,formData);
+      await Course.findOneAndUpdate({ _id : courseId},formData);
   
       return ResponseHandler.success(res,STRING_CONSTANTS.UPDATION_SUCCESS, HttpStatus.OK);
 
     } catch (error) {
         console.log(STRING_CONSTANTS.UPDATION_ERROR, error);
-        return ResponseHandler.error(res,STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseHandler.error(res,STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR,error)
     }
 };
   
@@ -140,15 +137,18 @@ export const updateCourse = async (req, res) => {
 export const requestPublish = async (req,res) => {
     
     try {
-        const {tutorId, courseId} = req.body
+        const tutorId = req.tutor.id
+        const {courseId, formData} = req.body
         const course = await Course.findOne({_id : courseId , tutor : tutorId})
 
         if (!course) return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
-        if(course.isPublished || course.isApproved === "approved") 
+        if(course.isPublished || course.status === "approved") 
              return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
 
         course.isApproved = 'pending';
+
+        course.draft = false
 
         await course.save();
 

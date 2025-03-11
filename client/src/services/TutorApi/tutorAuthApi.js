@@ -77,6 +77,6 @@ export const {
     useTutorRefreshTokenMutation,
     useTutorForgotPasswordMutation,
     useTutorResetPasswordMutation,
-    useTutorGoogleCallbackQuery
+    useTutorGoogleCallbackQuery,
 
 } = tutorAuthApi

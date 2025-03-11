@@ -1,12 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Plus, Edit, Trash, BarChart3, ChevronLeft, ChevronRight, Search} from "lucide-react";
+import { MoreHorizontal, BarChart3, ChevronLeft, ChevronRight, Search} from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {useNavigate, useParams } from "react-router-dom";
-import { DeleteDialog } from "./components/DeleteDialog";
-import {useTutorLoadCoursesQuery, useTutorDeleteCourseMutation } from '@/services/TutorApi/tutorCourseApi'
+import {useTutorLoadCoursesQuery } from '@/services/TutorApi/tutorCourseApi'
 import { useLoadCategoriesQuery } from '@/services/commonApi'
 import {CreateCourseButton} from './CreateCourse/Course-create-button.jsx'
 import { FilterBox } from "@/components/FilterBox";

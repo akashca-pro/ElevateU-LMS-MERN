@@ -50,7 +50,7 @@ const tutorSchema = mongoose.Schema({
         default : [] 
     },
     expertise: {
-        type: [String], // Example: ["Web Development", "Machine Learning"]
+        type: [String], 
         default : []
     },
     experience: {
@@ -89,6 +89,14 @@ const tutorSchema = mongoose.Schema({
         type : Boolean,
     },
     draftCount : {
+        type : Number,
+        default : 0
+    },
+    students : {
+        type : Number,
+        default : 0
+    },
+    courseCount : {
         type : Number,
         default : 0
     }

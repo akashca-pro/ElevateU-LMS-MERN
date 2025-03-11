@@ -51,7 +51,7 @@ const Navbar = () => {
             <img src="/logo.svg" alt="ElevateU Logo" className="h-8 w-8" />
             <span className="text-xl font-bold">ElevateU</span>
           </Link>
-          <Link to="/courses" className="hidden text-gray-600 hover:text-purple-600 md:block">
+          <Link to="/explore" className="hidden text-gray-600 hover:text-purple-600 md:block">
             Explore
           </Link>
         </div>

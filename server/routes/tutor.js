@@ -10,7 +10,7 @@ import {loadProfile,updateProfile,deleteAccount,requestVerification
 import {verifyAccessToken, verifyRefreshToken} from '../utils/verifyToken.js'
 import {otpLimiter} from '../middleware/rateLimiting.js';
 
-import { updateEmail, verifyEmail } from '../controllers/commonControllers.js';
+import { updateEmail, verifyEmail, isBlock} from '../controllers/commonControllers.js';
 
 import {createCourse, updateCourse, requestPublish, deleteCourse, loadCourses, courseDetails,
 courseTitleExist,
@@ -37,6 +37,10 @@ router.get('/auth-callback',passport.authenticate('google-tutor',{ session : fal
 router.get('/auth-failure',authFailure)
 
 router.get('/auth-load',verifyAccessToken('tutor'),authLoad)
+
+//Is Blocked
+
+router.get('/isblocked',verifyAccessToken('tutor'),isBlock('tutor'))
 
 // CRUD routes
 

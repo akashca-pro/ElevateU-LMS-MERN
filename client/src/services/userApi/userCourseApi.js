@@ -13,8 +13,8 @@ const userCourseApi = apiSlice.injectEndpoints({
             invalidatesTags : ['User']
         }),
         userEnrolledCourses : builder.query({
-            query : (id) =>({
-                url : `user/enrolled-courses/${id}`,
+            query : () =>({
+                url : `user/enrolled-courses`,
                 method : 'GET'
             }),
             providesTags : ['User']

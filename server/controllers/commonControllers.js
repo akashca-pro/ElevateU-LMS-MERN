@@ -2,12 +2,18 @@ import User from "../model/user.js"
 import Tutor from "../model/tutor.js"
 import OTP from "../model/otp.js"
 import { generateOtpCode, saveOtp } from "../utils/generateOtp.js"
-import { sendEmailOTP, sendEmailResetPassword } from "../utils/sendEmail.js"
+import { sendEmailOTP } from "../utils/sendEmail.js"
 import HttpStatus from "../utils/statusCodes.js"
 import ResponseHandler from "../utils/responseHandler.js"
 import { DATABASE_FIELDS, STRING_CONSTANTS } from "../utils/stringConstants.js"
 import Category from "../model/category.js"
+import EnrolledCourse from "../model/enrolledCourses.js"
+import Course from "../model/course.js"
 
+const roleModals = {
+    user : User,
+    tutor : Tutor
+}
 
 //Update Email
 
@@ -138,9 +144,11 @@ export const verifyOtp = async (req,res) => {
 export const loadCategories = async (req,res) => {
         
     try {
-        const categories = await Category.find().select([
+        const categories = await Category.find({isActive : true}).select([
             DATABASE_FIELDS.ID,
-            DATABASE_FIELDS.NAME
+            DATABASE_FIELDS.NAME,
+            DATABASE_FIELDS.ICON,
+            DATABASE_FIELDS.DESCRIPTION
         ])
 
         if(!categories) 
@@ -151,6 +159,139 @@ export const loadCategories = async (req,res) => {
     } catch (error) {
         console.log(STRING_CONSTANTS.LOADING_ERROR, error);
         return ResponseHandler.error(res, STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// Load course
+
+export const loadCourses = (sort) => async (req,res) => {
+    
+    try {
+        let sortQuery;
+
+        if(sort === 'top-rated'){
+            sortQuery = {rating : -1}
+        }else if(sort === 'best-selling'){
+            sortQuery = {totalEnrollment : -1}
+        }else if(sort === 'new-releases'){
+            sortQuery = {createdAt : -1}
+        }else if (sort === 'trending'){
+            const oneWeekAgo = new Date()
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+            const trendingEnrollments = await EnrolledCourse.aggregate( 
+                [ {$match : { createdAt : {$gte : oneWeekAgo} } },
+                  { $group : { _id : '$course' , count : { $sum : 1 } } },
+                  { $sort : { count : -1 } },
+                  { $limit : 10 }
+                ]);
+        
+            const trendingCoursesIds = trendingEnrollments.map((e)=>e._id)
+            const trendingCourses = await Course.find({ _id : { $in : trendingCoursesIds } , isPublished : true })
+            .select('_id title tutor totalEnrollment category duration thumbnail rating')
+            .populate('tutor','name profileImage')
+            .exec()
+
+            return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.ok,trendingCourses)
+        };
+
+        const courses = await Course.find()
+        .select('_id title tutor totalEnrollment category duration thumbnail rating')
+        .sort(sortQuery)
+        .limit(10)
+        .populate('tutor','firstName profileImage')
+        .exec();
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.ok,courses)
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.LOADING_ERROR,error)
+        return ResponseHandler.success(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// Load Course details
+
+export const loadCourseDetails = async (req,res) => {
+    
+    try {
+        const courseId = req.params.id
+
+        const course = await Course.findById(courseId)
+        .populate('tutor' , 'firstName profileImage bio')
+
+        if(!course)
+            ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+        const processedModules = course.modules.map(module=>({
+            _id : module._id,
+            title : module.title,
+            lessons : module.lessons.map((lesson,index)=>{
+                if(index === 0 ){
+                    return {
+                        _id : lesson._id,
+                        title : lesson.title,
+                        videoUrl : lesson.videoUrl,
+                        duration : lesson.duration
+                    }
+                }else{
+                    return {
+                        _id : lesson._id,
+                        title : lesson.title,
+                        duration : lesson.duration
+                    }
+                }
+            })
+
+        }))
+
+        
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK,{
+            _id : course._id,
+            title : course.title,
+            description : course.description,
+            category : course.category,
+            tutor : course.tutor,
+            price : course.price,
+            discount : course.discount,
+            totalEnrollment : course.totalEnrollment,
+            thumbnail : course.thumbnail,
+            requirements : course.requirements,
+            rating : course.rating,
+            level : course.level,
+            modules : processedModules,
+            updatedAt : course.updatedAt,
+            whatYouLearn : course.whatYouLearn
+        })
+
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.LOADING_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// isBlock
+
+export const isBlock = (role) => async (req,res) => {
+    
+    try {
+        const Model = roleModals[role]
+        const id = req[role].id;
+        const user = await Model.findById(id)
+        if(!user)
+            return ResponseHandler.error(res, STRING_CONSTANTS.BLOCKED, HttpStatus.NOT_FOUND);
+
+        if(user.isBlocked)
+            return ResponseHandler.error(res, STRING_CONSTANTS.BLOCKED, HttpStatus.FORBIDDEN); 
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.SUCCESS, HttpStatus.OK, id)
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.SERVER, error)
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

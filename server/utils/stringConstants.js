@@ -62,5 +62,7 @@ export const DATABASE_FIELDS = {
     ENROLLED_COURSES : 'enrolledCourses',
     TITLE : 'title',
     CATEGORY : 'category',
+    ICON : 'icon',
+    DESCRIPTION : 'description'
 
 }

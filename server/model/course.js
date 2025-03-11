@@ -18,13 +18,6 @@ const moduleSchema = new mongoose.Schema({
 
 })
 
-const reviewSchema = new mongoose.Schema({
-    _id : { type : String, default : ()=> nanoid(12) },
-    userId : { type : String, ref : 'User', required : true},
-    rating : {type : Number, required : true , min : 1 , max : 5},
-    comment : {type : String},
-
-},{timestamps : true})
 
 const courseSchema = new mongoose.Schema(
     {
@@ -64,7 +57,7 @@ const courseSchema = new mongoose.Schema(
 
       modules: {type : [moduleSchema] },
 
-      reviews: [reviewSchema], // Array of reviews
+      whatYouLearn : [{ type : String }],
       
       draft : { type : Boolean, default : false },
     },
@@ -139,6 +132,7 @@ const courseSchema = new mongoose.Schema(
         next(error);
     }
 });
+
 
 
 const Course = mongoose.model('Course',courseSchema)
