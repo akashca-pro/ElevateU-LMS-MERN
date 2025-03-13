@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import useForm from "@/hooks/useForm";
 import { toast } from "sonner";
-import {useSendOtpMutation} from '@/services/commonApi'
-import React from "react"
+import {useSendOtpMutation, useIsAccountExistQuery} from '@/services/commonApi'
+import React, { useEffect } from "react"
 
 const SignUp = ({role}) => {
-  
+ 
   const navigate = useNavigate();
   const [sendOtp,{isLoading}] = useSendOtpMutation();
   const {
@@ -15,6 +15,20 @@ const SignUp = ({role}) => {
     toggleConfirmPasswordVisibility, togglePasswordVisibility
 
   } = useForm()
+
+  const { data, isError, error } = useIsAccountExistQuery(
+    role,formData.email,  // ✅ Trigger query when email is provided
+    { skip: !formData.email } // ✅ Skip API call if email is empty
+  );
+
+ 
+  useEffect(() => {
+  if (data?.status === 409) {
+    toast.error("Your account already exists. Try logging in.");
+    navigate(`/${role}/login`);
+  }
+}, [data, navigate, role]);
+
 
   const isFormValid = Object.values(errors).some((err) => err) || 
     !formData.password || 
@@ -36,12 +50,14 @@ const SignUp = ({role}) => {
 
     const toastId = toast.loading("Signing up...");
 
+
     const credentials = {
       role,
       firstName : formData.firstName,
       email : formData.email,
       otpType : 'signIn'
     }
+
 
     try {
       await sendOtp(credentials).unwrap()

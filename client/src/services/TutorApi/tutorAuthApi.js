@@ -64,6 +64,13 @@ const tutorAuthApi = apiSlice.injectEndpoints({
                 method : 'GET',
             }),
         }),
+        tutorIsVerified : builder.query({
+            query : () => ({
+                url : `tutor/is-verified`,
+                method : 'GET'
+            }),
+            providesTags : ['Tutor']
+        })
     })
 })
 
@@ -78,5 +85,6 @@ export const {
     useTutorForgotPasswordMutation,
     useTutorResetPasswordMutation,
     useTutorGoogleCallbackQuery,
+    useTutorIsVerifiedQuery
 
 } = tutorAuthApi

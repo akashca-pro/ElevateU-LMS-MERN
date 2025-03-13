@@ -16,10 +16,12 @@ import { SelectExperience } from "./components/SelectExperience";
 import Tooltip from "./components/Tooltip";
 import {useTutorRequestVerificationMutation} from '@/services/TutorApi/tutorProfileApi'
 import { Card } from "@/components/ui/card";
+import { useTutorAuthActions } from '@/hooks/useDispatch.js'
 
 
 const ProfileDetails = () => {
   const {tutor} = useSelect()
+  const { login } = useTutorAuthActions()
 
   const {data : details } = useTutorLoadProfileQuery()
   const teacher = details?.data
@@ -55,7 +57,7 @@ const ProfileDetails = () => {
 
 // every time api fetch happens data is stored in the form data 
   useEffect(() => {
-    if (teacher) {
+    if (teacher !== undefined) {
       setFormData({
         firstName: teacher?.firstName || "",
         lastName: teacher?.lastName || "",
@@ -67,7 +69,9 @@ const ProfileDetails = () => {
         experience : teacher?.experience
       });
       if(teacher.expertise.length !== 0) setExpertise([...teacher.expertise])
+      login(teacher)
     }
+    
   }, [teacher]);
 
 // check current formdata and api fetched data is same or not, inorder to ensure errorless update disables the button
@@ -126,7 +130,7 @@ const ProfileDetails = () => {
       formData.profileImage = uploadedImageUrl
     }
 
-    console.log(formData)
+   
 
     try {
       await tutorUpdateProfile(formData).unwrap()
@@ -321,7 +325,7 @@ const ProfileDetails = () => {
           className='bg-blue-600 hover:bg-blue-700'
           onClick = {handleVerificationRequest}
           >
-            {tutor.tutorData?.status === 'pending' ? 'Check verification status' : 'Request verification'}
+            {teacher?.status === 'pending' ? 'Check verification status' : 'Request verification'}
           </Button>}
           </div>
         </form>

@@ -1,8 +1,11 @@
 import Course from '../../model/course.js'
 import Tutor from '../../model/tutor.js'
+import Admin from '../../model/admin.js'
+import Notification from '../../model/notification.js'
 import ResponseHandler from '../../utils/responseHandler.js'
 import HttpStatus from '../../utils/statusCodes.js'
 import { STRING_CONSTANTS } from '../../utils/stringConstants.js'
+import { connectedUsers } from '../../services/socketServer.js'
 
 // create a course
 export const createCourse = async (req,res) => {
@@ -117,6 +120,9 @@ export const updateCourse = async (req, res) => {
       const { formData } = req.body;
       const tutorId = req.tutor.id
       const courseId = formData._id
+      formData.isPublished = false
+      formData.draft = true
+      formData.status = 'draft'
 
       const course = await Course.findOne({_id : courseId , tutor : tutorId});
       if (!course) 
@@ -134,32 +140,80 @@ export const updateCourse = async (req, res) => {
   
 // publish course
 
-export const requestPublish = async (req,res) => {
-    
+export const requestPublish = async (req, res) => {
     try {
-        const tutorId = req.tutor.id
-        const {courseId, formData} = req.body
-        const course = await Course.findOne({_id : courseId , tutor : tutorId})
+        const tutorId = req.tutor.id;
+        const { courseId } = req.body;
 
-        if (!course) return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+        // Find course owned by tutor
+        const course = await Course.findOne({ _id: courseId, tutor: tutorId }).populate('tutor', 'firstName email')
 
-        if(course.isPublished || course.status === "approved") 
-             return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
+        if (!course) {
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
 
-        course.isApproved = 'pending';
+        if (course.isPublished || course.status === "approved") {
+            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
+        }
+       
+            const missingFields = [];
 
-        course.draft = false
+            if (!course.title?.trim()) missingFields.push("title");
+            if (!course.description?.trim()) missingFields.push("description");
+            if (!course.category) missingFields.push("category");
+            if (!course.isFree && (typeof course.price !== 'number' || course.price <= 0)) missingFields.push("price");
+            if (!course.thumbnail) missingFields.push("thumbnail");
 
+            if (!course.modules || course.modules.length === 0) {
+                missingFields.push("modules (at least one required)");
+            } else {
+                course.modules.forEach((module, moduleIndex) => {
+                    if (!module.title?.trim()) missingFields.push(`Module ${moduleIndex + 1}: title`);
+                    if (!module.lessons || module.lessons.length === 0) {
+                        missingFields.push(`Module ${moduleIndex + 1}: At least one lesson required`);
+                    } else {
+                        module.lessons.forEach((lesson, lessonIndex) => {
+                            if (!lesson.title?.trim()) missingFields.push(`Module ${moduleIndex + 1}, Lesson ${lessonIndex + 1}: title`);
+                            if (!lesson.videoUrl?.trim()) missingFields.push(`Module ${moduleIndex + 1}, Lesson ${lessonIndex + 1}: videoUrl`);
+                        });
+                    }
+                });
+            }
+
+            if (missingFields.length > 0) {
+                return ResponseHandler.error(res, `Missing required fields: ${missingFields.join(", ")}`, HttpStatus.BAD_REQUEST);
+            }
+
+        const adminId = await Admin.findOne()
+
+        course.status = "pending";
+        course.draft = false;
         await course.save();
 
-        return ResponseHandler.success(res,"Course Approve requested , after verifying course will be published", HttpStatus.OK)
+
+
+        const newNotification = await Notification.create({
+            recipientId : adminId._id,
+            recipientType : 'Admin',
+            senderId : tutorId,
+            senderType : 'Tutor',
+            type : 'publish_request',
+            message : `Course publish request recieved from ${course?.tutor?.firstName} , email : ${course?.tutor?.email}`
+        })
+
+
+        if(connectedUsers[newNotification.recipientId]){
+            const socketId = connectedUsers[newNotification.recipientId].socketId
+            req.io.to(socketId).emit('newNotification',newNotification)
+        }
+
+        return ResponseHandler.success(res, "Course publish request submitted. It will be reviewed before publishing.", HttpStatus.OK);
 
     } catch (error) {
-        console.log(STRING_CONSTANTS.UPDATION_ERROR, error);
-        return ResponseHandler.error(res,STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
+        console.error(STRING_CONSTANTS.UPDATION_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.UPDATION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-}
+};
 
 // delete course 
 
@@ -205,4 +259,3 @@ export const courseTitleExist = async (req,res) => {
     }
 
 }
-

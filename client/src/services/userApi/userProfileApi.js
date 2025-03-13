@@ -41,7 +41,22 @@ const userProfileApi = apiSlice.injectEndpoints({
                 method : 'DELETE'
             }),
             invalidatesTags : ['User']
-        })  
+        }),
+        userLoadNotifications : builder.query({
+            query : ()=>({
+                url : `user/load-notifications`,
+                method : 'GET'
+            }),
+            providesTags :['User']
+        }),
+        userReadNotifications : builder.mutation({
+            query : (credentials)=>({
+                url : `user/read-notifications`,
+                method : 'POST',
+                body : credentials
+            }),
+            invalidatesTags : ['Admin']
+        }),
     })
 })
 
@@ -51,6 +66,8 @@ export const {
     useUserUpdateEmailMutation,
     useUserVerifyEmailMutation,
     useUserUpdateProfileMutation,
-    useUserDeleteAccountMutation
+    useUserDeleteAccountMutation,
+    useUserLoadNotificationsQuery,
+    useUserReadNotificationsMutation
 
 } = userProfileApi

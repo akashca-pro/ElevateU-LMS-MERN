@@ -7,7 +7,6 @@ import { imageUpload } from "@/services/Cloudinary/imageUpload"
 import { toast } from "sonner"
 
 export function ImageUpload({ value, onChange, onRemove, disabled = false }) {
-  console.log(value)
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [imageElement, setImageElement] = useState(null);

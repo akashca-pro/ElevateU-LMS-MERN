@@ -1,3 +1,4 @@
+import http from 'http'
 import express from 'express'
 import 'dotenv/config'
 import cookieParser from 'cookie-parser'
@@ -11,11 +12,22 @@ import commonRouter from './routes/common.js'
 
 import {errorHandler,notFound} from './middleware/errorHandling.js'
 import passport from './config/passport.js'
+import { initializeSocket } from './services/socketServer.js'
 
 connectDB();
 
 
 const app= express()
+const server = http.createServer(app);
+
+const io = initializeSocket(server);
+
+app.use((req, res, next) => {
+    req.io = io;
+    next();
+  });
+  
+
 app.use(passport.initialize())
 
 app.use(cors({
@@ -43,6 +55,6 @@ app.use('/api/admin',adminRouter)
 app.use(notFound)
 app.use(errorHandler)
 
-app.listen(process.env.PORT || 9000,()=>{
+server.listen(process.env.PORT || 9000,()=>{
     console.log(`Server started on http://localhost:${process.env.PORT}`)
 })

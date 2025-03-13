@@ -11,10 +11,12 @@ import {enrollInCourse, loadEnrolledCourses} from '../controllers/enrolledCourse
 
 import {verifyAccessToken,verifyRefreshToken} from '../utils/verifyToken.js'
 import {otpLimiter} from '../middleware/rateLimiting.js';
+import { isBlocked } from '../middleware/isBlocked.js'
 
-import { updateEmail, verifyEmail, isBlock} from '../controllers/commonControllers.js';
+import { updateEmail, verifyEmail , isBlock} from '../controllers/commonControllers.js';
 
 import passport from 'passport'
+import { loadNotifications, readNotifications } from '../controllers/notificationController.js'
 
 
 const router =  express.Router();
@@ -54,5 +56,9 @@ router.delete('/delete-account/:id',verifyAccessToken('user'),deleteAccount)
 router.post('/enroll-course',verifyAccessToken('user'),enrollInCourse)
 router.get('/enrolled-courses',verifyAccessToken('user'),loadEnrolledCourses)
 
+// notification
+
+router.get('/load-notifications',verifyAccessToken('user'),loadNotifications('user'))
+router.post('/read-notifications',verifyAccessToken('user'),readNotifications)
 
 export default router

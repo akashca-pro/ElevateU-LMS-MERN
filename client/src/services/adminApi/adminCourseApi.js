@@ -5,27 +5,18 @@ import apiSlice from "../apiSlice";
 const adminCourseApi = apiSlice.injectEndpoints({
     endpoints : (builder) =>({
         adminLoadPendingRequest : builder.query({
-            query : ({page,limit,search})=>({
-                url : `admin/pending-request?page=${page}&limit=${limit}&search=${search}`,
+            query : ()=>({
+                url : `admin/pending-request`,
                 method : 'GET'
             }),
             providesTags : ['Admin']
         }),
-        adminCourseApprove : builder.mutation({
-            query : ({id,credentials})=>({
-                url : `admin/course-approve/${id}`,
-                method : 'POST',
-                body :credentials
-            }),
-            invalidatesTags : ['Admin']
-        }),
-        adminCourseReject : builder.mutation({
-            query : ({id,credentials})=>({
-                url : `admin/course-reject/${id}`,
+        adminApproveOrRejectCourse : builder.mutation({
+            query  : (credentials)=>({
+                url : `admin/verify-course`,
                 method : 'POST',
                 body : credentials
-            }),
-            invalidatesTags : ['Admin']
+            })
         }),
         adminLoadCourses : builder.query({
             query : ({page,limit,search})=>({
@@ -58,8 +49,7 @@ export const {
     // course publish request manage
 
     useAdminLoadPendingRequestQuery,
-    useAdminCourseApproveMutation,
-    useAdminCourseRejectMutation,
+    useAdminApproveOrRejectCourseMutation,
 
     // course manage
 

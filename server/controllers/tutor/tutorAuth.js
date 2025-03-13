@@ -275,3 +275,24 @@ export const authLoad = async (req,res) => {
     }
 
 }
+
+export const isTutorVerified = async (req,res) => {
+    
+    try {
+        const tutorId = req.tutor.id
+        const tutor = Tutor.findById(tutorId)
+
+        if(!tutor)
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
+
+        if(!tutor.isAdminVerified)
+            return ResponseHandler.error(res, STRING_CONSTANTS.NOT_ALLOWED, HttpStatus.FORBIDDEN)
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.ALLOWED, HttpStatus.OK)
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.NOT_ALLOWED, error)
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { nanoid } from "nanoid";
 
 const reviewSchema = new mongoose.Schema({
     _id : { type : String, default : ()=> nanoid(12) },

@@ -17,6 +17,7 @@ import {loadPendingRequest, deleteCourse, loadCourses, assignCategory, approveOr
 } from '../controllers/course/adminOps.js' // Admin manage course approval and course Manage
 
 import {verifyAccessToken,verifyRefreshToken} from '../utils/verifyToken.js'
+import { loadNotifications, readNotifications } from '../controllers/notificationController.js'
 
 const router = express.Router()
 
@@ -74,6 +75,11 @@ router.post('/verify-course',verifyAccessToken('admin'),approveOrRejectCourse)
 router.get('/view-courses',verifyAccessToken('admin'),loadCourses)
 router.post('/assign-category',verifyAccessToken('admin'),assignCategory)
 router.delete('/delete-course/:id',verifyAccessToken('admin'),deleteCourse)
+
+// notification
+
+router.get('/load-notifications',verifyAccessToken('admin'),loadNotifications('admin'))
+router.post('/read-notifications',verifyAccessToken('admin'),readNotifications)
 
 
 export default router

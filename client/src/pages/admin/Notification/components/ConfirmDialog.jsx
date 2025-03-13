@@ -14,18 +14,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"; // Ensure Input is imported
 import { toast } from "sonner";
 
-export default function ConfirmDialog({ btnName, btnClass, id, action, refetchData}) {
+export default function ConfirmDialog({ 
+  btnName, btnClass, id, action, refetchData, description='' ,title = ''}) {
   const [reason, setReason] = useState("");
 
-  const handleVerification = async (tutorId, reason) => {
+  const handleAction = async (id, reason) => {
     const toastId = toast.loading("Please wait . . .");
     try {
       const input = btnName.toLowerCase();
-      const response = await action({ input, tutorId, reason }).unwrap();
+      const response = await action({ input, id, reason }).unwrap();
       toast.success(response?.message || "Verification done", { id: toastId });
       refetchData();
       setReason('');
     } catch (error) {
+      console.log(error)
       toast.error(error?.data?.message || "Error verifying", { id: toastId });
     }
   };
@@ -37,9 +39,9 @@ export default function ConfirmDialog({ btnName, btnClass, id, action, refetchDa
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>{title ? title : "Are you absolutely sure?"}</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone.
+            {description ? description : "This action cannot be undone."}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-2">
@@ -52,8 +54,8 @@ export default function ConfirmDialog({ btnName, btnClass, id, action, refetchDa
           />
         </div>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={() => handleVerification(id, reason)} >
+          <AlertDialogCancel >Cancel</AlertDialogCancel>
+          <AlertDialogAction className={btnClass} onClick={() => handleAction(id, reason)} >
             Continue
           </AlertDialogAction>
         </AlertDialogFooter>

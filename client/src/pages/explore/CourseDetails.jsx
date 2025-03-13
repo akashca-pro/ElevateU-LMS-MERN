@@ -168,7 +168,7 @@ const CourseDetails = () => {
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold mb-4">What You'll Learn</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {mockCourse.whatYouLearn.map((item, index) => (
+                  {course.whatYouLearn.map((item, index) => (
                     <div key={index} className="flex items-start">
                       <CheckCircle className="h-5 w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
                       <span>{item}</span>

@@ -19,8 +19,6 @@ const ExplorePage = () => {
     const { data : newReleasesData, isLoading : newReleasesDataLoading, error : newReleasesDataError } = useLoadNewReleasesCoursesQuery()
     const categories = details?.data
 
-    console.log(topRatedData?.data)
-
   const courseSections = [
       { title: "Trending Now", courses: trendingData?.data || [] },
       { title: "Top Rated", courses: topRatedData?.data || [] },
@@ -87,8 +85,8 @@ const ExplorePage = () => {
         <h2 className="text-2xl font-semibold mb-4">Categories</h2>
         <Carousel className="w-full">
           <CarouselContent className="-ml-2 md:-ml-4">
-            {categories?.map((category) => (
-              <CarouselItem key={category.id} className="pl-2 md:pl-4 md:basis-1/3 lg:basis-1/4">
+            {categories?.map((category,index) => (
+              <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/3 lg:basis-1/4">
                 <CategoryCard category={category} />
               </CarouselItem>
             ))}
@@ -111,8 +109,8 @@ const ExplorePage = () => {
           </div>
           <Carousel className="w-full">
             <CarouselContent className="-ml-2 md:-ml-4">
-              {section.courses?.map((course) => (
-                <CarouselItem key={course._id} className="pl-2 md:pl-4 md:basis-1/3">
+              {section.courses?.map((course,index) => (
+                <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/3">
                   <CourseCard course={course} />
                 </CarouselItem>
               ))}

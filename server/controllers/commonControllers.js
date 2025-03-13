@@ -1,5 +1,6 @@
 import User from "../model/user.js"
 import Tutor from "../model/tutor.js"
+import Admin from "../model/admin.js"
 import OTP from "../model/otp.js"
 import { generateOtpCode, saveOtp } from "../utils/generateOtp.js"
 import { sendEmailOTP } from "../utils/sendEmail.js"
@@ -9,10 +10,33 @@ import { DATABASE_FIELDS, STRING_CONSTANTS } from "../utils/stringConstants.js"
 import Category from "../model/category.js"
 import EnrolledCourse from "../model/enrolledCourses.js"
 import Course from "../model/course.js"
+import Notification from "../model/notification.js"
 
 const roleModals = {
     user : User,
-    tutor : Tutor
+    tutor : Tutor,
+    admin : Admin
+}
+
+// Email exist 
+
+export const isAccountExist = async (req,res) => {
+    
+    try {
+        const { role , email} = req.query
+        console.log(req.query)
+        const db = roleModals[role]
+        const exist = await db.findOne({email : email})
+        if(exist) 
+            return ResponseHandler.error(res,STRING_CONSTANTS.EXIST,HttpStatus.CONFLICT)
+
+        return ResponseHandler.success(res,STRING_CONSTANTS.SUCCESS, HttpStatus.OK)
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.CONFLICT,error)
+        return ResponseHandler.success(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
 }
 
 //Update Email

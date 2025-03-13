@@ -33,8 +33,6 @@ const Index = () => {
     }
   }, [adminDetails , loadProfile]);
 
-  console.log('adminData',adminDetails)
-  console.log('formdata',formData)
 
 
   const notValid = 

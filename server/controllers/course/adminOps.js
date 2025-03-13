@@ -40,13 +40,9 @@ export const loadPendingRequest = async (req,res) => {
     
     try {
         const request = await Course.find({status : 'pending'})
-        .select([
-            DATABASE_FIELDS.ID,
-            DATABASE_FIELDS.EMAIL,
-            DATABASE_FIELDS.FIRST_NAME,
-            DATABASE_FIELDS.STATUS,
-            DATABASE_FIELDS.REASON
-        ].join(' '));
+        .populate('tutor','_id firstName lastName email profileImage')
+        .populate('category','name')
+        .select('_id title tutor category thumbnail description createdAt modules price isFree level')
 
         if(!request||request.length === 0) 
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -65,21 +61,21 @@ export const loadPendingRequest = async (req,res) => {
 export const approveOrRejectCourse = async (req,res) => {
     
     try {
-        const {tutorId, courseId, input, reason} = req.body
+        const {id, input, reason} = req.body
+
+        const courseId = id.courseId;
+        const tutorId = id.tutorId;
 
         const course = await Course.findOne({_id : courseId , tutor : tutorId})
 
         if(!course) 
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
-        if(course.status === 'approved' ) 
+        if(course.status === 'approved' || course.status === 'rejected' ) 
             return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
         
-        if(course.status === 'rejected') 
-            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
-
         if(input === 'approve'){
-            await Course.findByIdAndUpdate(tutorId,{
+            await Course.findByIdAndUpdate(courseId,{
                 status : 'approved',
                 reason,
                 isPublished : true
@@ -88,7 +84,7 @@ export const approveOrRejectCourse = async (req,res) => {
             return ResponseHandler.success(res,`Verification approved for ${course?.title}`,HttpStatus.OK)
         } 
         else if(input === 'reject') {
-            await Course.findByIdAndUpdate(tutorId,{status : 'rejected' , reason})
+            await Course.findByIdAndUpdate(courseId,{status : 'rejected' , reason})
             return ResponseHandler.success(res,`Verification rejected for  ${course?.title}`,HttpStatus.OK)
         }   
         else return ResponseHandler.error(res, STRING_CONSTANTS.INVALID_INPUT, HttpStatus.BAD_REQUEST);

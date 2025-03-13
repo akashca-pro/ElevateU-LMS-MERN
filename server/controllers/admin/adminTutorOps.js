@@ -1,4 +1,6 @@
+import Notification from '../../model/notification.js';
 import Tutor from '../../model/tutor.js'
+import { connectedUsers } from '../../services/socketServer.js';
 import ResponseHandler from '../../utils/responseHandler.js';
 import HttpStatus from '../../utils/statusCodes.js';
 import { DATABASE_FIELDS, STRING_CONSTANTS } from '../../utils/stringConstants.js';
@@ -219,13 +221,7 @@ export const loadRequests = async (req,res) => {
     
     try {
         const request = await Tutor.find({status : 'pending'})
-        .select([
-            DATABASE_FIELDS.ID,
-            DATABASE_FIELDS.EMAIL,
-            DATABASE_FIELDS.FIRST_NAME,
-            DATABASE_FIELDS.STATUS,
-            DATABASE_FIELDS.REASON
-        ].join(' '));
+        .select('_id email firstName lastName profileImage  bio experience expertise createdAt');
 
         if(!request || request.length===0) 
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -244,30 +240,54 @@ export const loadRequests = async (req,res) => {
 export const approveOrRejectrequest = async (req,res) => {
     
     try {
-        const {tutorId , input , reason} = req.body
+        const {id , input , reason} = req.body
 
-        const tutor = await Tutor.findById(tutorId)
+        const tutor = await Tutor.findById(id)
+
+        let newNotification = {}
 
         if(!tutor) 
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
-        if(tutor.status === 'approved' ) 
-            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
-        
-        if(tutor.status === 'rejected') 
+        if(tutor.status === 'approved' || tutor.status === 'rejected') 
             return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
 
         if(input === 'approve'){
-            await Tutor.findByIdAndUpdate(tutorId,{
+            await Tutor.findByIdAndUpdate(id,{
                 status : 'approved',
                 reason,
                 isAdminVerified : true
             })
 
+            newNotification = await Notification.create({
+                recipientId : id,
+                recipientType : 'Tutor',
+                type : 'verify_profile',
+                message : `Hi ${tutor.firstName}, your profile is verified. Now you can upload courses ${reason}`
+            })
+
+            if(connectedUsers[newNotification.recipientId]){
+                const socketId = connectedUsers[newNotification.recipientId].socketId
+                req.io.to(socketId).emit('newNotification',newNotification)
+            }
+
             return ResponseHandler.success(res,`Verification approved for ${tutor?.firstName}`,HttpStatus.OK)
         } 
         else if(input === 'reject') {
-            await Tutor.findByIdAndUpdate(tutorId,{status : 'rejected' , reason})
+            await Tutor.findByIdAndUpdate(id,{status : 'rejected' , reason})
+
+            newNotification = await Notification.create({
+                recipientId : id,
+                recipientType : 'Tutor',
+                type : 'verify_profile',
+                message : `Hi ${tutor.firstName}, your profile is rejected. ${reason}`
+            })
+
+            if(connectedUsers[newNotification.recipientId]){
+                const socketId = connectedUsers[newNotification.recipientId].socketId
+                req.io.to(socketId).emit('newNotification',newNotification)
+            }
+
             return ResponseHandler.success(res,`Verification rejected for ${tutor?.firstName}`,HttpStatus.OK)
         }   
         else return ResponseHandler.error(res, STRING_CONSTANTS.INVALID_INPUT, HttpStatus.BAD_REQUEST);

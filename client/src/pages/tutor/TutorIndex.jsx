@@ -5,7 +5,7 @@ BellRing, SquareUser, BookOpen, MessagesSquare, IndianRupee, ChartNoAxesCombined
 
 import {Routes , Route, Outlet} from 'react-router-dom'
 
-import {useTutorSignupMutation, useTutorLoginMutation,
+import {useTutorSignupMutation, useTutorLoginMutation,useTutorIsVerifiedQuery,
    useTutorForgotPasswordMutation, useTutorResetPasswordMutation ,useTutorGoogleCallbackQuery
 } from '@/services/TutorApi/tutorAuthApi.js'
 
@@ -23,10 +23,14 @@ import Navbar from '@/components/Navbar.jsx'
 import Layout from '@/components/Drawer/Layout.jsx'
 import Footer from '@/components/Footer.jsx'
 import NotFound from '@/components/FallbackUI/NotFound'
-
+import BlockedUI from '@/protectors/BlockedUI';
+import IsAccessGranted from './courseManagement/IsAccessGranted';
 
 
 // Tutor Profile
+
+import ProtectAuthPage from '@/protectors/ProtectAuthPage.jsx';
+import ProtectedRoute from '@/protectors/ProtectedRoute.jsx';
 
 import ProfileDetails from './tutorProfile/Index'
 
@@ -36,13 +40,12 @@ import Analytics from './analytics/Analytics.jsx'
 import Notification from './Notification/Index.jsx'
 import Setting from './settings/Settings.jsx'
 
-import ProtectAuthPage from '@/protectors/ProtectAuthPage.jsx';
-import ProtectedRoute from '@/protectors/ProtectedRoute.jsx';
 
 import CourseLayout from '@/pages/tutor/courseManagement/Index.jsx'
 import CourseDashboard from './courseManagement/CourseDashboard.jsx'
 import CourseDetails from './courseManagement/CourseDetails';
-import BlockedUI from '@/protectors/BlockedUI';
+
+
 
 const TutorIndex = () => {
   return (
@@ -116,7 +119,11 @@ return (
 
         <Route path='profile' element={<ProtectedLayout/>}>
           <Route index element={<ProfileDetails/>}/>
-          <Route path='course-management' element={<CourseLayout/>}>
+          <Route path='course-management' element={
+            <IsAccessGranted useCheckApi = {useTutorIsVerifiedQuery} >
+            <CourseLayout/>
+            </IsAccessGranted>
+            }>
             <Route index element={<CourseDashboard/>}/>
             <Route path=':courseId' element={<CourseDetails/>}/>
           </Route>

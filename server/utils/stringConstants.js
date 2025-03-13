@@ -36,7 +36,9 @@ export const STRING_CONSTANTS = {
     SUCCESS : 'Success',
     SERVER : 'Server error',
     DRAFT_LIMIT : 'Draft limit exceeded',
-
+    NOT_ALLOWED : 'Access Restricted',
+    ALLOWED : 'Access Granted'
+ 
 }
 
 export const DATABASE_FIELDS = {

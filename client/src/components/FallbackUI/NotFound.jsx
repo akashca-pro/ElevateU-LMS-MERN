@@ -93,7 +93,7 @@ const NotFound = () => {
                       whileTap={{ scale: 0.95 }}
                     >
                       <Home className="h-5 w-5" />
-                      <span>Return to Dashboard</span>
+                      <span>Return to Home</span>
                       <ArrowRight className="h-4 w-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
                     </motion.button>
                   </motion.div>

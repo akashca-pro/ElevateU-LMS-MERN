@@ -54,7 +54,8 @@ const tutorCourseApi = apiSlice.injectEndpoints({
                 url : `tutor/check-title/${id}`,
                 method : 'GET'
             }) 
-        })
+        }),
+        
     })
 })
 

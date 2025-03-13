@@ -66,6 +66,12 @@ const commonApi = apiSlice.injectEndpoints({
                 url : `courses/${id}`,
                 method : 'GET'
             })
+        }),
+        isAccountExist : builder.query({
+            query : (role, email) => ({
+                url : `is-account-exist?role=${role}&email=${email}`,
+                method : 'GET'
+            })
         })
         
         
@@ -83,6 +89,7 @@ export const {
     useLoadBestSellersCoursesQuery,
     useLoadNewReleasesCoursesQuery,
     useLoadTrendingCoursesQuery,
-    useLoadCourseDetailsQuery
+    useLoadCourseDetailsQuery,
+    useIsAccountExistQuery
 
 } = commonApi

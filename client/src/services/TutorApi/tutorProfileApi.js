@@ -50,6 +50,21 @@ const tutorProfileApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags : ['Tutor']
         }),
+        tutorLoadNotifications : builder.query({
+            query : ()=> ({
+                url : `tutor/load-notifications`,
+                method : 'GET'
+            }),
+            providesTags : ['Tutor']
+        }),
+        tutorReadNotifications : builder.mutation({
+            query : (credentials)=>({
+                url : `tutor/read-notifications`,
+                method : 'POST',
+                body : credentials
+            }),
+            invalidatesTags : ['Admin']
+        }),
     })
 })
 
@@ -60,6 +75,8 @@ export const {
     useTutorVerifyEmailMutation,
     useTutorUpdateProfileMutation,
     useTutorDeleteProfileMutation,
-    useTutorRequestVerificationMutation
+    useTutorRequestVerificationMutation,
+    useTutorLoadNotificationsQuery,
+    useTutorReadNotificationsMutation
 
 } = tutorProfileApi

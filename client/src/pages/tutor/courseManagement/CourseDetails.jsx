@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react"
+import equal from "fast-deep-equal"
 import { useNavigate, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,7 +13,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AlertCircle, Edit2, Plus, Clock, Users, BookOpen, Award, Copy, Car, X } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { useTutorLoadCourseQuery, useTutorUpdateCourseMutation, useTutorDeleteCourseMutation } from "@/services/TutorApi/tutorCourseApi"
+import { useTutorLoadCourseQuery, useTutorUpdateCourseMutation, useTutorDeleteCourseMutation, 
+  useTutorPublishCourseMutation
+} from "@/services/TutorApi/tutorCourseApi"
 import { useLoadCategoriesQuery } from '@/services/commonApi'
 import { format } from "date-fns"
 import LoadingSpinner from "@/components/FallbackUI/LoadingSpinner"
@@ -24,14 +27,19 @@ import { toast } from "sonner"
 import DeleteCourseCard from "./CreateCourse/DeleteCourseCard"
 import validateUpdatedData from "./CreateCourse/validateUpdatedData"
 
+
 const CourseDetails = () => {
   const { courseId } = useParams()
   const navigate = useNavigate();
   const [updateCourse,{isLoading : isUpdating}] = useTutorUpdateCourseMutation()
   const [deleteCourse] = useTutorDeleteCourseMutation()
+  const [publishCourse,{}] = useTutorPublishCourseMutation()
   const [course, setCourse] = useState(null)
   const [categories,setCategories] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
+  const [isDataChanged,setIsDataChanged] = useState(false)
+  const [prevData,setPrevData] = useState(null)
+  const [formErrors,setFormErrors] = useState(null)
   const editSectionRef = useRef(null)
 
   const { data: courseDetails, isLoading, isError, refetch } = useTutorLoadCourseQuery(courseId)
@@ -40,6 +48,7 @@ const CourseDetails = () => {
   useEffect(() => {
     if (courseDetails?.data) {
       setCourse(JSON.parse(JSON.stringify(courseDetails.data)));
+      setPrevData(course)
     }
     setCategories(categoryDetails?.data)
 
@@ -53,15 +62,9 @@ const CourseDetails = () => {
   const handleSave = async () => {
     const toastId = toast.loading('Updating data . . . ')
     try {
-
+       
       const errors = validateUpdatedData(course)
-      console.log(errors)
-
-      if(errors.length > 0){
-        toast.dismiss(toastId)
-        errors.forEach(error => toast.error(error));
-        return
-      }
+      setFormErrors(errors)
 
       await updateCourse({formData : course}).unwrap()
       toast.success('Data updated successfully',{id : toastId});
@@ -74,43 +77,51 @@ const CourseDetails = () => {
 
   const handleImageChange = (uploadedImageUrl = null)=>{
     setCourse({ ...course, thumbnail : uploadedImageUrl });
+    setIsDataChanged(true)
   }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setCourse({ ...course, [name]: value })
+    setIsDataChanged(true)
   }
 
   const handleInputArrayChange = (field, index, value) => {
     setCourse({...course, 
       [field] : course[field].map((item,i)=> i===index ? value : item )
      });
+     setIsDataChanged(true)
   }
 
   const handleRemoveArrayItems = (field, index) =>{
       setCourse({ ...course,
         [field] : course[field].filter((_,i)=> i!==index )
       })
+      setIsDataChanged(true)
   }
 
   const handleInputAddItemsToArray = (field) =>{
     setCourse({...course,
       [field] : [...course[field], '']
     })
+    setIsDataChanged(true)
   }
 
   const handleSwitchChange = (name) => {
     setCourse({ ...course, [name]: !course[name] })
+    setIsDataChanged(true)
   }
 
   const handleSelectChange = (name, value) => {
     setCourse({ ...course, [name]: value })
+    setIsDataChanged(true)
   }
 
   const handleAddModule = () => {
     const courseCopy = JSON.parse(JSON.stringify(course));
     courseCopy.modules.push({ title: "", lessons: [] });
     setCourse(courseCopy);
+    setIsDataChanged(true)
   }
 
   const handleAddLesson = (moduleIndex) => {
@@ -122,18 +133,22 @@ const CourseDetails = () => {
       attachments: [],
     });
     setCourse(courseCopy);
+    setIsDataChanged(true)
   }
 
   const handleModuleChange = (index, field, value) => {
    const courseCopy = JSON.parse(JSON.stringify(course))
    courseCopy.modules[index][field] = value;
-   setCourse(courseCopy) ;
+   setCourse(courseCopy);
+   setIsDataChanged(true)
+   setIsDataChanged(true)
   }
 
   const handleLessonChange = (moduleIndex, lessonIndex, field, value) => {
     const courseCopy = JSON.parse(JSON.stringify(course))
     courseCopy.modules[moduleIndex].lessons[lessonIndex][field] = value;
     setCourse(courseCopy);
+    setIsDataChanged(true)
   }
   
   const handleDeleteCourse = async() =>{
@@ -151,9 +166,11 @@ const CourseDetails = () => {
   const handleSubmitApproval = async() =>{
     const toastId = toast.loading('Please Wait . . . ')
     try {
-      
+       const response = await publishCourse({courseId : course._id}).unwrap()
+       toast.success(response?.message,{id : toastId , duration : 5000})
     } catch (error) {
-      
+      console.log(error)
+      toast.error(error?.data?.message,{id : toastId})
     }
   }
 
@@ -212,7 +229,8 @@ const CourseDetails = () => {
         <div className="flex items-center gap-3">
           {getStatusBadge(course.status)}
           {!isEditing && (
-            <Button onClick={handleEdit} className="flex items-center gap-2">
+            <Button
+             onClick={handleEdit} className="flex items-center gap-2">
               <Edit2 className="h-4 w-4" /> Edit Course
             </Button>
           )}
@@ -325,8 +343,14 @@ const CourseDetails = () => {
               {course.status !== "approved" && (
                 <Button 
                 onClick={handleSubmitApproval}
+                disabled = {course?.status === 'pending' || course?.status === 'approved' || isEditing}
                 className="w-full justify-start" variant="default">
-                  <Clock className="mr-2 h-4 w-4" /> Submit for Approval
+                  <Clock className="mr-2 h-4 w-4" />
+                   {course?.status === 'pending' 
+                   ? 'Request Pending' 
+                   : course?.status === 'approved'
+                   ? 'Already approved' 
+                   : 'Submit for Approval'}
                 </Button>
               )}
             </CardContent>
@@ -345,15 +369,22 @@ const CourseDetails = () => {
         </TabsList>
 
         <TabsContent value="details">
+        <p className="text-sm text-gray-600 italic bg-gray-100 p-2 rounded-md border-l-4 border-blue-500">
+  <span className="font-semibold">NB:</span> Publishing request will be accepted after required fields are filled.
+</p>
           <Card>
             <CardHeader>
               <CardTitle className="flex justify-between items-center">
                 Course Details
-                {!isEditing && (
+                {!isEditing ? (
                   <Button onClick={handleEdit}>
                     <Edit2 className="mr-2 h-4 w-4" /> Edit
                   </Button>
-                )}
+                ) : ( <div className="flex gap-2" >
+                  <Button disabled = {!isDataChanged} onClick={handleSave}>Save Changes</Button>
+                  <Button variant='destructive' onClick={()=>(setIsEditing((prev)=>!prev) , setIsDataChanged(false))}>Cancel</Button>
+                </div> )}
+                 
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -367,6 +398,9 @@ const CourseDetails = () => {
                     onChange={handleInputChange}
                     disabled={!isEditing}
                   />
+                  <p className="text-blue-500 text-sm font-semibold opacity-80">
+                  Required Field
+                </p>
                 </div>
                 <div>
                   <Label htmlFor="description">Description</Label>
@@ -378,6 +412,9 @@ const CourseDetails = () => {
                     disabled={!isEditing}
                     className="min-h-[150px]"
                   />
+                   <p className="text-blue-500 text-sm font-semibold opacity-80">
+                  Required Field
+                </p>
                 </div>
 
                 <div className="space-y-2 mt-4 md:mt-6 lg:mt-8">
@@ -433,6 +470,9 @@ const CourseDetails = () => {
                     
                     </SelectContent>
                   </Select>
+                  <p className="text-blue-500 text-sm font-semibold opacity-80">
+                  Required Field
+                </p>
                 </div>
                 <div>
                   <Label htmlFor="level">Level</Label>
@@ -458,12 +498,11 @@ const CourseDetails = () => {
                    onRemove={handleImageChange}
                     value={course.thumbnail}
                     disabled={!isEditing} />
+                     <p className="text-blue-500 text-sm font-semibold opacity-80">
+                  Required Field
+                </p>
                  </div>
                 </div>
-                {isEditing && ( <div className="flex gap-2" >
-                  <Button onClick={handleSave}>Save Changes</Button>
-                  <Button className='bg-red-600 hover:bg-red-700' onClick={()=>setIsEditing((prev)=>!prev)}>Cancel</Button>
-                </div> )}
               </div>
             </CardContent>
           </Card>
@@ -479,9 +518,13 @@ const CourseDetails = () => {
                     <Edit2 className="mr-2 h-4 w-4" /> Edit
                   </Button>
                 )}
+                
               </CardTitle>
             </CardHeader>
             <CardContent>
+            <p className="text-blue-500 text-sm font-semibold opacity-80">
+            NB : At least one module is required, and each module must have at least one lesson.
+                </p>
               <Accordion type="single" collapsible className="w-full">
                 {course?.modules.map((module, moduleIndex) => (
                   <AccordionItem value={`module-${moduleIndex}`} key={moduleIndex}>
@@ -524,6 +567,9 @@ const CourseDetails = () => {
                                 onChange={(e) => handleLessonChange(moduleIndex, lessonIndex, "title", e.target.value)}
                                 disabled={!isEditing}
                               />
+                               <p className="text-blue-500 text-sm font-semibold opacity-80">
+                          Required
+                            </p>
                             </div>
 
                           <div className="w-1/2">
@@ -534,6 +580,9 @@ const CourseDetails = () => {
                             onRemove={()=> handleLessonChange(moduleIndex, lessonIndex, "videoUrl", "")}
                             disabled={!isEditing ? true : false}
                             />
+                            <p className="text-blue-500 text-sm font-semibold opacity-80">
+                          Required
+                            </p>
                           </div>
 
                           <div>
@@ -544,23 +593,6 @@ const CourseDetails = () => {
                               disabled={!isEditing ? true : false}
                             />
                           </div>
-
-                            <div>
-                              <Label>Duration (minutes)</Label>
-                              <Input
-                                type="number"
-                                value={lesson.duration}
-                                onChange={(e) =>
-                                  handleLessonChange(
-                                    moduleIndex,
-                                    lessonIndex,
-                                    "duration",
-                                    Number.parseInt(e.target.value),
-                                  )
-                                }
-                                disabled={!isEditing}
-                              />
-                            </div>
                           </div>
                         </div>
                       ))}
@@ -617,6 +649,9 @@ const CourseDetails = () => {
                         onChange={handleInputChange}
                         disabled={!isEditing}
                       />
+                      <p className="text-blue-500 text-sm font-semibold opacity-80">
+                          Required
+                            </p>
                     </div>
                     <div>
                       <Label htmlFor="discount">Discount (%)</Label>
