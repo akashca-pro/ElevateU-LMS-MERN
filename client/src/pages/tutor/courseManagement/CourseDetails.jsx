@@ -593,6 +593,17 @@ const CourseDetails = () => {
                               disabled={!isEditing ? true : false}
                             />
                           </div>
+                          <div>
+                        <Label htmlFor="duration">Duration ( In minutes )</Label>
+                        <Input
+                          id="duration"
+                          name="duration"
+                          type="number"
+                          value={course?.duration}
+                          onChange={handleInputChange}
+                          disabled={!isEditing}
+                        />
+                    </div>
                           </div>
                         </div>
                       ))}

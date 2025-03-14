@@ -62,7 +62,7 @@ const OTPVerification = ({ role, useSignup, useAuthActions }) => {
     
       const responseSignup = await signup(formData).unwrap()
       toast.success(responseSignup?.message || "Signup successful", { id: toastId });
-      login(responseSignup?.data)
+      login(responseSignup?.data?._id)
       navigate(`/${role}/profile`)
 
     } catch (error) {

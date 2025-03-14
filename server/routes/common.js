@@ -1,14 +1,13 @@
 import express from 'express'
 const router = express.Router()
 import {sendOtp, verifyOtp, loadCategories, loadCourses ,
-    loadCourseDetails,isAccountExist} from '../controllers/commonControllers.js'
+    loadCourseDetails} from '../controllers/commonControllers.js'
 
 
 
 
 router.post('/generate-otp',sendOtp)
 router.post('/verify-otp',verifyOtp)
-router.get('/is-account-exist',isAccountExist)
 
 router.get('/load-categories',loadCategories)
 

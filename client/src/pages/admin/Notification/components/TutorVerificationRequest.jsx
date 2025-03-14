@@ -78,7 +78,7 @@ const TutorVerificationRequest = ({ VerificationRequests, tutorApproveOrRequest,
                       <TutorRequestCard
                         tutor={tutor}
                         tutorApproveOrReject={tutorApproveOrRequest}
-                        refetchPublishRequest={refetchVerificationRequest}
+                        refetchVerificationRequest={refetchVerificationRequest}
                       />
                     </CarouselItem>
                   ))}

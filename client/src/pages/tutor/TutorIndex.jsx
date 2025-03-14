@@ -23,7 +23,7 @@ import Navbar from '@/components/Navbar.jsx'
 import Layout from '@/components/Drawer/Layout.jsx'
 import Footer from '@/components/Footer.jsx'
 import NotFound from '@/components/FallbackUI/NotFound'
-import BlockedUI from '@/protectors/BlockedUI';
+import BlockedUI from '@/components/FallbackUI/BlockedUI';
 import IsAccessGranted from './courseManagement/IsAccessGranted';
 
 
@@ -124,7 +124,9 @@ return (
             <CourseLayout/>
             </IsAccessGranted>
             }>
-            <Route index element={<CourseDashboard/>}/>
+            <Route index element={
+                <CourseDashboard/>}
+              />
             <Route path=':courseId' element={<CourseDetails/>}/>
           </Route>
           <Route path='messages' element={<Messages/>}/>

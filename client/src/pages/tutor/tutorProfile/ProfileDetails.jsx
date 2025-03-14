@@ -1,5 +1,5 @@
 import { useState ,useEffect} from "react";
-import { RefreshCw, Trash2, CircleCheckBig, ShieldAlert } from "lucide-react";
+import { RefreshCw, Trash2, CircleCheckBig } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -16,12 +16,11 @@ import { SelectExperience } from "./components/SelectExperience";
 import Tooltip from "./components/Tooltip";
 import {useTutorRequestVerificationMutation} from '@/services/TutorApi/tutorProfileApi'
 import { Card } from "@/components/ui/card";
-import { useTutorAuthActions } from '@/hooks/useDispatch.js'
+
 
 
 const ProfileDetails = () => {
-  const {tutor} = useSelect()
-  const { login } = useTutorAuthActions()
+
 
   const {data : details } = useTutorLoadProfileQuery()
   const teacher = details?.data
@@ -69,7 +68,7 @@ const ProfileDetails = () => {
         experience : teacher?.experience
       });
       if(teacher.expertise.length !== 0) setExpertise([...teacher.expertise])
-      login(teacher)
+      
     }
     
   }, [teacher]);
@@ -149,10 +148,11 @@ const ProfileDetails = () => {
     e.preventDefault()
     const toastId = toast.loading('Please wait...')
         try {
-          await requestVerification(tutor.tutorData._id).unwrap()
+          await requestVerification(teacher._id).unwrap()
           toast.success('Verification request submited',{ id: toastId });
           setTimeout(()=>{toast.info('Track verification status in notification section');},[2500])
         } catch (error) {
+          
           toast.error(error?.data?.message || "Verification request failed try again later",{id : toastId})
         }
   }
@@ -175,7 +175,7 @@ const ProfileDetails = () => {
                   alt="Avatar preview"
                   className="w-20 h-20 rounded-full object-cover"
                 />
-                {tutor.tutorData?.isAdminVerified 
+                {teacher?.isAdminVerified 
                 ? <Label className = 'flex gap-2'>
                   <CircleCheckBig color="#008000"/> 
                 </Label>
@@ -319,7 +319,7 @@ const ProfileDetails = () => {
             desc={`Make changes to your profile here. Click save when you're done.`}
             onSave={(closeDialog) => handleSubmit(event, closeDialog)} // Pass closeDialog
           />
-          {!tutor.tutorData?.isAdminVerified  && 
+          {!teacher?.isAdminVerified  && 
           <Button 
           disabled = {!isDataUpdated}
           className='bg-blue-600 hover:bg-blue-700'

@@ -2,11 +2,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import {Check} from 'lucide-react'
 import {useTutorLoadProfileQuery} from '@/services/TutorApi/tutorProfileApi'
 import { Button } from "@/components/ui/button";
-import { useSelect } from "@/hooks/useSelect";
 
 
 const VerificationNotification = ({markRead}) => {
-    const {tutor} = useSelect()
     const {data : details} = useTutorLoadProfileQuery()
     const data = details?.data;
   return (

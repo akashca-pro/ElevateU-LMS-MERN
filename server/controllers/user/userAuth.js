@@ -257,7 +257,7 @@ export const authLoad = async (req,res) => {
         if(!user) 
             return ResponseHandler.error(res, STRING_CONSTANTS.GOOGLE_AUTH_ERROR, HttpStatus.NOT_FOUND)
             
-        return ResponseHandler.success(res, STRING_CONSTANTS.GOOGLE_AUTH_SUCCESS, HttpStatus.OK,tutor)
+        return ResponseHandler.success(res, STRING_CONSTANTS.GOOGLE_AUTH_SUCCESS, HttpStatus.OK,user)
         
     } catch (error) {
         console.log(STRING_CONSTANTS.GOOGLE_AUTH_ERROR, error);

@@ -18,7 +18,7 @@ export const isBlocked = (role) => async (req,res,next) => {
         const id = req[role].id;
         const user = await Model.findById(id)
         if(!user)
-            return ResponseHandler.error(res, STRING_CONSTANTS.BLOCKED, HttpStatus.NOT_FOUND);
+            return ResponseHandler.success(res, STRING_CONSTANTS.BLOCKED, HttpStatus.OK);
 
         if(user.isBlocked)
             return ResponseHandler.error(res, STRING_CONSTANTS.BLOCKED, HttpStatus.FORBIDDEN); 

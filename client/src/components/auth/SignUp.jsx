@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import useForm from "@/hooks/useForm";
 import { toast } from "sonner";
-import {useSendOtpMutation, useIsAccountExistQuery} from '@/services/commonApi'
+import {useSendOtpMutation} from '@/services/commonApi'
 import React, { useEffect } from "react"
 
 const SignUp = ({role}) => {
@@ -15,19 +15,6 @@ const SignUp = ({role}) => {
     toggleConfirmPasswordVisibility, togglePasswordVisibility
 
   } = useForm()
-
-  const { data, isError, error } = useIsAccountExistQuery(
-    role,formData.email,  // ✅ Trigger query when email is provided
-    { skip: !formData.email } // ✅ Skip API call if email is empty
-  );
-
- 
-  useEffect(() => {
-  if (data?.status === 409) {
-    toast.error("Your account already exists. Try logging in.");
-    navigate(`/${role}/login`);
-  }
-}, [data, navigate, role]);
 
 
   const isFormValid = Object.values(errors).some((err) => err) || 
@@ -73,6 +60,9 @@ const SignUp = ({role}) => {
         navigate(`/${role}/verify-otp`, { state: formData });
       
     } catch (error) {
+      if(error?.status === 409){
+        toast.error('Account already exists, Try login ',{id :toastId})
+      }
       toast.error(error?.data?.message || "Signup failed. Try again.", { id: toastId });
     }
   };

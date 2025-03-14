@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { UserCircle, ShoppingCart, MessageSquare, LogOut, Menu, X } from "lucide-react"; 
+import { UserCircle, ShoppingCart, MessageSquare, LogOut, Menu, X, Search } from "lucide-react"; 
 import { useSelect } from "@/hooks/useSelect";
 import { useUserAuthActions, useTutorAuthActions, useAdminAuthActions } from "@/hooks/useDispatch";
 import { useTutorLogoutMutation } from '@/services/TutorApi/tutorAuthApi';
@@ -68,19 +68,11 @@ const Navbar = () => {
               placeholder="Search courses"
               className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
             />
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+            <div >
               <button className="absolute right-3 top-1/2 -translate-y-1/2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <Search/>
               </button>
-            </motion.div>
+            </div>
           </div>
         </div>
 
@@ -110,7 +102,7 @@ const Navbar = () => {
                 </Link>
               </motion.div>
 
-              <Notification role={role} userId={roleData._id} />
+              <Notification role={role} userId={roleData} />
 
               <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                 <button onClick={handleLogout} className="hidden text-gray-600 hover:text-red-600 md:block">

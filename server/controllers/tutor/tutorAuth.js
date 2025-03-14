@@ -280,10 +280,10 @@ export const isTutorVerified = async (req,res) => {
     
     try {
         const tutorId = req.tutor.id
-        const tutor = Tutor.findById(tutorId)
+        const tutor = await Tutor.findById(tutorId)
 
         if(!tutor)
-            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
+            return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.OK)
 
         if(!tutor.isAdminVerified)
             return ResponseHandler.error(res, STRING_CONSTANTS.NOT_ALLOWED, HttpStatus.FORBIDDEN)

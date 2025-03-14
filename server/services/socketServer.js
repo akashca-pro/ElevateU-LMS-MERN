@@ -12,12 +12,12 @@ export const initializeSocket = (server) =>{
     })
 
     io.on('connection',(socket)=>{
-        // console.log(`New client connected: ${socket.id}`);
+        console.log(`New client connected: ${socket.id}`);
 
         // Register user with their ID and role
         socket.on('register',({ userId, role })=>{
             connectedUsers[userId] = { socketId : socket.id, role };
-            // console.log(`User ${userId} (${role}) registered with socket ${socket.id}`);
+            console.log(`User ${userId} (${role}) registered with socket ${socket.id}`);
         })
 
         socket.on('disconnect',()=> {

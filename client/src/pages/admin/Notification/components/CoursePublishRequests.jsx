@@ -18,7 +18,6 @@ import ConfirmDialog from "./ConfirmDialog";
 
 const CoursePublishRequests = ({ publishRequests, courseApproveOrReject, refetchPublishRequest }) => {
   const [activeFilter, setActiveFilter] = useState("all")
-  console.log(publishRequests)
 
   const filteredRequests =
     activeFilter === "all"

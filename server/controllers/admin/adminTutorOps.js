@@ -224,7 +224,7 @@ export const loadRequests = async (req,res) => {
         .select('_id email firstName lastName profileImage  bio experience expertise createdAt');
 
         if(!request || request.length===0) 
-            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+            return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.ok);
 
         return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, request);
 

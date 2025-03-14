@@ -107,7 +107,8 @@ let readNotificationQuery;
       verify_profile: "bg-purple-500",
       new_enrollment: "bg-green-500",
       payment_update: "bg-amber-500",
-      published_course: "bg-teal-500",
+      publish_course: "bg-blue-500",
+
       default: "bg-gray-500",
     };
     return colors[type] || colors.default;
@@ -120,7 +121,7 @@ let readNotificationQuery;
       verify_profile: { label: "Profile", variant: "purple" },
       new_enrollment: { label: "Enrollment", variant: "green" },
       payment_update: { label: "Payment", variant: "yellow" },
-      published_course: { label: "Published", variant: "teal" },
+      publish_course: { label: "Approve course", variant: "blue" },
       default: { label: "Notification", variant: "default" },
     };
 

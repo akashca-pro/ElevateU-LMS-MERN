@@ -1,27 +1,29 @@
-import { useEffect } from "react"
-import { useIsBlockedQuery } from '@/services/commonApi.js'
-import { Link, useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Ban, Home } from "lucide-react"
-import { toast } from "sonner"
 
 
-const BlockedUI = ({ role, children }) => {
-  const navigate = useNavigate()
+const BlockedUI = ({ children }) => {
+  const [isBlocked,setIsBlocked] = useState(false);
 
-  const { error } = useIsBlockedQuery(role)
-  
-  useEffect(() => {
-    if (error?.status === 500 || error?.status === 404) {
-      toast.error('session time out')
-      navigate(`/${role}/login`)
+  useEffect(()=>{
+
+    const handleBlockEvent = () => {
+      setIsBlocked(true)
     }
 
-  }, [error, navigate])
+    window.addEventListener('userBlocked',handleBlockEvent)
 
-  if (error?.status === 403) {
+    return ()=> {
+      window.removeEventListener('userBlocked',handleBlockEvent)
+    }
+
+  },[])
+  
+  if(isBlocked) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -65,9 +67,10 @@ const BlockedUI = ({ role, children }) => {
         </motion.div>
       </div>
     )
+  }else{
+    return <>{children}</>
   }
 
-  return <>{children}</>
 }
 
 export default BlockedUI

@@ -21,7 +21,7 @@ const GoogleAuth = ({ role, useGoogleCalback, useAuthActions }) => {
 
     if (data) {
       toast.success('Google authentication successful!');
-      login(data); // Save user in Redux
+      login(data?._id);
       navigate('/');
     }
   }, [data, error, isLoading, navigate, login, role]);

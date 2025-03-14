@@ -1,8 +1,5 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {useAdminVerificationRequestQuery, useAdminApproveOrRequestMutation} from '@/services/adminApi/adminTutorApi'
 import { useAdminLoadPendingRequestQuery, useAdminApproveOrRejectCourseMutation } from '@/services/adminApi/adminCourseApi.js'
-import { FilterBox } from "./FilterBox";
-import ConfirmDialog from "./ConfirmDialog";
 import CoursePublishRequests from "./CoursePublishRequests";
 import TutorVerificationRequest from "./tutorVerificationRequest";
 

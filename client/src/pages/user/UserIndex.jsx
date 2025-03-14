@@ -47,7 +47,7 @@ import ProtectAuthPage from '@/protectors/ProtectAuthPage';
 import ProtectedRoute from '@/protectors/ProtectedRoute';
 
 import NotFound from '@/components/FallbackUI/NotFound';
-import BlockedUI from '@/protectors/BlockedUI';
+import BlockedUI from '@/components/FallbackUI/BlockedUI';
 
 const UserIndex = () => {
   return (
@@ -72,7 +72,7 @@ const menuItems = [
 
 const ProtectedLayout = () => (
   <ProtectedRoute role={'user'}>
-    <BlockedUI role={'user'}>
+    <BlockedUI >
     <Navbar/>
     <Layout menuItems = {menuItems}  >
       <Outlet/>

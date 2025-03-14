@@ -7,12 +7,10 @@ import { ProfileDialog } from "./ProfileDialog";
 import useForm from "@/hooks/useForm";
 import { imageUpload } from "@/services/Cloudinary/imageUpload";
 import {useAdminLoadProfileQuery, useAdminUpdateProfileMutation} from '@/services/adminApi/adminProfileApi'
-import {useAdminAuthActions} from '@/hooks/useDispatch'
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 
 const Index = () => {
-  const {login} = useAdminAuthActions()
   const {data : admin, error, isLoading} = useAdminLoadProfileQuery()
   const adminDetails = admin?.data
   const loadProfile = useAdminLoadProfileQuery()
@@ -75,7 +73,6 @@ const Index = () => {
    
     try {
       const response = await updateProfile(formData).unwrap()
-      login(response.data)
       toast.success('Profile updated successfully',{ id: toastId })
     } catch (error) {
       console.log(error)

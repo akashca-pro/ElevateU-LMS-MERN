@@ -17,6 +17,7 @@ courseTitleExist,
 } from '../controllers/course/tutorOps.js'
 import passport from 'passport';
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js';
+import { isBlocked } from '../middleware/isBlocked.js';
 
 const router = express.Router()
 

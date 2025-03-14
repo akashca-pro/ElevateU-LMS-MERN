@@ -10,7 +10,6 @@ import { DATABASE_FIELDS, STRING_CONSTANTS } from "../utils/stringConstants.js"
 import Category from "../model/category.js"
 import EnrolledCourse from "../model/enrolledCourses.js"
 import Course from "../model/course.js"
-import Notification from "../model/notification.js"
 
 const roleModals = {
     user : User,
@@ -18,26 +17,6 @@ const roleModals = {
     admin : Admin
 }
 
-// Email exist 
-
-export const isAccountExist = async (req,res) => {
-    
-    try {
-        const { role , email} = req.query
-        console.log(req.query)
-        const db = roleModals[role]
-        const exist = await db.findOne({email : email})
-        if(exist) 
-            return ResponseHandler.error(res,STRING_CONSTANTS.EXIST,HttpStatus.CONFLICT)
-
-        return ResponseHandler.success(res,STRING_CONSTANTS.SUCCESS, HttpStatus.OK)
-
-    } catch (error) {
-        console.log(STRING_CONSTANTS.CONFLICT,error)
-        return ResponseHandler.success(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-
-}
 
 //Update Email
 
@@ -119,6 +98,13 @@ export const sendOtp = async(req,res) =>{
     
     try {
         const {role, firstName, email, otpType } = req.body;
+
+        const db = roleModals[role]
+
+        const emailExist = await db.findOne({ email })
+
+        if(emailExist)
+            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST,HttpStatus.CONFLICT)
 
         const {otp} = generateOtpCode();
 
@@ -219,7 +205,7 @@ export const loadCourses = (sort) => async (req,res) => {
             return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.ok,trendingCourses)
         };
 
-        const courses = await Course.find()
+        const courses = await Course.find({ isPublished :true })
         .select('_id title tutor totalEnrollment category duration thumbnail rating')
         .sort(sortQuery)
         .limit(10)

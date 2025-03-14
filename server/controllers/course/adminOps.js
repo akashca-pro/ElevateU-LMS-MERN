@@ -2,8 +2,8 @@ import Category from "../../model/category.js";
 import Course from "../../model/course.js";
 import ResponseHandler from "../../utils/responseHandler.js";
 import HttpStatus from "../../utils/statusCodes.js";
-import { DATABASE_FIELDS, STRING_CONSTANTS } from "../../utils/stringConstants.js";
-
+import { STRING_CONSTANTS } from "../../utils/stringConstants.js";
+import { saveNotification ,sendNotification } from '../../utils/LiveNotification.js'
 // view all courses
 
 export const loadCourses = async (req,res) => {
@@ -45,7 +45,7 @@ export const loadPendingRequest = async (req,res) => {
         .select('_id title tutor category thumbnail description createdAt modules price isFree level')
 
         if(!request||request.length === 0) 
-            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+            return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.OK);
 
         return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, request);
 
@@ -81,10 +81,24 @@ export const approveOrRejectCourse = async (req,res) => {
                 isPublished : true
             })
 
+             
+             const newNotification = await saveNotification(tutorId, 'Tutor', 'publish_course',
+                `Congrats your ${course.title} course has been verified and published,${reason}`
+             )
+ 
+             sendNotification(req,newNotification)
+
             return ResponseHandler.success(res,`Verification approved for ${course?.title}`,HttpStatus.OK)
         } 
         else if(input === 'reject') {
             await Course.findByIdAndUpdate(courseId,{status : 'rejected' , reason})
+
+            const newNotification = await saveNotification(tutorId, 'Tutor', 'publish_course',
+               `Sorry ${course.title} course has been rejected,${reason}`
+             )
+
+             sendNotification(req,newNotification)
+            
             return ResponseHandler.success(res,`Verification rejected for  ${course?.title}`,HttpStatus.OK)
         }   
         else return ResponseHandler.error(res, STRING_CONSTANTS.INVALID_INPUT, HttpStatus.BAD_REQUEST);

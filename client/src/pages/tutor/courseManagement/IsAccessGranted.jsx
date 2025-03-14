@@ -1,10 +1,12 @@
 import { Lock } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useEffect } from "react";
 
 const IsAccessGranted = ({ children, useCheckApi }) => {
-  const { status } = useCheckApi();
-
-  if (status !== 403) return children;
+ 
+  const { error } = useCheckApi(); 
+  
+  if (error?.status !== 403) return children;
 
   return (
     <div className="relative w-full h-screen flex items-start justify-center pt-[20vh]">
