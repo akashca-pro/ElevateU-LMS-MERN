@@ -18,7 +18,7 @@ const courseFormSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   category: z.string().min(1, "Please select a category"),
-  thumbnail: z.string().min(1,'Thumbnail is required'),
+  thumbnail: z.string().optional(),
   modules: z
     .array(
       z.object({
@@ -26,8 +26,9 @@ const courseFormSchema = z.object({
         lessons: z.array(
           z.object({
             title: z.string().min(1, "Lesson title is required"),
-            videoUrl: z.string().min(1, "Video URL is required"),
+            videoUrl: z.string().min(1,'Video file is required'),
             attachments: z.array(z.string()).optional(),
+            duration : z.number().min(0,'Duration is required')
           }),
         ),
       }),

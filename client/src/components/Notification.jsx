@@ -108,7 +108,6 @@ let readNotificationQuery;
       new_enrollment: "bg-green-500",
       payment_update: "bg-amber-500",
       publish_course: "bg-blue-500",
-
       default: "bg-gray-500",
     };
     return colors[type] || colors.default;

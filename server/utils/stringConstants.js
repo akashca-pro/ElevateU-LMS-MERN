@@ -39,7 +39,8 @@ export const STRING_CONSTANTS = {
     SERVER : 'Server error',
     DRAFT_LIMIT : 'Draft limit exceeded',
     NOT_ALLOWED : 'Access Restricted',
-    ALLOWED : 'Access Granted'
+    ALLOWED : 'Access Granted',
+    INVALID_FILTER : 'Invalid Filter'
  
 }
 

@@ -175,7 +175,7 @@ export const loadCategories = async (req,res) => {
 
 // Load course
 
-export const loadCourses = (sort) => async (req,res) => {
+export const getCourses = (sort) => async (req,res) => {
     
     try {
         let sortQuery;
@@ -302,6 +302,90 @@ export const isBlock = (role) => async (req,res) => {
     } catch (error) {
         console.log(STRING_CONSTANTS.SERVER, error)
         return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+}
+
+export const loadCourses = async (req,res) => {
+    
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 9;
+        const skip = (page - 1) * limit
+
+        let filter = {};
+        filter.isPublished = true
+        if (req.query.filter) {
+            try {
+              const parsedFilter = JSON.parse(req.query.filter);
+          
+              if (parsedFilter.search) {
+                filter.title = { $regex: parsedFilter.search, $options: "i" };
+              }
+          
+              if (parsedFilter.tutors && parsedFilter.tutors.length > 0) {
+                filter.tutor = { $in: parsedFilter.tutors };
+              }
+          
+              if (parsedFilter.rating) {
+                filter.rating = { $gte: parsedFilter.rating };
+              }
+          
+              if (parsedFilter.levels && parsedFilter.levels.length > 0) {
+                filter.level = { $in: parsedFilter.levels };
+              }
+          
+              if (parsedFilter.priceRange && parsedFilter.priceRange.length === 2) {
+                filter.price = { $gte: parsedFilter.priceRange[0], $lte: parsedFilter.priceRange[1] };
+              }
+
+              if (parsedFilter.duration && parsedFilter.duration.length === 2) {
+                filter.duration = { $gte: parsedFilter.duration[0], $lte: parsedFilter.duration[1] };
+              }
+          
+              if (parsedFilter.hasCertification !== undefined) {
+                filter.hasCertification = parsedFilter.hasCertification;
+              }
+              
+            } catch (error) {
+              return ResponseHandler.error(
+                res,
+                STRING_CONSTANTS.INVALID_FILTER,
+                HttpStatus.BAD_REQUEST
+              );
+            }
+          }
+       
+
+        const totalCourses = await Course.countDocuments(filter)
+
+        const courses = await Course.find(filter)
+        .populate('tutor', '_id firstName lastName')
+        .skip(skip)
+        .limit(limit)
+        .select('_id title description price rating duration hasCertification level thumbnail createdAt')
+
+        if(!courses || courses.length === 0) 
+            return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.ok,{
+                courses: [],
+                total: 0,
+                currentPage: page,
+                totalPages: 0,
+              })
+
+
+        return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, {
+            courses,
+            total: totalCourses, 
+            currentPage: page,
+            totalPages: Math.ceil(totalCourses / limit),
+            tutors : courses.map(course=>course.tutor)
+        })
+
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.LOADING_ERROR, error)
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }

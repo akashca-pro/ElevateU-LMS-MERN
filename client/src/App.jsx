@@ -11,7 +11,7 @@ import NotFound from '@/components/FallbackUI/NotFound';
 import Explore from '@/pages/explore/Index'
 import ExplorePage from './pages/explore/ExplorePage'
 import CourseDetails from './pages/explore/CourseDetails'
-import CategoryBasedCourses from './pages/explore/CategoryBasedCourses'
+
 
 const App = () => {
   return (
@@ -23,7 +23,7 @@ const App = () => {
 
         <Route path='/explore' element={<Explore/>}>
         <Route index element={<ExplorePage/>}/>
-        <Route path='categories/:categoryName' element={<CategoryBasedCourses/>}/>
+        {/* <Route path='categories/:categoryName' element={}/> */}
         <Route path='courses/:courseName' element={<CourseDetails/>} />
         </Route>
 

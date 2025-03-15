@@ -61,11 +61,24 @@ const commonApi = apiSlice.injectEndpoints({
             }),
             providesTags : ['Common']
         }),
+        loadCourses: builder.query({
+            query: ({ page, limit, filter }) => ({
+              url: `courses`,
+              method: 'GET',
+              params: {
+                page,
+                limit,
+                filter: JSON.stringify(filter)
+              }
+            }),
+            providesTags: ['Common']
+          }),
         loadCourseDetails : builder.query({
             query : (id) => ({
                 url : `courses/${id}`,
                 method : 'GET'
-            })
+            }),
+            providesTags : ['Common']
         }), 
     })
 })
@@ -82,5 +95,6 @@ export const {
     useLoadNewReleasesCoursesQuery,
     useLoadTrendingCoursesQuery,
     useLoadCourseDetailsQuery,
+    useLoadCoursesQuery
 
 } = commonApi

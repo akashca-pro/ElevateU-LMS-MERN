@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link , useLocation} from "react-router-dom";
 import { UserCircle, ShoppingCart, MessageSquare, LogOut, Menu, X, Search } from "lucide-react"; 
 import { useSelect } from "@/hooks/useSelect";
 import { useUserAuthActions, useTutorAuthActions, useAdminAuthActions } from "@/hooks/useDispatch";
@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
+  const location = useLocation()
+  const isHome = location.pathname === '/'
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, tutor, admin } = useSelect();
 
@@ -61,11 +63,11 @@ const Navbar = () => {
         </div>
 
         {/* Search Bar */}
-        <div className="hidden w-full max-w-xl md:flex justify-center px-8">
+         <div className="hidden w-full max-w-xl md:flex justify-center px-8">
           <div className="relative w-full">
             <input
               type="text"
-              placeholder="Search courses"
+              placeholder="Search all courses"
               className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
             />
             <div >

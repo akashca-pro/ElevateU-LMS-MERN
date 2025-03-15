@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 import { format } from "date-fns"
 import { useLoadCourseDetailsQuery } from '@/services/commonApi.js'
+import LoadingSpinner from "@/components/FallbackUI/LoadingSpinner"
 
 const CourseDetails = () => {
   const location = useLocation()
@@ -35,22 +36,7 @@ const CourseDetails = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto  p-4">
-        <div className="animate-pulse">
-          <div className="h-[400px] bg-gray-200 rounded-xl mb-6"></div>
-          <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2">
-              <div className="h-40 bg-gray-200 rounded-lg mb-6"></div>
-              <div className="h-60 bg-gray-200 rounded-lg"></div>
-            </div>
-            <div>
-              <div className="h-80 bg-gray-200 rounded-lg"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <LoadingSpinner/>
     )
   }
 

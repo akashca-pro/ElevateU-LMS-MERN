@@ -6,6 +6,7 @@ import ResponseHandler from '../../utils/responseHandler.js'
 import HttpStatus from '../../utils/statusCodes.js'
 import { STRING_CONSTANTS } from '../../utils/stringConstants.js'
 import { connectedUsers } from '../../services/socketServer.js'
+import { saveNotification, sendNotification } from '../../utils/LiveNotification.js'
 
 // create a course
 export const createCourse = async (req,res) => {
@@ -76,7 +77,7 @@ export const loadCourses = async (req,res) => {
         .sort(sort)
 
         if(!course || course.length === 0) 
-            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
+            return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.OK)
 
         return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, {
             courses : course,
@@ -190,22 +191,9 @@ export const requestPublish = async (req, res) => {
         course.draft = false;
         await course.save();
 
+        const newNotification = await saveNotification(adminId._id, 'Admin', 'publish_request', `Course publish request recieved from ${course?.tutor?.firstName} , email : ${course?.tutor?.email}`)
 
-
-        const newNotification = await Notification.create({
-            recipientId : adminId._id,
-            recipientType : 'Admin',
-            senderId : tutorId,
-            senderType : 'Tutor',
-            type : 'publish_request',
-            message : `Course publish request recieved from ${course?.tutor?.firstName} , email : ${course?.tutor?.email}`
-        })
-
-
-        if(connectedUsers[newNotification.recipientId]){
-            const socketId = connectedUsers[newNotification.recipientId].socketId
-            req.io.to(socketId).emit('newNotification',newNotification)
-        }
+        sendNotification(req, newNotification)
 
         return ResponseHandler.success(res, "Course publish request submitted. It will be reviewed before publishing.", HttpStatus.OK);
 

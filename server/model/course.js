@@ -58,6 +58,8 @@ const courseSchema = new mongoose.Schema(
       modules: {type : [moduleSchema] },
 
       whatYouLearn : [{ type : String }],
+
+      hasCertification : { type : Boolean , default : false},
       
       draft : { type : Boolean, default : false },
     },

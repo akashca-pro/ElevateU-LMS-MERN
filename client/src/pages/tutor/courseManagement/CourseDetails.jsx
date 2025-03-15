@@ -65,7 +65,7 @@ const CourseDetails = () => {
        
       const errors = validateUpdatedData(course)
       setFormErrors(errors)
-
+      console.log(course)
       await updateCourse({formData : course}).unwrap()
       toast.success('Data updated successfully',{id : toastId});
       setIsEditing(false)
@@ -398,8 +398,8 @@ const CourseDetails = () => {
                     onChange={handleInputChange}
                     disabled={!isEditing}
                   />
-                  <p className="text-blue-500 text-sm font-semibold opacity-80">
-                  Required Field
+                  <p className={`${formErrors?.title ? 'text-red-500' : 'text-blue-500' } text-sm font-semibold opacity-80`}>
+                  {formErrors ? formErrors.title : 'Required Field'} 
                 </p>
                 </div>
                 <div>
@@ -412,8 +412,8 @@ const CourseDetails = () => {
                     disabled={!isEditing}
                     className="min-h-[150px]"
                   />
-                   <p className="text-blue-500 text-sm font-semibold opacity-80">
-                  Required Field
+                  <p className={`${formErrors?.description ? 'text-red-500' : 'text-blue-500' } text-sm font-semibold opacity-80`}>
+                  {formErrors ? formErrors.description : 'Required Field'} 
                 </p>
                 </div>
 
@@ -441,6 +441,9 @@ const CourseDetails = () => {
                 </Button>
                   </div>
                 ))}
+                <p className={`${formErrors?.whatYouLearn ? 'text-red-500' : 'text-blue-500' } text-sm font-semibold opacity-80`}>
+                  {formErrors ? formErrors.whatYouLearn : 'Required Field'} 
+                </p>
               <br/>
             <Button type="button" variant="outline" size="sm" 
             onClick={() => handleInputAddItemsToArray('whatYouLearn')}
@@ -470,8 +473,8 @@ const CourseDetails = () => {
                     
                     </SelectContent>
                   </Select>
-                  <p className="text-blue-500 text-sm font-semibold opacity-80">
-                  Required Field
+                  <p className={`${formErrors?.category ? 'text-red-500' : 'text-blue-500' } text-sm font-semibold opacity-80`}>
+                  {formErrors ? formErrors.category : 'Required Field'} 
                 </p>
                 </div>
                 <div>
@@ -498,8 +501,8 @@ const CourseDetails = () => {
                    onRemove={handleImageChange}
                     value={course.thumbnail}
                     disabled={!isEditing} />
-                     <p className="text-blue-500 text-sm font-semibold opacity-80">
-                  Required Field
+                    <p className={`${formErrors?.thumbnail ? 'text-red-500' : 'text-blue-500' } text-sm font-semibold opacity-80`}>
+                  {formErrors ? formErrors.thumbnail : 'Required Field'} 
                 </p>
                  </div>
                 </div>
@@ -530,6 +533,7 @@ const CourseDetails = () => {
                   <AccordionItem value={`module-${moduleIndex}`} key={moduleIndex}>
                     <AccordionTrigger>
                       {isEditing ? (
+                     
                         <Input
                           value={module.title || ''}
                           placeholder = 'Enter Module Title'
@@ -540,6 +544,8 @@ const CourseDetails = () => {
                           }}
                           onClick={(e) => e.stopPropagation()}
                         />
+               
+                        
                       ) : (
                         <div className="flex items-center justify-between w-full pr-4">
                           <span>{module.title}</span>
@@ -567,9 +573,7 @@ const CourseDetails = () => {
                                 onChange={(e) => handleLessonChange(moduleIndex, lessonIndex, "title", e.target.value)}
                                 disabled={!isEditing}
                               />
-                               <p className="text-blue-500 text-sm font-semibold opacity-80">
-                          Required
-                            </p>
+                               
                             </div>
 
                           <div className="w-1/2">
@@ -599,10 +603,13 @@ const CourseDetails = () => {
                           id="duration"
                           name="duration"
                           type="number"
-                          value={course?.duration}
-                          onChange={handleInputChange}
+                          value={lesson.duration}
+                          onChange={(e)=>handleLessonChange(moduleIndex, lessonIndex, 'duration', Number(e.target.value))}
                           disabled={!isEditing}
                         />
+                         <p className="text-blue-500 text-sm font-semibold opacity-80">
+                          Required
+                            </p>
                     </div>
                           </div>
                         </div>

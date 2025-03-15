@@ -179,7 +179,7 @@ function ModuleLessons({ form, moduleIndex }) {
 
           <FormField
               control={form.control}
-              name="duration"
+              name={`modules.${moduleIndex}.lessons.${lessonIndex}.duration`}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Duration</FormLabel>
