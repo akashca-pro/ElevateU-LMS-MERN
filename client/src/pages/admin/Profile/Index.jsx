@@ -9,6 +9,7 @@ import { imageUpload } from "@/services/Cloudinary/imageUpload";
 import {useAdminLoadProfileQuery, useAdminUpdateProfileMutation} from '@/services/adminApi/adminProfileApi'
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
+import LoadingSpinner from "@/components/FallbackUI/LoadingSpinner";
 
 const Index = () => {
   const {data : admin, error, isLoading} = useAdminLoadProfileQuery()
@@ -83,6 +84,8 @@ const Index = () => {
     }
     
   };
+
+  if(isLoading) return(<LoadingSpinner/>)
 
   return (
      <div className="flex justify-center p-4">

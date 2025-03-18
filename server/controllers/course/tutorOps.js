@@ -216,6 +216,8 @@ export const deleteCourse = async (req,res) => {
         if(!course) 
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
         
+        await Tutor.findByIdAndUpdate(tutorId, { $inc : { $courseCount : -1 } })
+        
         await Course.findOneAndDelete({_id : courseId , tutor : tutorId})
 
         return ResponseHandler.success(res,STRING_CONSTANTS.DELETION_SUCCESS, HttpStatus.OK)

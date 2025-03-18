@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-const VideoPlayer = ({ videoUrl, preview }) => {
+const VideoPlayer = ({ videoUrl, preview, className="w-full rounded-md object-cover" }) => {
   const cloudinaryRef = useRef();
   const videoRef = useRef();
 
@@ -19,7 +19,7 @@ const VideoPlayer = ({ videoUrl, preview }) => {
 
   return <video 
           ref={videoRef} 
-          className="w-full rounded-md object-cover" 
+          className={className} 
           { ...(preview ? { src : preview , controls : true } : {} ) } 
           />;
 };

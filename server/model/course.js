@@ -55,6 +55,8 @@ const courseSchema = new mongoose.Schema(
 
       level: { type: String, enum: ["Beginner", "Intermediate", "Advanced"], default: "Beginner" },
 
+      badge : { type : String }, enum : ['New', 'Best Seller', 'Top Rated', 'Trending'],
+
       modules: {type : [moduleSchema] },
 
       whatYouLearn : [{ type : String }],
@@ -101,9 +103,11 @@ const courseSchema = new mongoose.Schema(
     }
 });
 
-  courseSchema.pre("validate", function (next) {
+  courseSchema.pre("validate", async function (next) {
     try {
+        
         // If the course is not a draft, ensure modules and lessons have required fields
+
         if (!this.draft) {
             if (!this.modules || this.modules.length === 0) {
                 return next(new Error("At least one module is required when draft is false."));
@@ -135,7 +139,29 @@ const courseSchema = new mongoose.Schema(
     }
 });
 
+courseSchema.post("save", async function (doc) {
+    try {
+        // Fetch the previous state of the course
+        const previousCourse = await Course.findById(doc._id).lean();
 
+        if (previousCourse) {
+            const tutor = await Tutor.findById(doc.tutor);
+            if (tutor) {
+                // If isPublished changed from false to true, increase count
+                if (!previousCourse.isPublished && doc.isPublished) {
+                    tutor.courseCount += 1;
+                }
+                // If isPublished changed from true to false, decrease count
+                else if (previousCourse.isPublished && !doc.isPublished) {
+                    tutor.courseCount -= 1;
+                }
+                await tutor.save();
+            }
+        }
+    } catch (error) {
+        console.log("Error updating course count:", error);
+    }
+});
 
 const Course = mongoose.model('Course',courseSchema)
 

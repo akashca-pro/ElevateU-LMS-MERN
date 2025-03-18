@@ -92,6 +92,9 @@ const tutorSchema = mongoose.Schema({
         type : Number,
         default : 0
     },
+    rating : {
+        type : Number
+    },
     students : {
         type : Number,
         default : 0

@@ -6,23 +6,32 @@ import { Badge } from "@/components/ui/badge"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import {
   BookOpen, Clock,Users, Star, CheckCircle,Lock,  Play,  Bookmark, BookmarkPlus,
    Award, Globe, Calendar, BarChart3,
+   X,
 } from "lucide-react"
 import { format } from "date-fns"
 import { useLoadCourseDetailsQuery } from '@/services/commonApi.js'
 import LoadingSpinner from "@/components/FallbackUI/LoadingSpinner"
+import VideoPlayer from "@/services/Cloudinary/VideoPlayer"
 
 const CourseDetails = () => {
+  const [selectedLesson,setSelectedLesson] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const location = useLocation()
   const courseId = location.state
   const navigate = useNavigate()
   const { data : details, isLoading, error } = useLoadCourseDetailsQuery(courseId)
   const course = details?.data
   const [isBookmarked, setIsBookmarked] = useState(false)
-  
+
+  const openModal = (lesson) =>{
+    setSelectedLesson(lesson);
+    setIsModalOpen(true)
+  }
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked)
@@ -105,11 +114,21 @@ const CourseDetails = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/70 to-transparent"></div>
         <div className="container mx-auto px-4 relative h-full flex flex-col justify-end pb-12">
           <div className="flex flex-wrap gap-2 mb-4">
-            {mockCourse.badges.map((badge, index) => (
-              <Badge key={index} className="bg-primary hover:bg-primary/90">
-                {badge}
+            
+            {course?.badge && (
+              <Badge 
+              className={`${course?.badge === 'Best Seller' 
+                ? 'bg-blue-500 hover:bg-blue-500' 
+                : course?.badge === 'Trending'
+                ? 'bg-red-500 hover:bg-red-500' 
+                : course?.badge === 'New' 
+                ? 'bg-green-500 hover:bg-green-500'
+                : 'bg-yellow-500 hover:bg-yellow-500' }`}>
+                
+                {course.badge}
+
               </Badge>
-            ))}
+            )}
             <Badge variant="outline" className="bg-white/10 text-white border-white/20">
               {course?.level}
             </Badge>
@@ -137,7 +156,7 @@ const CourseDetails = () => {
             <div className="flex items-center">
               <Calendar className="h-5 w-5 mr-1" />
               <span>
-                Last updated {course.updatedAt ? format(new Date(mockCourse.updatedAt), "MMM yyyy") : "N/A"}
+                Last updated {course?.updatedAt ? format(new Date(course?.updatedAt), "MMM yyyy") : "N/A"}
               </span>
             </div>
           </div>
@@ -170,12 +189,12 @@ const CourseDetails = () => {
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-2xl font-bold">Course Content</h2>
                   <div className="text-sm text-muted-foreground">
-                    {mockCourse.modules.length} modules • {totalLessons} lessons • {formatDuration(totalDuration)} total
+                    {course?.modules.length} modules • {totalLessons} lessons • {formatDuration(totalDuration)} total
                   </div>
                 </div>
 
                 <Accordion type="single" collapsible className="w-full">
-                  {mockCourse.modules.map((module, moduleIndex) => (
+                  {course.modules.map((module, moduleIndex) => (
                     <AccordionItem value={`module-${moduleIndex}`} key={moduleIndex}>
                       <AccordionTrigger className="hover:bg-muted/50 px-4 py-3 rounded-lg">
                         <div className="flex justify-between items-center w-full text-left">
@@ -207,7 +226,14 @@ const CourseDetails = () => {
                                       isUnlocked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
                                     }`}
                                   >
-                                    {isUnlocked ? <Play className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                                    {isUnlocked 
+                                    ? (<> 
+                                    <Button
+                                    onClick={()=>openModal(lesson)}                                    >
+                                      <Play className="h-4 w-4" />
+                                       </Button>                  
+                                       </>)
+                                    : <Lock className="h-4 w-4" />}
                                   </div>
                                   <div>
                                     <div className="font-medium">{lesson.title}</div>
@@ -229,6 +255,28 @@ const CourseDetails = () => {
                             )
                           })}
                         </div>
+                        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}
+                 
+                        >
+                         <DialogContent 
+                        className="w-full max-w-[90vw] md:max-w-[820px] p-0 bg-white rounded-lg overflow-hidden flex flex-col items-center"
+                      >
+                        {/* Title Section */}
+                        <DialogHeader className="p-4 bg-white text-black rounded-t-lg w-full text-center">
+                          <DialogTitle className="text-lg md:text-xl font-semibold">
+                            {selectedLesson?.title}
+                          </DialogTitle>
+                       </DialogHeader>
+
+                        {/* Video Player Section */}
+                       <div className="w-full flex justify-center p-4">
+                          <VideoPlayer 
+                            className="w-full md:w-[800px] h-[40vh] md:h-[450px] max-w-full max-h-[90vh] object-contain"
+                            videoUrl={selectedLesson?.videoUrl}
+                          />
+                        </div>
+                      </DialogContent>
+                        </Dialog>
                       </AccordionContent>
                     </AccordionItem>
                   ))}
@@ -243,27 +291,28 @@ const CourseDetails = () => {
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="flex-shrink-0">
                     <Avatar className="h-24 w-24">
-                      <AvatarImage src={mockCourse.tutor.avatar} alt={mockCourse.tutor.name} />
-                      <AvatarFallback>{mockCourse.tutor.name.charAt(0)}</AvatarFallback>
+                      <AvatarImage src={course?.tutor.profileImage} alt={course?.tutor.firstName} />
+                      <AvatarFallback>{course?.tutor?.firstName.charAt(0)}</AvatarFallback>
                     </Avatar>
                   </div>
                   <div className="space-y-3">
-                    <h3 className="text-xl font-semibold">{mockCourse.tutor.name}</h3>
+                    <h3 className="text-xl font-semibold">{course?.tutor.firstName}</h3>
                     <div className="flex flex-wrap gap-4 text-sm">
                       <div className="flex items-center">
                         <Star className="h-4 w-4 text-yellow-400 mr-1" fill="currentColor" />
-                        <span>{mockCourse.tutor.rating} Instructor Rating</span>
+                        <span>{course?.tutor.rating} Instructor Rating</span>
                       </div>
                       <div className="flex items-center">
                         <Award className="h-4 w-4 mr-1" />
-                        <span>{mockCourse.tutor.courses} Courses</span>
+                        <span>{course?.tutor.courseCount} Courses</span>
                       </div>
                       <div className="flex items-center">
                         <Users className="h-4 w-4 mr-1" />
-                        <span>{mockCourse.tutor.students.toLocaleString()} Students</span>
+                        <span>{course?.tutor.students.toLocaleString()} Students</span>
                       </div>
                     </div>
-                    <p className="text-muted-foreground">{mockCourse.tutor.bio}</p>
+                    <p className="text-muted-foreground">{course?.tutor.bio}</p>
+                    <p className="text-muted-foreground">{course?.tutor.expertise}</p>
                   </div>
                 </div>
               </CardContent>

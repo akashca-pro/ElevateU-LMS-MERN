@@ -1,7 +1,7 @@
 import express from 'express'
 const router = express.Router()
 import {sendOtp, verifyOtp, loadCategories, getCourses ,
-    loadCourseDetails, loadCourses} from '../controllers/commonControllers.js'
+    loadCourseDetails, loadCourses, loadCourseTitles} from '../controllers/commonControllers.js'
 
 
 
@@ -17,8 +17,8 @@ router.get('/courses/best-sellers',getCourses('best-selling'))
 router.get('/courses/new-releases',getCourses('new-releases'))
 router.get('/courses/trending',getCourses('trending'))
 router.get('/courses/:id',loadCourseDetails)
+router.get('/course-titles',loadCourseTitles)
 
-router.get('/load-notifications',)
 
 
 export default router

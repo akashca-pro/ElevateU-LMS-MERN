@@ -66,7 +66,9 @@ const userSchema  = new mongoose.Schema({
     isBlocked : {
         type : Boolean,
         default : false
-    }
+    },
+    bookmarks : [{ type : String , ref : 'Course' }]
+    
 },{timestamps : true});
 
 const User = mongoose.model("User",userSchema);

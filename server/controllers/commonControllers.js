@@ -17,6 +17,13 @@ const roleModals = {
     admin : Admin
 }
 
+const sortingConditions = {
+    'newest' : { createdAt : -1 },
+    'oldest' : { createdAt : 1 },
+    'price-high-low' : { price : -1 },
+    'price-low-high' : { price : 1 },
+    'rating-high-low': { rating : -1 }
+}
 
 //Update Email
 
@@ -229,10 +236,10 @@ export const loadCourseDetails = async (req,res) => {
         const courseId = req.params.id
 
         const course = await Course.findById(courseId)
-        .populate('tutor' , 'firstName profileImage bio')
+        .populate('tutor' , 'firstName profileImage bio students courseCount rating expertise')
 
         if(!course)
-            ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
         const processedModules = course.modules.map(module=>({
             _id : module._id,
@@ -272,7 +279,8 @@ export const loadCourseDetails = async (req,res) => {
             level : course.level,
             modules : processedModules,
             updatedAt : course.updatedAt,
-            whatYouLearn : course.whatYouLearn
+            whatYouLearn : course.whatYouLearn,
+            badge : course.badge
         })
 
 
@@ -306,6 +314,8 @@ export const isBlock = (role) => async (req,res) => {
 
 }
 
+// load courses
+
 export const loadCourses = async (req,res) => {
     
     try {
@@ -314,10 +324,14 @@ export const loadCourses = async (req,res) => {
         const skip = (page - 1) * limit
 
         let filter = {};
+        let sort
         filter.isPublished = true
         if (req.query.filter) {
             try {
               const parsedFilter = JSON.parse(req.query.filter);
+              console.log(parsedFilter)
+
+                sort = sortingConditions[parsedFilter.sort]
           
               if (parsedFilter.search) {
                 filter.title = { $regex: parsedFilter.search, $options: "i" };
@@ -363,7 +377,9 @@ export const loadCourses = async (req,res) => {
         .populate('tutor', '_id firstName lastName')
         .skip(skip)
         .limit(limit)
+        .sort(sort)
         .select('_id title description price rating duration hasCertification level thumbnail createdAt')
+
 
         if(!courses || courses.length === 0) 
             return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.ok,{
@@ -389,3 +405,32 @@ export const loadCourses = async (req,res) => {
     }
 
 }
+
+// search course titles 
+
+export const loadCourseTitles = async (req,res) => {
+    
+    try {
+        const searchQuery = req.query.search;
+        console.log(searchQuery)
+
+        let courseTitles
+
+        if(searchQuery){
+            courseTitles = await Course.find({ title : { $regex : `^${searchQuery}` , $options : 'i' } })
+            .select('_id title')
+        }
+        
+        if(!courseTitles || courseTitles.length === 0 || !searchQuery)
+            return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.OK,[])
+        
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK,courseTitles)
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.LOADING_ERROR,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+

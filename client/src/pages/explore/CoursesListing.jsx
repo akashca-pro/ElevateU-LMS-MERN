@@ -54,6 +54,7 @@ const CoursesListing = () => {
     page: 1,
     limit: 9,
     filter: {
+      sort : 'newest',
       search: "",
       tutors: [],
       rating: 0,
@@ -64,15 +65,14 @@ const CoursesListing = () => {
     },
   });
 
+  console.log(queryParams)
+
 
   // Fetch courses using RTK Query
   const { data: allCourses, isLoading, isError , refetch} = useLoadCoursesQuery(queryParams);
 
 
   const coursesData = allCourses?.data
-
-  console.log(queryParams)
-  console.log(coursesData)
 
   // State for mobile filter visibility
   const [showFilters, setShowFilters] = useState(false);
@@ -107,6 +107,7 @@ const CoursesListing = () => {
         priceRange: [0, 10000],
         duration: [0, 500],
         hasCertification: false,
+        sort : 'newest'
       },
       page: 1,
     }));
@@ -383,12 +384,11 @@ const uniqueTutors = coursesData?.courses
 
             <div className="flex items-center gap-2">
               <label htmlFor="sort" className="text-sm whitespace-nowrap">
-                Sort by:
               </label>
               <Select
                 value={queryParams.sort}
                 onValueChange={(value) =>
-                  setQueryParams((prev) => ({ ...prev, sort: value }))
+                  setQueryParams((prev) => ({ ...prev, filter : { ...prev.filter, sort : value } }))
                 }
               >
                 <SelectTrigger className="w-[180px]" id="sort">

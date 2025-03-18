@@ -1,19 +1,11 @@
 import React from 'react';
 import { Routes, Route, Outlet } from 'react-router-dom';
-
 import {SquareUser, BookOpen, LibraryBig, MessagesSquare, BellRing, Handshake, Paperclip, ClipboardCheck, 
   Trophy, Settings
 } from 'lucide-react'
-
-
-
-
-
 import {useUserForgotPasswordMutation,useUserResetPasswordMutation,useUserGoogleCallbackQuery,
   useUserSignupMutation,useUserLoginMutation
 } from '@/services/userApi/userAuthApi.js'
-
-
 import { useUserAuthActions } from '@/hooks/useDispatch.js';
 
 //Re-usable components
@@ -29,6 +21,8 @@ import Footer from '@/components/Footer';
 import Layout from '@/components/Drawer/Layout';
 
 import Profile from '@/pages/user/ProfileDetails/Index'
+
+import Checkout from './checkout/Index'
 
 import Notification from './notification/Index';
 import Assignments from './assignments/Index';
@@ -48,6 +42,7 @@ import ProtectedRoute from '@/protectors/ProtectedRoute';
 
 import NotFound from '@/components/FallbackUI/NotFound';
 import BlockedUI from '@/components/FallbackUI/BlockedUI';
+import CourseEnrollment from './checkout/CourseEnrollment';
 
 const UserIndex = () => {
   return (
@@ -132,6 +127,15 @@ const UserRoutes = () => {
           <Route path='certificates' element={<Certificates/>}/>
           <Route path='settings' element={<Setting/>}/>
         </Route>
+        <Route path='course-enrollment/:courseName' element={
+        <ProtectedRoute role={'user'}>
+          <BlockedUI >
+            <Navbar/>
+          <CourseEnrollment/>
+          <Footer/>
+          </BlockedUI>
+          </ProtectedRoute>
+          } />
         <Route path='*' element={<NotFound/>}/>
       </Route>
     </Routes>

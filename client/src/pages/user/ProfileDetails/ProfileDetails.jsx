@@ -11,6 +11,7 @@ import {useUserLoadProfileQuery, useUserUpdateProfileMutation} from '@/services/
 import { formatDate } from "@/utils/dateToString";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
+import LoadingSpinner from "@/components/FallbackUI/LoadingSpinner";
 
 const ProfileDetails = () => {
   const {data : details , error, isLoading} = useUserLoadProfileQuery()
@@ -20,6 +21,8 @@ const ProfileDetails = () => {
 
   const [avatarPreview, setAvatarPreview] = useState(null);  
   const { formData, errors, handleChange ,setFormData} = useForm();
+
+  
 
   useEffect(() => {
     if (student) {
