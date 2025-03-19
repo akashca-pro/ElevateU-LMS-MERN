@@ -18,20 +18,21 @@ import {loadPendingRequest, deleteCourse, loadCourses, assignCategory, approveOr
 
 import {verifyAccessToken,verifyRefreshToken} from '../utils/verifyToken.js'
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js'
+import { validateForm } from '../middleware/validation.js'
 
 const router = express.Router()
 
 // Auth routes
 
-router.post('/signup',registerAdmin);
-router.post('/login',loginAdmin);
+router.post('/signup',validateForm('admim','register'),registerAdmin);
+router.post('/login',validateForm('admin','login'),loginAdmin);
 router.delete('/logout',logoutAdmin)
 router.patch('/refresh-token',verifyRefreshToken('admin'),refreshToken)
 
 // Admin profile CRUD
 
 router.get('/profile',verifyAccessToken('admin'),loadProfile)
-router.post('/update-profile',verifyAccessToken('admin'),updateProfile)
+router.post('/update-profile',validateForm('admin','profile'),verifyAccessToken('admin'),updateProfile)
 
 //  Admin - Users CRUD
 

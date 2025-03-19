@@ -60,9 +60,8 @@ export const updateProfile = async (req,res) => {
             bio,
             expertise,
             experience,
-            earnings,
             dob
-        } )
+        })
 
         return ResponseHandler.success(res,STRING_CONSTANTS.UPDATION_SUCCESS, HttpStatus.OK)
 

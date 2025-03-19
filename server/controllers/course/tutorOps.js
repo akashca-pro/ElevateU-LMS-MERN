@@ -144,10 +144,17 @@ export const updateCourse = async (req, res) => {
 export const requestPublish = async (req, res) => {
     try {
         const tutorId = req.tutor.id;
-        const { courseId } = req.body;
+        const { courseDetails } = req.body;
+        
+        const titleExist = await Course.findOne({  _id: {$ne : courseDetails._id},
+            tutor: tutorId,
+            title : courseDetails.title  })
+        
+        if(titleExist)
+            return ResponseHandler.error(res,'Title already exist for another course',HttpStatus.CONFLICT)
 
         // Find course owned by tutor
-        const course = await Course.findOne({ _id: courseId, tutor: tutorId }).populate('tutor', 'firstName email')
+        const course = await Course.findOne({ _id: courseDetails._id, tutor: tutorId }).populate('tutor', 'firstName email')
 
         if (!course) {
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -156,34 +163,6 @@ export const requestPublish = async (req, res) => {
         if (course.isPublished || course.status === "approved") {
             return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
         }
-       
-            const missingFields = [];
-
-            if (!course.title?.trim()) missingFields.push("title");
-            if (!course.description?.trim()) missingFields.push("description");
-            if (!course.category) missingFields.push("category");
-            if (!course.isFree && (typeof course.price !== 'number' || course.price <= 0)) missingFields.push("price");
-            if (!course.thumbnail) missingFields.push("thumbnail");
-
-            if (!course.modules || course.modules.length === 0) {
-                missingFields.push("modules (at least one required)");
-            } else {
-                course.modules.forEach((module, moduleIndex) => {
-                    if (!module.title?.trim()) missingFields.push(`Module ${moduleIndex + 1}: title`);
-                    if (!module.lessons || module.lessons.length === 0) {
-                        missingFields.push(`Module ${moduleIndex + 1}: At least one lesson required`);
-                    } else {
-                        module.lessons.forEach((lesson, lessonIndex) => {
-                            if (!lesson.title?.trim()) missingFields.push(`Module ${moduleIndex + 1}, Lesson ${lessonIndex + 1}: title`);
-                            if (!lesson.videoUrl?.trim()) missingFields.push(`Module ${moduleIndex + 1}, Lesson ${lessonIndex + 1}: videoUrl`);
-                        });
-                    }
-                });
-            }
-
-            if (missingFields.length > 0) {
-                return ResponseHandler.error(res, `Missing required fields: ${missingFields.join(", ")}`, HttpStatus.BAD_REQUEST);
-            }
 
         const adminId = await Admin.findOne()
 

@@ -545,7 +545,7 @@ const CourseCard = ({ course, renderStars }) => {
 
     <CardFooter className="p-4 pt-0 mt-auto flex justify-between items-center">
     <span className="font-bold text-lg">
-     {course.price === 0 ? "Free" : `$${course.price}`}
+     {course.price === 0 ? "Free" : `₹${course.price}`}
     </span>
     <Button
     onClick = {()=>navigate(`/explore/courses/${course.title}`,{state : course._id})}

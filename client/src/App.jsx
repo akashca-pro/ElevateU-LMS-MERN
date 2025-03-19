@@ -12,6 +12,13 @@ import Explore from '@/pages/explore/Index'
 import ExplorePage from './pages/explore/ExplorePage'
 import CourseDetails from './pages/explore/CourseDetails'
 
+// checkout page
+import ProtectedRoute from './protectors/ProtectedRoute'
+import BlockedUI from './components/FallbackUI/BlockedUI'
+import Navbar from './components/Navbar'
+import CourseEnrollment from './pages/checkout/CourseEnrollment'
+import Footer from './components/Footer'
+
 
 const App = () => {
   return (
@@ -26,6 +33,16 @@ const App = () => {
         {/* <Route path='categories/:categoryName' element={}/> */}
         <Route path='courses/:courseName' element={<CourseDetails/>} />
         </Route>
+
+        <Route path='/courses/:courseName/checkout' element={
+          <ProtectedRoute role={'user'}>
+          <BlockedUI >
+            <Navbar/>
+          <CourseEnrollment/>
+          <Footer/>
+          </BlockedUI>
+          </ProtectedRoute>
+        }/>
 
         <Route path="/user/*" element={<UserRoutes />} />
 

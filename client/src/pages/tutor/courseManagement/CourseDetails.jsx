@@ -166,11 +166,28 @@ const CourseDetails = () => {
   const handleSubmitApproval = async() =>{
     const toastId = toast.loading('Please Wait . . . ')
     try {
-       const response = await publishCourse({courseId : course._id}).unwrap()
+       const response = await publishCourse({ courseDetails : course }).unwrap()
        toast.success(response?.message,{id : toastId , duration : 5000})
     } catch (error) {
       console.log(error)
-      toast.error(error?.data?.message,{id : toastId})
+      if (error?.status === 400 && Array.isArray(error?.data?.errors)) {
+        const errorMessages = error.data.errors.map((err) => `• ${err.msg}`).join("\n");
+
+      toast.error("Validation Errors", {
+          id : toastId,
+          description: errorMessages, 
+          duration: 6000,
+          important: true,
+          style: { 
+            fontSize: "14px",  
+            whiteSpace: "pre-line",  
+            padding: "18px",  
+            maxWidth: "500px" 
+        }
+      });
+    } else {
+        toast.error(error?.data?.message, { id: toastId });
+    }
     }
   }
 
@@ -313,7 +330,7 @@ const CourseDetails = () => {
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Price:</span>
                   <span className="font-bold">
-                    {course.isFree ? "Free" : `$${course.price}`}
+                    {course.isFree ? "Free" : `₹${course.price}`}
                     {!course.isFree && course.discount > 0 && (
                       <span className="ml-2 text-sm text-green-600">(-{course.discount}%)</span>
                     )}

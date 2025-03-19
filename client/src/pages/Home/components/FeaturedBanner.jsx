@@ -37,7 +37,7 @@ const FeaturedBanner = () =>{
                   <div className="flex items-center gap-2">
                     <img src="/placeholder.svg?height=32&width=32" alt="Jessica Jones" className="w-8 h-8 rounded-full" />
                     <span className="font-medium">Jessica Jones</span>
-                    <span className="text-blue-600 ml-auto">$99</span>
+                    <span className="text-blue-600 ml-auto">₹99</span>
                   </div>
                 </div>
               </div>

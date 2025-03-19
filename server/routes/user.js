@@ -11,7 +11,7 @@ import {enrollInCourse, loadEnrolledCourses} from '../controllers/enrolledCourse
 
 import {verifyAccessToken,verifyRefreshToken} from '../utils/verifyToken.js'
 import {otpLimiter} from '../middleware/rateLimiting.js';
-import { isBlocked } from '../middleware/isBlocked.js'
+import { validateForm } from '../middleware/validation.js'
 
 import { updateEmail, verifyEmail , isBlock} from '../controllers/commonControllers.js';
 
@@ -23,9 +23,8 @@ const router =  express.Router();
 
 // Auth routes
 
-router.post('/signup',registerUser)
-// router.post('/verify-otp',otpLimiter,verifyOtp)
-router.post('/login',loginUser)
+router.post('/signup',validateForm('user','register'),registerUser)
+router.post('/login',validateForm('user','login'),loginUser)
 router.post('/forgot-password',forgotPassword)
 router.post('/reset-password',verifyResetLink)
 router.delete('/logout',logoutUser)
@@ -48,7 +47,7 @@ router.get('/isblocked',verifyAccessToken('user'),isBlock('user'))
 router.get('/profile',verifyAccessToken('user'),loadProfile)
 router.post('/update-email/:id',otpLimiter,verifyAccessToken('user'),updateEmail('user'))
 router.post('/verify-email',verifyAccessToken('user'),verifyEmail('user'))
-router.post('/update-profile/:id',verifyAccessToken('user'),updateProfile)
+router.post('/update-profile/:id',validateForm('user','profile'),verifyAccessToken('user'),updateProfile)
 router.delete('/delete-account/:id',verifyAccessToken('user'),deleteAccount)
 
 // course enrollment

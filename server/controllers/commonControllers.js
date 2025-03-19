@@ -235,7 +235,7 @@ export const loadCourseDetails = async (req,res) => {
     try {
         const courseId = req.params.id
 
-        const course = await Course.findById(courseId)
+        const course = await Course.findOne({ _id : courseId , isPublished : true})
         .populate('tutor' , 'firstName profileImage bio students courseCount rating expertise')
 
         if(!course)
@@ -369,7 +369,6 @@ export const loadCourses = async (req,res) => {
               );
             }
           }
-       
 
         const totalCourses = await Course.countDocuments(filter)
 
@@ -412,12 +411,12 @@ export const loadCourseTitles = async (req,res) => {
     
     try {
         const searchQuery = req.query.search;
-        console.log(searchQuery)
 
         let courseTitles
 
         if(searchQuery){
-            courseTitles = await Course.find({ title : { $regex : `^${searchQuery}` , $options : 'i' } })
+            courseTitles = await Course.find({ title : { $regex : `^${searchQuery}` , $options : 'i' }, 
+            isPublished : true })
             .select('_id title')
         }
         

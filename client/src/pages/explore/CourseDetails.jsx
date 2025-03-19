@@ -39,8 +39,7 @@ const CourseDetails = () => {
   }
 
   const handleEnroll = () => {
-    // Add enrollment logic
-    navigate(`/checkout/${courseId}`)
+    navigate(`/courses/${course.title}/checkout`,{state : course})
   }
 
   if (isLoading) {
@@ -432,19 +431,19 @@ const CourseDetails = () => {
               <Card className="shadow-lg border-2">
                 <CardContent className="p-0">
                   <img
-                    src={mockCourse.thumbnail || "/placeholder.svg?height=400&width=600&text=Course+Thumbnail"}
-                    alt={mockCourse.title}
+                    src={course?.thumbnail || "/placeholder.svg?height=400&width=600&text=Course+Thumbnail"}
+                    alt={course?.title}
                     className="w-full h-48 object-cover"
                   />
                   <div className="p-6 space-y-6">
                     <div className="flex justify-between items-center">
                       <div className="flex items-baseline gap-2">
                         <span className="text-3xl font-bold">
-                          {mockCourse.isFree ? "Free" : `$${mockCourse.price}`}
+                          {course?.isFree ? "Free" : `₹${course?.price}`}
                         </span>
-                        {!mockCourse.isFree && mockCourse.discount > 0 && (
+                        {!course?.isFree && course?.discount > 0 && (
                           <span className="text-lg line-through text-muted-foreground">
-                            ${(mockCourse.price * (100 / (100 - mockCourse.discount))).toFixed(2)}
+                            ₹{(course?.price * (100 / (100 - course?.discount))).toFixed(2)}
                           </span>
                         )}
                       </div>
@@ -462,17 +461,15 @@ const CourseDetails = () => {
                       </Button>
                     </div>
 
-                    {!mockCourse.isFree && mockCourse.discount > 0 && (
+                    {!course?.isFree && course?.discount > 0 && (
                       <div className="bg-primary/10 text-primary rounded-md p-2 text-center text-sm font-medium">
-                        {mockCourse.discount}% discount! Limited time offer
+                        {course?.discount}% discount! Limited time offer
                       </div>
                     )}
 
                     <Button className="w-full text-lg py-6" size="lg" onClick={handleEnroll}>
-                      {mockCourse.isFree ? "Enroll Now" : "Buy Now"}
+                      {course?.isFree ? "Enroll Now" : "Buy Now"}
                     </Button>
-
-                    <div className="text-center text-sm text-muted-foreground">30-Day Money-Back Guarantee</div>
 
                     <div className="space-y-3">
                       <h3 className="font-semibold">This course includes:</h3>
