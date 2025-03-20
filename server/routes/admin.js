@@ -19,6 +19,7 @@ import {loadPendingRequest, deleteCourse, loadCourses, assignCategory, approveOr
 import {verifyAccessToken,verifyRefreshToken} from '../utils/verifyToken.js'
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js'
 import { validateForm } from '../middleware/validation.js'
+import { createCoupon, deleteCoupon, loadCoupons } from '../controllers/admin/adminCouponOps.js'
 
 const router = express.Router()
 
@@ -65,6 +66,12 @@ router.get('/category',verifyAccessToken('admin'),loadCategoryDetails)
 router.post('/add-category',verifyAccessToken('admin'),addCategory)
 router.post('/update-category',verifyAccessToken('admin'),updateCategory)
 router.delete('/delete-category/:id',verifyAccessToken('admin'),deleteCategory)
+
+// coupon CRUD
+
+router.post('/create-coupon',verifyAccessToken('admin'),validateForm('admin','coupon'),createCoupon)
+router.get('/load-coupons',verifyAccessToken('admin'),loadCoupons)
+router.delete('/delete-coupon/:id',verifyAccessToken('admin'),deleteCoupon)
 
 //course publish request manage
 

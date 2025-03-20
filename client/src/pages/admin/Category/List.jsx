@@ -1,5 +1,5 @@
 import {  useState } from "react"
-import { Search, ChevronLeft, ChevronRight ,Trash2 } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight ,Trash2, Edit, PlusCircle } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import {
   Table, TableBody,TableCaption,TableCell, TableHead,TableHeader,TableRow,
@@ -10,6 +10,7 @@ import {useAdminLoadCategoriesQuery, useAdminAddCategoryMutation,
 import { AlertDialogDelete } from "@/components/AlertDialog"
 import { Badge } from "@/components/ui/badge"
 import { FilterBox } from "@/components/FilterBox"
+import { Input } from "@/components/ui/input"
 
 const List = () => {
   
@@ -28,12 +29,12 @@ const List = () => {
  
   return (
     <div className="container mx-auto p-6 max-w-full overflow-x-auto">
-      <h1 className="mb-8 text-2xl font-bold text-center md:text-left">Categories</h1>
+      <h1 className="mb-8 text-2xl font-bold text-center md:text-left">Category Management</h1>
 
       {/* Search and Filter */}
       <div className="mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="relative w-full md:w-96">
-          <input
+          <Input
             type="text"
             placeholder="Search by name and description"
             className="w-full rounded-lg border border-gray-300 px-4 py-2 pl-10"
@@ -70,14 +71,14 @@ const List = () => {
               className="font-semibold">
                 {category.name} </TableCell>
               <TableCell>{category.description}</TableCell>
-              <TableCell className="flex flex-col md:flex-row items-center justify-end gap-2">
+              <TableCell className="flex flex-col md:flex-row items-center justify-end gap-12">
                 <Badge 
                   className={`${category?.isActive ? 'bg-green-500' : 'bg-red-500'} text-white px-3 py-1 rounded text-sm ${category?.isActive ? 'hover:bg-green-500' : 'hover:bg-red-500'}`}
                 >
                  {category?.isActive ? 'Active' : 'Not Active'}
                 </Badge>
                 <div className="flex flex-wrap justify-end gap-2">
-                <FormModal title={'Edit Category'} 
+                <FormModal title={<Edit/>} 
                 useCategory={useAdminUpdateCategoryMutation}
                 name={category.name}
                 type={'edit'} 

@@ -29,7 +29,7 @@ const adminCategoryApi = apiSlice.injectEndpoints({
         adminUpdateCategory : builder.mutation({
             query : (credential) =>({
                 url : `admin/update-category`,
-                method : 'POST',
+                method : 'POST',   
                 body : credential
             }),
             invalidatesTags : ['Admin']

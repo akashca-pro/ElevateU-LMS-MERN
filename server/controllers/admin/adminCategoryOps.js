@@ -41,7 +41,7 @@ export const loadCategory = async (req,res) => {
         const totalCategories = await Category.countDocuments(filterQuery);
         
         if(!categoryDetails || categoryDetails.length === 0) 
-            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+            return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
             
         return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK,{
             categories: categoryDetails,

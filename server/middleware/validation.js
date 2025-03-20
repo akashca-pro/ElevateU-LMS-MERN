@@ -122,6 +122,42 @@ const roleValidations = {
         profile : [
             ...commonValidations.profile,
             body('email').isEmail().withMessage('Invalid email format'),
+        ],
+        coupon :[
+            body("formData.code")
+                .trim()
+                .notEmpty().withMessage("Coupon code is required")
+                .isLength({ min: 3, max: 20 }).withMessage("Coupon code must be between 3 to 20 characters")
+                .matches(/^[A-Z0-9]+$/).withMessage("Coupon code must be uppercase letters and numbers only"),
+            
+            body("formData.discountType")
+                .isIn(["percentage", "fixed"]).withMessage("Discount type must be 'percentage' or 'fixed'"),
+        
+            body("formData.discountValue")
+                .isNumeric().withMessage("Discount value must be a number")
+                .isFloat({ gt: 0 }).withMessage("Discount value must be greater than zero"),
+        
+            body("formData.minPurchaseAmount")
+                .optional()
+                .isNumeric().withMessage("Minimum purchase amount must be a number")
+                .isFloat({ gt: 0 }).withMessage("Minimum purchase amount must be greater than zero"),
+        
+            body("formData.maxDiscount")
+                .optional()
+                .isNumeric().withMessage("Max discount must be a number")
+                .isFloat({ gt: 0 }).withMessage("Max discount must be greater than zero"),
+        
+            body("formData.expiryDate")
+                .notEmpty().withMessage("Expiry date is required")
+                .isISO8601().toDate().withMessage("Invalid date format, use ISO8601 format"),
+        
+            body("formData.usageLimit")
+                .optional()
+                .isInt({ gt: 0 }).withMessage("Usage limit must be a positive integer"),
+            
+            body("formData.status")
+                .optional()
+                .isBoolean().withMessage("Status must be true or false"),
         ]
     }
 }
