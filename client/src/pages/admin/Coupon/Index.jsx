@@ -1,10 +1,11 @@
 import { ChevronLeft, ChevronRight, Delete, Edit, Search, Trash, Trash2 } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { use, useState } from 'react'
 import FormModal from './components/FormModal'
 import { FilterBox } from '@/components/FilterBox'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { useAdminCreateCouponMutation, useAdminLoadCouponsQuery, useAdminDeleteCouponMutation} from '@/services/adminApi/adminCouponApi.js'  
+import { useAdminCreateCouponMutation, useAdminLoadCouponsQuery,
+     useAdminDeleteCouponMutation, useAdminUpdateCouponMutation} from '@/services/adminApi/adminCouponApi.js'  
 import { useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
 import LoadingSpinner from '@/components/FallbackUI/LoadingSpinner'
@@ -16,6 +17,7 @@ const Index = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [filteredQuery,setFilteredQuery] = useState('latest')
     const [createCoupon] = useAdminCreateCouponMutation()
+    const [updateCoupon] = useAdminUpdateCouponMutation()
     const limit = 7;
     const navigate = useNavigate()
     const {data : coupon, isLoading , error ,refetch} = useAdminLoadCouponsQuery({
@@ -45,7 +47,7 @@ const Index = () => {
           <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
         </div >
         <div className="flex flex-wrap justify-end gap-2 w-full md:w-auto">
-            <FormModal/> 
+            <FormModal useAction={useAdminCreateCouponMutation} refetch={refetch}/> 
           <FilterBox onSelect={setFilteredQuery} selectValue={'Not-Active'}/>
         </div>
     </div>
@@ -82,10 +84,8 @@ const Index = () => {
                 <TableCell>{coupon.usageLimit}</TableCell>
                 <TableCell>{format(new Date(coupon.expiryDate),'PPP')}</TableCell>
                 <TableCell>{coupon.isActive ? 'Active' : 'InActive'}</TableCell>
-                <TableCell>
-                    <Button>
-                    <Edit/>
-                    </Button>
+                <TableCell>   
+                    <FormModal useAction={useAdminUpdateCouponMutation} existValues={data?.coupons[index]} refetch={refetch}/> 
                 </TableCell>
                 <TableCell>
                 <AlertDialogDelete

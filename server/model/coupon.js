@@ -19,7 +19,7 @@ const couponSchema = mongoose.Schema({
 
     usageLimit : { type : Number, default : 1 },
 
-    usedBy : [{ type : String, ref : 'User' }],
+    usedBy : [ { userId : { type : String, ref : 'User' } , usage : { type : Number, default : 0 }  } ],
 
     isActive : { type : Boolean, default : false },
 

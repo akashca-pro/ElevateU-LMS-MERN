@@ -13,6 +13,14 @@ const couponApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags : ['Admin']
         }),
+        adminUpdateCoupon : builder.mutation({
+            query : (credentials) => ({
+                url : `admin/update-coupon`,
+                method : 'POST',
+                body : credentials
+            }),
+            invalidatesTags : ['Admin']
+        }),
         adminLoadCoupons : builder.query({
             query : ({page,limit,search,filter})=>({
                 url : `admin/load-coupons`,
@@ -40,6 +48,7 @@ export const {
 
     useAdminCreateCouponMutation,
     useAdminLoadCouponsQuery,
-    useAdminDeleteCouponMutation
+    useAdminDeleteCouponMutation,
+    useAdminUpdateCouponMutation,
 
 } = couponApi

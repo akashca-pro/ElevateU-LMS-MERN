@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { Card } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -7,6 +7,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Shield, Info } from "lucide-react"
 import { toast } from "sonner"
 import { useUserLoadProfileQuery } from '@/services/userApi/userProfileApi'
+import { useUserGetPricingQuery, useUserApplyCouponMutation,
+   useUserRemoveAppliedCouponMutation, useUserFetchAppliedCouponQuery } from '@/services/userApi/userCourseApi.js'
 
 import CourseDetails from "./CourseDetails"
 import UserInformation from "./UserInformation"
@@ -21,24 +23,39 @@ const CourseEnrollment = () => {
   const { courseId } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
   const [processingPayment, setProcessingPayment] = useState(false)
   const [paymentStatus, setPaymentStatus] = useState(null) // null, 'success', 'failure'
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [couponCode, setCouponCode] = useState("")
   const [couponApplied, setCouponApplied] = useState(false)
-  const [couponDiscount, setCouponDiscount] = useState(0)
+
+  const { data } = useUserFetchAppliedCouponQuery()
+
+  const appliedCoupon = data?.data
+
+  console.log(appliedCoupon)
+
+  const [couponDiscount, setCouponDiscount] = useState(null)
+
+  useEffect(()=>{
+    if(appliedCoupon){
+      setCouponDiscount(appliedCoupon)
+      setCouponApplied(true)
+    }
+  },[appliedCoupon])
+
   const { data : userDetails } = useUserLoadProfileQuery()
   const user = userDetails?.data
   const course = location.state
 
-  // Mock user data (would come from auth context in a real app)
-  // const user = {
-  //   id: "user123",
-  //   name: "John Doe",
-  //   email: "john.doe@example.com",
-  //   profileImage: "/placeholder.svg?height=100&width=100&text=JD",
-  // }
+  const { data : details } = useUserGetPricingQuery(course?._id)
+
+  const pricing = details?.data
+
+  
+  const [applyCoupon] = useUserApplyCouponMutation()
+
+  const [removeAppliedCoupon] = useUserRemoveAppliedCouponMutation()
 
   const  features = [
     "Lifetime Access",
@@ -51,7 +68,7 @@ const CourseEnrollment = () => {
 
 
   // Handle coupon application
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = async() => {
     if (!couponCode.trim()) {
       toast.error('Error',{
         description : 'Please enter a coupon code',
@@ -59,43 +76,37 @@ const CourseEnrollment = () => {
       return
     }
 
-    // Simulate coupon validation
-    if (couponCode.toUpperCase() === "SAVE20") {
-      setCouponApplied(true)
-      setCouponDiscount(20)
-      toast.success("Coupon Applied", {
-        description: "20% discount has been applied to your order",
-      });
-    } else {
-      toast.error('Invalid Coupon',{
-        description : 'The coupon code you entered is invalid or expired',
+    const toastId = toast.loading('Applying coupon . . .')
+
+    const details = {
+      code : couponCode,
+      total : pricing.total
+    }
+
+    try {
+      const response = await applyCoupon({ details }).unwrap()
+      console.log(response)
+      toast.success(response?.message,{id : toastId})
+      setCouponApplied(true);
+      setCouponDiscount(response?.data)
+    } catch (error) {
+      console.log(error)
+      toast.error('Applying coupon Failed',{
+        description : error?.data?.message,
+        id : toastId
       })
     }
+
   }
 
-  const handleRemoveCoupon = () =>{
+  const handleRemoveCoupon = async() =>{
       setCouponApplied(false)
-      setCouponDiscount(0)
-  }
-
-  // Calculate pricing
-  const calculatePricing = () => {
-    if (!course) return { subtotal: 0, discount: 0, couponDiscount: 0, tax: 0, total: 0 }
-
-    const subtotal = course?.price
-    const courseDiscount = subtotal * (course?.discount / 100)
-    const couponDiscountAmount = couponApplied ? (subtotal - courseDiscount) * (couponDiscount / 100) : 0
-    const priceAfterDiscounts = subtotal - courseDiscount - couponDiscountAmount
-    const tax = priceAfterDiscounts * 0.05 // 5% tax
-    const total = priceAfterDiscounts + tax
-
-    return {
-      subtotal: subtotal.toFixed(2),
-      courseDiscount: courseDiscount.toFixed(2),
-      couponDiscount: couponDiscountAmount.toFixed(2),
-      tax: tax.toFixed(2),
-      total: total.toFixed(2),
-    }
+      setCouponDiscount(null)
+      try {
+        await removeAppliedCoupon(couponDiscount.appliedCoupon).unwrap()
+      } catch (error) {
+        console.Consolelog(error)
+      }
   }
 
   // Handle payment submission
@@ -129,12 +140,6 @@ const CourseEnrollment = () => {
         }, 5000)
       }
     }, 2000)
-  }
-
-  const pricing = calculatePricing()
-
-  if (loading) {
-    return <LoadingSkeleton />
   }
 
   if (paymentStatus === "success") {
@@ -201,13 +206,16 @@ const CourseEnrollment = () => {
           <div>
             <div className="sticky top-4">
               <OrderSummary
+                acceptTerms={acceptTerms}
                 pricing={pricing}
+                couponDiscount={couponDiscount}
                 courseFeatures={features}
                 processingPayment={processingPayment}
                 onSubmitPayment={handleSubmitPayment}
               >
                 
-                  <CouponForm couponApplied={couponApplied} couponCode={couponCode} setCouponCode={setCouponCode} onApplyCoupon={handleApplyCoupon}
+                  <CouponForm couponApplied={couponApplied} couponCode={couponDiscount?.couponCode || couponCode} 
+                  setCouponCode={setCouponCode} onApplyCoupon={handleApplyCoupon}
                   onRemoveCoupon={handleRemoveCoupon}
                    />
             

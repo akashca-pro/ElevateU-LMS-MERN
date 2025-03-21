@@ -15,7 +15,7 @@ const CouponForm = ({ couponCode, setCouponCode, onApplyCoupon, couponApplied, o
           id="couponCode"
           placeholder="Enter coupon code"
           value={couponCode}
-          onChange={(e) => setCouponCode(e.target.value)}
+          onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
           className="rounded-r-none"
           disabled={couponApplied} // Disable input if coupon is applied
         />
@@ -35,7 +35,7 @@ const CouponForm = ({ couponCode, setCouponCode, onApplyCoupon, couponApplied, o
           </Badge>
         </div>
       ) : (
-        <p className="text-xs text-gray-500 mt-1">Try "SAVE20" for 20% off</p>
+        <p className="text-xs text-gray-500 mt-1">Try "WELCOME20" for 20% off</p>
       )}
     </div>
   );

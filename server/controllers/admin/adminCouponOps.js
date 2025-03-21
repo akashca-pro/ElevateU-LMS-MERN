@@ -75,6 +75,29 @@ export const loadCoupons = async (req,res) => {
 
 }
 
+export const updateCoupons = async (req,res) => {
+    
+    try {
+        const { formData } = req.body;
+
+        const coupon = await Coupon.findById(formData._id)
+
+        if(!coupon)
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND,HttpStatus.NOT_FOUND);
+
+        Object.assign(coupon, formData)
+
+        await coupon.save()
+        
+        return ResponseHandler.success(res, STRING_CONSTANTS.UPDATION_SUCCESS, HttpStatus.OK)
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.UPDATION_ERROR, error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER,HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
 export const deleteCoupon = async (req,res) => {
     
     try {

@@ -3,7 +3,10 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { CheckCircle2 } from "lucide-react"
 
-const OrderSummary = ({ pricing, courseFeatures, processingPayment, onSubmitPayment, children }) => {
+const OrderSummary = ({ pricing, courseFeatures, processingPayment,
+  onSubmitPayment, acceptTerms, couponDiscount, children}) => {
+
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -14,33 +17,33 @@ const OrderSummary = ({ pricing, courseFeatures, processingPayment, onSubmitPaym
         <div className="space-y-4">
           <div className="flex justify-between">
             <span className="text-gray-600">Original Price</span>
-            <span>₹{pricing.subtotal}</span>
+            <span>₹{pricing?.subtotal}</span>
           </div>
 
-          {Number.parseFloat(pricing.courseDiscount) > 0 && (
+          {Number.parseFloat(pricing?.discount) > 0 && (
             <div className="flex justify-between text-green-600">
               <span>Course Discount</span>
-              <span>-₹{pricing.courseDiscount}</span>
+              <span>-₹{pricing?.discount}</span>
             </div>
           )}
 
-          {Number.parseFloat(pricing.couponDiscount) > 0 && (
+          {Number.parseFloat(couponDiscount?.discount) > 0 && (
             <div className="flex justify-between text-green-600">
               <span>Coupon Discount</span>
-              <span>-₹{pricing.couponDiscount}</span>
+              <span>-₹{couponDiscount?.discount}</span>
             </div>
           )}
 
           <div className="flex justify-between">
-            <span className="text-gray-600">Tax (5%)</span>
-            <span>₹{pricing.tax}</span>
+            <span className="text-gray-600">GST (18%)</span>
+            <span>₹{pricing?.gst}</span>
           </div>
 
           <Separator />
 
           <div className="flex justify-between font-bold text-lg">
             <span>Total</span>
-            <span>₹{pricing.total}</span>
+            <span>₹{couponDiscount?.finalAmount ? couponDiscount?.finalAmount : pricing?.total}</span>
           </div>
 
           {children}
@@ -51,7 +54,7 @@ const OrderSummary = ({ pricing, courseFeatures, processingPayment, onSubmitPaym
 
       <CardContent className="pt-4">
         <div className="space-y-4">
-          <Button className="w-full" size="lg" onClick={onSubmitPayment} disabled={processingPayment}>
+          <Button className="w-full" size="lg" onClick={onSubmitPayment} disabled={processingPayment || !acceptTerms}>
             {processingPayment ? "Processing..." : "Complete Enrollment"}
           </Button>
 

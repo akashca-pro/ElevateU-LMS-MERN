@@ -40,7 +40,9 @@ export const STRING_CONSTANTS = {
     DRAFT_LIMIT : 'Draft limit exceeded',
     NOT_ALLOWED : 'Access Restricted',
     ALLOWED : 'Access Granted',
-    INVALID_FILTER : 'Invalid Filter'
+    INVALID_FILTER : 'Invalid Filter',
+    PRICING_SUCCESS : 'Pricing success',
+    PRICING_FAILED : 'Pricing failed' ,
  
 }
 

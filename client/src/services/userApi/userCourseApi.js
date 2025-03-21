@@ -18,6 +18,35 @@ const userCourseApi = apiSlice.injectEndpoints({
                 method : 'GET'
             }),
             providesTags : ['User']
+        }),
+        userGetPricing : builder.query({
+            query : (id) => ({
+                url : `user/get-pricing/${id}`,
+                method : 'GET'
+            }),
+            providesTags : ['User']
+        }),
+        userApplyCoupon : builder.mutation({
+            query : (credentials)=>({
+                url : `user/apply-coupon`,
+                method : 'POST',
+                body : credentials
+            }),
+            invalidatesTags : ['User']
+        }),
+        userRemoveAppliedCoupon : builder.mutation({
+            query : (id) => ({
+                url : `user/remove-applied-coupon/${id}`,
+                method : 'DELETE'
+            }),
+            invalidatesTags : ['User']
+        }),
+        userFetchAppliedCoupon : builder.query({
+            query : ()=>({
+                url : `user/get-applied-coupon`,
+                method : 'GET'
+            }),
+            providesTags : ['User']
         })
     })
 })
@@ -25,6 +54,10 @@ const userCourseApi = apiSlice.injectEndpoints({
 export const {
 
     useUserEnrollCourseMutation,
-    useUserEnrolledCoursesQuery
+    useUserEnrolledCoursesQuery,
+    useUserGetPricingQuery,
+    useUserApplyCouponMutation,
+    useUserRemoveAppliedCouponMutation,
+    useUserFetchAppliedCouponQuery
 
 } = userCourseApi

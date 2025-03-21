@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { toast } from "sonner"
-import { PlusCircle } from "lucide-react"
+import { Edit, PlusCircle } from "lucide-react"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -19,37 +19,41 @@ import { useAdminCreateCouponMutation } from '@/services/adminApi/adminCouponApi
 import { Switch } from "@/components/ui/switch"
 
 
-const FormModal = ()=>{
+const FormModal = ({ existValues=null, useAction, refetch })=>{
     const [isOpen, setIsOpen] = useState(false)
     const [confirmClose,setConfirmClose] = useState(false)
-    const [createCoupon] = useAdminCreateCouponMutation()
+    const [addOrUpdateCoupon] = useAction()
     
     const form = useForm({
         resolver : zodResolver(couponSchema),
         defaultValues : {
-            code : "",
-            discountType : '',
-            discountValue : 0,
-            minPurchaseAmount : 0,
-            maxDiscount : 0,
-            expiryDate : "",
-            usageLimit : 1,
-            isActive : false
+            code : existValues?.code || "",
+            discountType : existValues?.discountType || '',
+            discountValue : existValues?.discountValue || 0,
+            minPurchaseAmount : existValues?.minPurchaseAmount || 0,
+            maxDiscount : existValues?.maxDiscount || 0,
+            expiryDate : existValues?.expiryDate || "",
+            usageLimit : existValues?.usageLimit || 1,
+            isActive : existValues?.isActive || false
         }
     })
 
     const handleSubmit = async (data) => {
+        if(existValues){
+            data._id = existValues._id
+        }
         const toastId = toast.loading('Please wait...')
         try {
             console.log(data)
-            await createCoupon({ formData : data }).unwrap()
+            await addOrUpdateCoupon({ formData : data }).unwrap()
 
             toast.success('Coupon created',{
-                description : `${data.code} is created`,
+                description : `${data.code} is ${existValues ? 'Updated' : 'Created'}`,
                 id : toastId
             })
             setIsOpen(false)
             form.reset()
+            refetch()
         } catch (error) {
             console.log(error)
             if (error?.status === 400 && Array.isArray(error?.data?.errors)) {
@@ -101,13 +105,13 @@ const FormModal = ()=>{
         <Button
          onClick={()=>setIsOpen(true)}
         >
-        Add Coupon <PlusCircle/>
+        {existValues ? <Edit/> : <PlusCircle/> }
         </Button>
         </DialogTrigger>
 
         <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Coupon</DialogTitle>
+          <DialogTitle>{existValues ? 'Edit' : 'Add'} Coupon</DialogTitle>
           <DialogDescription>Enter the coupon details below.</DialogDescription>
         </DialogHeader>
 
@@ -299,7 +303,7 @@ const FormModal = ()=>{
             <Button
             type='submit'
             >
-            Create Coupon
+            {existValues ? 'Update' : 'Create'} Coupon
             </Button>
 
         </div>
