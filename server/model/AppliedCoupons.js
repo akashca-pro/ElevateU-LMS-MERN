@@ -4,6 +4,7 @@ import { nanoid } from "nanoid";
 const appliedCouponSchema = new mongoose.Schema({
     _id : { type : String, default : ()=> nanoid(12) },
     userId: { type: String, ref: "User", required: true },
+    courseId : {type : String, ref : 'Course', required : true},
     couponCode: { type: String, required: true },
     discount : { type : Number, required : true },
     discountType : {type : String},

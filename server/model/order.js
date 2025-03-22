@@ -18,14 +18,16 @@ const orderSchema = new mongoose.Schema({
 
     price : { 
         originalPrice : { type : Number, required : true },
-        discount :  { type : Number },
-        coupon : { type : String, ref : 'Coupon' },
+        courseDiscount :  { type : Number },
+        couponCode : { type : String },
+        discountType : { type : String },
+        couponDiscount : { type : Number },
         finalPrice : { type : Number, required : true }
      },
 
      paymentDetails : {
-        transactionId : { type : Number, required : true, unique : true },
-        orderId : { type : String  }
+        transactionId : { type : String, unique : true },
+        orderId : { type : String , required : true }
      },
 
 }, { timestamps : true });

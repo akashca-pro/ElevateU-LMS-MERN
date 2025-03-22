@@ -43,7 +43,9 @@ export const STRING_CONSTANTS = {
     INVALID_FILTER : 'Invalid Filter',
     PRICING_SUCCESS : 'Pricing success',
     PRICING_FAILED : 'Pricing failed' ,
- 
+    PAYMENT_SUCCESS : 'Payment Success',
+    PAYMENT_FAILED : 'Payment Failed'
+  
 }
 
 export const DATABASE_FIELDS = {

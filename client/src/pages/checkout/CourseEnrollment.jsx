@@ -8,7 +8,10 @@ import { Shield, Info } from "lucide-react"
 import { toast } from "sonner"
 import { useUserLoadProfileQuery } from '@/services/userApi/userProfileApi'
 import { useUserGetPricingQuery, useUserApplyCouponMutation,
-   useUserRemoveAppliedCouponMutation, useUserFetchAppliedCouponQuery } from '@/services/userApi/userCourseApi.js'
+   useUserRemoveAppliedCouponMutation, useUserFetchAppliedCouponQuery,
+   useUserCreateOrderMutation
+  } from '@/services/userApi/userCourseApi.js'
+import { useRazorpayPayment } from '@/services/razorpay.js'
 
 import CourseDetails from "./CourseDetails"
 import UserInformation from "./UserInformation"
@@ -17,7 +20,6 @@ import OrderSummary from "./OrderSummary"
 import CouponForm from "./CouponForm"
 import PaymentSuccess from "./PaymentSuccess"
 import PaymentFailure from "./PaymentFailure"
-import LoadingSkeleton from "./LoadingSkeleton"
 
 const CourseEnrollment = () => {
   const { courseId } = useParams()
@@ -28,14 +30,14 @@ const CourseEnrollment = () => {
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [couponCode, setCouponCode] = useState("")
   const [couponApplied, setCouponApplied] = useState(false)
+  const course = location.state
 
-  const { data } = useUserFetchAppliedCouponQuery()
+  const { data } = useUserFetchAppliedCouponQuery(course._id)
 
   const appliedCoupon = data?.data
 
-  console.log(appliedCoupon)
-
   const [couponDiscount, setCouponDiscount] = useState(null)
+  console.log(couponDiscount)
 
   useEffect(()=>{
     if(appliedCoupon){
@@ -46,16 +48,19 @@ const CourseEnrollment = () => {
 
   const { data : userDetails } = useUserLoadProfileQuery()
   const user = userDetails?.data
-  const course = location.state
 
   const { data : details } = useUserGetPricingQuery(course?._id)
 
   const pricing = details?.data
 
-  
   const [applyCoupon] = useUserApplyCouponMutation()
 
   const [removeAppliedCoupon] = useUserRemoveAppliedCouponMutation()
+
+  const [createOrder] = useUserCreateOrderMutation()
+
+  const { handlePayment } = useRazorpayPayment()
+
 
   const  features = [
     "Lifetime Access",
@@ -79,12 +84,12 @@ const CourseEnrollment = () => {
     const toastId = toast.loading('Applying coupon . . .')
 
     const details = {
-      code : couponCode,
-      total : pricing.total
+      courseId : course._id,
+      couponCode : couponCode,
     }
 
     try {
-      const response = await applyCoupon({ details }).unwrap()
+      const response = await applyCoupon({ ...details }).unwrap()
       console.log(response)
       toast.success(response?.message,{id : toastId})
       setCouponApplied(true);
@@ -103,43 +108,60 @@ const CourseEnrollment = () => {
       setCouponApplied(false)
       setCouponDiscount(null)
       try {
-        await removeAppliedCoupon(couponDiscount.appliedCoupon).unwrap()
+        await removeAppliedCoupon(course._id).unwrap()
       } catch (error) {
         console.Consolelog(error)
       }
   }
 
   // Handle payment submission
-  const handleSubmitPayment = () => {
-    if (!acceptTerms) {
-      toast({
-        title: "Terms Required",
-        description: "Please accept the terms and conditions to proceed",
-        variant: "destructive",
+  const handleSubmitPayment = async() => {
+   
+
+    const courseId = course?._id
+    const userData = {
+      _id : user?._id,
+      name : user?.firstName,
+      email : user?.email,
+      phone : user?.phone
+    }
+    try {
+        const responseOrderCreation = await createOrder({courseId, userData})
+        const orderData = responseOrderCreation?.data?.data
+
+        const response = await handlePayment(orderData);
+        if(response.success){
+          toast.success(response.message)
+        }else{
+          toast.error(response.message)
+        }
+    } catch (error) {
+      console.log(error)
+      toast.error('Error',{
+        description : error?.data?.message
       })
-      return
+    } finally{
+      
     }
 
-    setProcessingPayment(true)
+    // // Simulate payment processing
+    // setTimeout(() => {
+    //   setProcessingPayment(false)
 
-    // Simulate payment processing
-    setTimeout(() => {
-      setProcessingPayment(false)
+    //   // Simulate success (90% chance) or failure (10% chance)
+    //   const isSuccess = Math.random() < 0.1
+    //   setPaymentStatus(isSuccess ? "success" : "failure")
 
-      // Simulate success (90% chance) or failure (10% chance)
-      const isSuccess = Math.random() < 0.9
-      setPaymentStatus(isSuccess ? "success" : "failure")
+    //   // Scroll to top to show success/failure message
+    //   window.scrollTo({ top: 0, behavior: "smooth" })
 
-      // Scroll to top to show success/failure message
-      window.scrollTo({ top: 0, behavior: "smooth" })
-
-      // Redirect to course after a delay if payment was successful
-      if (isSuccess) {
-        setTimeout(() => {
-          navigate(`/course/${courseId}`)
-        }, 5000)
-      }
-    }, 2000)
+    //   // Redirect to course after a delay if payment was successful
+    //   if (isSuccess) {
+    //     setTimeout(() => {
+    //       navigate(`/course/${courseId}`)
+    //     }, 5000)
+    //   }
+    // }, 2000)
   }
 
   if (paymentStatus === "success") {

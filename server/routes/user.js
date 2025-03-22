@@ -18,6 +18,7 @@ import { updateEmail, verifyEmail , isBlock} from '../controllers/commonControll
 import passport from 'passport'
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js'
 import { applyCoupon, fetchCurrentAppliedCoupon, getPricing, removeAppliedCoupon } from '../controllers/course/userOps.js'
+import { createOrder, verifyPayment } from '../controllers/order/userOrderOps.js'
 
 
 const router =  express.Router();
@@ -64,8 +65,13 @@ router.post('/read-notifications',verifyAccessToken('user'),readNotifications)
 //pricing
 
 router.get('/get-pricing/:id',verifyAccessToken('user'),getPricing)
-router.get('/get-applied-coupon',verifyAccessToken('user'),fetchCurrentAppliedCoupon)
+router.get('/get-applied-coupon/:id',verifyAccessToken('user'),fetchCurrentAppliedCoupon)
 router.post('/apply-coupon',verifyAccessToken('user'),applyCoupon)
 router.delete('/remove-applied-coupon/:id',verifyAccessToken('user'),removeAppliedCoupon)
+
+// order 
+
+router.post('/create-order',verifyAccessToken('user'),createOrder)
+router.post('/verify-payment',verifyAccessToken('user'),verifyPayment)
 
 export default router

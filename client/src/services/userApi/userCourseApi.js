@@ -42,11 +42,27 @@ const userCourseApi = apiSlice.injectEndpoints({
             invalidatesTags : ['User']
         }),
         userFetchAppliedCoupon : builder.query({
-            query : ()=>({
-                url : `user/get-applied-coupon`,
+            query : (id)=>({
+                url : `user/get-applied-coupon/${id}`,
                 method : 'GET'
             }),
             providesTags : ['User']
+        }),
+        userCreateOrder : builder.mutation({
+            query : (credentials) => ({
+                url : `user/create-order`,
+                method : 'POST',
+                body : credentials
+            }),
+            invalidatesTags : ['User']
+        }),
+        userVerifyPayment : builder.mutation({
+            query : (credentials) => ({
+                url : `user/verify-payment`,
+                method : 'POST',
+                body : credentials
+            }),
+            invalidatesTags :['User']
         })
     })
 })
@@ -58,6 +74,8 @@ export const {
     useUserGetPricingQuery,
     useUserApplyCouponMutation,
     useUserRemoveAppliedCouponMutation,
-    useUserFetchAppliedCouponQuery
+    useUserFetchAppliedCouponQuery,
+    useUserCreateOrderMutation,
+    useUserVerifyPaymentMutation
 
 } = userCourseApi
