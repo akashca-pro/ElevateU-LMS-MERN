@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { CheckCircle2 } from "lucide-react"
 
-const OrderSummary = ({ pricing, courseFeatures, processingPayment,
+const OrderSummary = ({ pricing, courseFeatures,
   onSubmitPayment, acceptTerms, couponDiscount, children}) => {
 
 
@@ -54,8 +54,8 @@ const OrderSummary = ({ pricing, courseFeatures, processingPayment,
 
       <CardContent className="pt-4">
         <div className="space-y-4">
-          <Button className="w-full" size="lg" onClick={onSubmitPayment} disabled={processingPayment || !acceptTerms}>
-            {processingPayment ? "Processing..." : "Complete Enrollment"}
+          <Button className="w-full" size="lg" onClick={onSubmitPayment} disabled={ !acceptTerms}>
+            Enroll Course
           </Button>
 
           <div className="text-xs text-gray-500 space-y-2">

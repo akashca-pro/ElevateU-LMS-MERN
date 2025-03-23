@@ -329,7 +329,6 @@ export const loadCourses = async (req,res) => {
         if (req.query.filter) {
             try {
               const parsedFilter = JSON.parse(req.query.filter);
-              console.log(parsedFilter)
 
                 sort = sortingConditions[parsedFilter.sort]
           

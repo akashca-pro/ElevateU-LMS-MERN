@@ -12,6 +12,13 @@ const userCourseApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags : ['User']
         }),
+        userEnrolledCourse : builder.query({
+            query : (id)=>({
+                url : `user/enrolled-course/${id}`,
+                method : 'GET',
+            }),
+            providesTags : ['User']
+        }),
         userEnrolledCourses : builder.query({
             query : () =>({
                 url : `user/enrolled-courses`,
@@ -71,6 +78,8 @@ export const {
 
     useUserEnrollCourseMutation,
     useUserEnrolledCoursesQuery,
+    useUserEnrolledCourseQuery,
+
     useUserGetPricingQuery,
     useUserApplyCouponMutation,
     useUserRemoveAppliedCouponMutation,

@@ -108,7 +108,6 @@ export const createOrder = async (req,res) => {
             userData : {
                 name : userData.name,
                 email : userData.email,
-                phone : userData.phone
             },
             price : {
                 originalPrice : course.price,
@@ -160,7 +159,7 @@ export const verifyPayment = async (req,res) => {
             const coupon = await Coupon.findOne({ code: order.price.couponCode });
         
             if (coupon) {
-                const userIndex = coupon.usedBy.findIndex(entry => entry.userId.toString() === userId.toString());
+                const userIndex = coupon.usedBy.findIndex(entry => entry.userId === userId);
         
                 if (userIndex !== -1) {
                     // User exists in the usedBy array
@@ -168,8 +167,10 @@ export const verifyPayment = async (req,res) => {
                         coupon.usedBy[userIndex].usage += 1;
                     }
                 } else {
-                    // User does not exist, add them with usage = 1
-                    coupon.usedBy.push({ userId: userId.toString(), usage: 1 });
+                    coupon.usedBy = [
+                        ...coupon.usedBy,
+                        { userId: userId.toString(), usage: 1 }
+                    ];
                 }
         
                 await coupon.save();
@@ -178,7 +179,11 @@ export const verifyPayment = async (req,res) => {
 
         await order.save();
 
-        return ResponseHandler.success(res, STRING_CONSTANTS.PAYMENT_SUCCESS,HttpStatus.OK)
+        return ResponseHandler.success(res, STRING_CONSTANTS.PAYMENT_SUCCESS,HttpStatus.OK,{
+            orderId : order._id,
+            transactionId : order.paymentDetails.transactionId,
+            amountPaid : order.price.finalPrice
+        })
 
     } catch (error) {
         console.log(STRING_CONSTANTS.PAYMENT_FAILED,error);

@@ -67,7 +67,9 @@ const userSchema  = new mongoose.Schema({
         type : Boolean,
         default : false
     },
-    bookmarks : [{ type : String , ref : 'Course' }]
+    bookmarks : [{ type : String , ref : 'Course' }],
+
+    cart : { type : String , ref : 'Course' },
     
 },{timestamps : true});
 

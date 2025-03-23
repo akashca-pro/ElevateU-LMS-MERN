@@ -18,11 +18,16 @@ import BlockedUI from './components/FallbackUI/BlockedUI'
 import Navbar from './components/Navbar'
 import CourseEnrollment from './pages/checkout/CourseEnrollment'
 import Footer from './components/Footer'
+import Index from './pages/checkout/Index'
+import PaymentSuccess from './pages/checkout/PaymentSuccess'
+import PaymentFailure from './pages/checkout/PaymentFailure'
+import ScrollToTop from './components/ScrollToTop'
 
 
 const App = () => {
   return (
     <>
+      <ScrollToTop/>
       <Toaster richColors position='top-right' duration={2000} />
       <Routes>
 
@@ -34,15 +39,19 @@ const App = () => {
         <Route path='courses/:courseName' element={<CourseDetails/>} />
         </Route>
 
-        <Route path='/courses/:courseName/checkout' element={
+        <Route path='/explore/courses/:courseName/checkout' element={
           <ProtectedRoute role={'user'}>
           <BlockedUI >
             <Navbar/>
-          <CourseEnrollment/>
+          <Index/>
           <Footer/>
           </BlockedUI>
           </ProtectedRoute>
-        }/>
+        }>
+        <Route index element={<CourseEnrollment/>}/>
+        <Route path='payment-success' element={<PaymentSuccess/>} />
+        <Route path='payment-failed' element={<PaymentFailure/>} />
+        </Route>
 
         <Route path="/user/*" element={<UserRoutes />} />
 

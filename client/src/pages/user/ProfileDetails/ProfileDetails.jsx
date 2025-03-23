@@ -22,6 +22,7 @@ const ProfileDetails = () => {
   const [avatarPreview, setAvatarPreview] = useState(null);  
   const { formData, errors, handleChange ,setFormData} = useForm();
 
+
   
 
   useEffect(() => {

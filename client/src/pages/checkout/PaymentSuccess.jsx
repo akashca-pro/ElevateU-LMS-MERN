@@ -1,8 +1,19 @@
 
 import { Button } from "@/components/ui/button"
-import { CheckCircle2, ArrowRight } from "lucide-react"
+import { formatUrl } from "@/utils/formatUrls"
+import { CheckCircle2, ArrowRight, BookOpen, LibraryBig } from "lucide-react"
+import { useLocation, useNavigate } from "react-router-dom"
 
-const PaymentSuccess = ({ course, pricing, orderId, onNavigate }) => {
+const PaymentSuccess = () => {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const orderDetails = location.state
+  const decodedCourseName = formatUrl(orderDetails?.courseTitle)
+
+  setTimeout(()=>{
+
+  },[4000])
+
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-2xl mx-auto text-center">
@@ -11,7 +22,7 @@ const PaymentSuccess = ({ course, pricing, orderId, onNavigate }) => {
         </div>
         <h1 className="text-3xl font-bold mb-4">Enrollment Successful!</h1>
         <p className="text-gray-600 mb-8">
-          Thank you for enrolling in <span className="font-semibold">{course.title}</span>. Your payment has been
+          Thank you for enrolling in <span className="font-semibold">{orderDetails?.courseTitle}</span>.Your payment has been
           processed successfully.
         </p>
 
@@ -19,7 +30,7 @@ const PaymentSuccess = ({ course, pricing, orderId, onNavigate }) => {
           <div className="grid grid-cols-2 gap-4 text-left">
             <div>
               <p className="text-sm text-gray-500">Order ID</p>
-              <p className="font-medium">ORD-{orderId}</p>
+              <p className="font-medium">ORD-{orderDetails?.orderId}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Date</p>
@@ -27,12 +38,17 @@ const PaymentSuccess = ({ course, pricing, orderId, onNavigate }) => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Amount Paid</p>
-              <p className="font-medium">₹{pricing.total}</p>
+              <p className="font-medium">₹{orderDetails.amountPaid}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Payment Method</p>
-              <p className="font-medium">PayPal</p>
+              <p className="font-medium">Razorpay</p>
             </div>
+            <div>
+              <p className="text-sm text-gray-500">Transaction ID</p>
+              <p className="font-medium">{orderDetails?.transactionId}</p>
+            </div>
+            
           </div>
         </div>
 
@@ -40,9 +56,14 @@ const PaymentSuccess = ({ course, pricing, orderId, onNavigate }) => {
           You will be redirected to the course dashboard shortly. If not, click the button below.
         </p>
 
-        <Button size="lg" className="gap-2" onClick={onNavigate}>
-          Go to Course <ArrowRight className="h-4 w-4" />
+        <div className="flex flex-row gap-4">
+        <Button size="lg" className="flex-1 " onClick={()=>navigate(`/user/profile/my-courses/${decodedCourseName}`,{replace : true})}>
+         Learn Now <BookOpen className="h-4 w-4" />
         </Button>
+        <Button size="lg" className="flex-1 " onClick={()=>navigate(`/user/profile/my-courses?tab=enrolled`,{replace : true})}>
+         Enrolled Courses <LibraryBig className="h-4 w-4" />
+        </Button>
+        </div>
       </div>
     </div>
   )

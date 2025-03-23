@@ -48,6 +48,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useLoadCoursesQuery } from "@/services/commonApi";
 import { useNavigate } from "react-router-dom";
+import { formatUrl } from "@/utils/formatUrls";
 
 const CoursesListing = () => {
   const [queryParams, setQueryParams] = useState({
@@ -65,7 +66,7 @@ const CoursesListing = () => {
     },
   });
 
-  console.log(queryParams)
+
 
 
   // Fetch courses using RTK Query
@@ -500,6 +501,7 @@ const uniqueTutors = coursesData?.courses
 
 // Course Card Component
 const CourseCard = ({ course, renderStars }) => {
+  const decodedCourseName = formatUrl(course.title)
   const navigate = useNavigate();
   return (
     <Card className="overflow-hidden h-full flex flex-col transition-all hover:shadow-md">
@@ -548,7 +550,7 @@ const CourseCard = ({ course, renderStars }) => {
      {course.price === 0 ? "Free" : `₹${course.price}`}
     </span>
     <Button
-    onClick = {()=>navigate(`/explore/courses/${course.title}`,{state : course._id})}
+    onClick = {()=>navigate(`/explore/courses/${decodedCourseName}`,{state : course._id})}
     >View Course</Button>
     </CardFooter>
     </Card>

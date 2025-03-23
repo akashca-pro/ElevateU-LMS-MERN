@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -11,12 +11,13 @@ import { Separator } from "@/components/ui/separator"
 import {
   BookOpen, Clock,Users, Star, CheckCircle,Lock,  Play,  Bookmark, BookmarkPlus,
    Award, Globe, Calendar, BarChart3,
-   X,
 } from "lucide-react"
 import { format } from "date-fns"
 import { useLoadCourseDetailsQuery } from '@/services/commonApi.js'
+import { useUserLoadProfileQuery } from '@/services/userApi/userProfileApi.js'
 import LoadingSpinner from "@/components/FallbackUI/LoadingSpinner"
 import VideoPlayer from "@/services/Cloudinary/VideoPlayer"
+import { formatUrl } from "@/utils/formatUrls"
 
 const CourseDetails = () => {
   const [selectedLesson,setSelectedLesson] = useState(null);
@@ -26,12 +27,30 @@ const CourseDetails = () => {
   const navigate = useNavigate()
   const { data : details, isLoading, error } = useLoadCourseDetailsQuery(courseId)
   const course = details?.data
+
   const [isBookmarked, setIsBookmarked] = useState(false)
+  const [isEnrolled,setIsEnrolled] = useState(false)
+  const [courseName,setCourseName] = useState('')
+  const { data } = useUserLoadProfileQuery()
+  const user = data?.data
 
   const openModal = (lesson) =>{
     setSelectedLesson(lesson);
     setIsModalOpen(true)
   }
+
+  useEffect(() => {
+    if (course?.title) {
+      const decodedCourseName = formatUrl(course.title);
+      setCourseName(decodedCourseName);
+    }
+  
+    if (user && course && user.enrolledCourses?.length > 0) {
+      if (user.enrolledCourses.includes(course._id)) {
+        setIsEnrolled(true);
+      }
+    }
+  }, [user, course]);
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked)
@@ -39,7 +58,11 @@ const CourseDetails = () => {
   }
 
   const handleEnroll = () => {
-    navigate(`/courses/${course.title}/checkout`,{state : course})
+    navigate(`/explore/courses/${courseName}/checkout`,{state : course})
+  }
+
+  const handleViewCourse = () => {
+    navigate(`/user/profile/my-courses/${courseName}`)
   }
 
   if (isLoading) {
@@ -437,7 +460,7 @@ const CourseDetails = () => {
                   />
                   <div className="p-6 space-y-6">
                     <div className="flex justify-between items-center">
-                      <div className="flex items-baseline gap-2">
+                     { !isEnrolled && <div className="flex items-baseline gap-2">
                         <span className="text-3xl font-bold">
                           {course?.isFree ? "Free" : `₹${course?.price}`}
                         </span>
@@ -446,8 +469,8 @@ const CourseDetails = () => {
                             ₹{(course?.price * (100 / (100 - course?.discount))).toFixed(2)}
                           </span>
                         )}
-                      </div>
-                      <Button
+                      </div>}
+                      { !isEnrolled && <Button
                         variant="outline"
                         size="icon"
                         className={isBookmarked ? "text-primary" : ""}
@@ -458,18 +481,18 @@ const CourseDetails = () => {
                         ) : (
                           <BookmarkPlus className="h-5 w-5" />
                         )}
-                      </Button>
+                      </Button>}
                     </div>
 
-                    {!course?.isFree && course?.discount > 0 && (
+                    { !isEnrolled && !course?.isFree && course?.discount > 0 && (
                       <div className="bg-primary/10 text-primary rounded-md p-2 text-center text-sm font-medium">
                         {course?.discount}% discount! Limited time offer
                       </div>
                     )}
 
-                    <Button className="w-full text-lg py-6" size="lg" onClick={handleEnroll}>
-                      {course?.isFree ? "Enroll Now" : "Buy Now"}
-                    </Button>
+                    {<Button className="w-full text-lg py-6" size="lg" onClick={ isEnrolled ? handleViewCourse : handleEnroll}>
+                    {isEnrolled ? 'View Course' : (course?.isFree ? "Enroll Now" : "Buy Now") }
+                    </Button>}
 
                     <div className="space-y-3">
                       <h3 className="font-semibold">This course includes:</h3>

@@ -9,37 +9,46 @@ import { toast } from "sonner"
 import { useUserLoadProfileQuery } from '@/services/userApi/userProfileApi'
 import { useUserGetPricingQuery, useUserApplyCouponMutation,
    useUserRemoveAppliedCouponMutation, useUserFetchAppliedCouponQuery,
-   useUserCreateOrderMutation
+   useUserCreateOrderMutation, useUserEnrollCourseMutation
   } from '@/services/userApi/userCourseApi.js'
 import { useRazorpayPayment } from '@/services/razorpay.js'
 
-import CourseDetails from "./CourseDetails"
-import UserInformation from "./UserInformation"
-import RazorPayPayment from "./RazorPayPayment"
-import OrderSummary from "./OrderSummary"
-import CouponForm from "./CouponForm"
-import PaymentSuccess from "./PaymentSuccess"
-import PaymentFailure from "./PaymentFailure"
+import CourseDetails from "./components/CourseDetails"
+import UserInformation from "./components/UserInformation"
+import RazorPayPayment from "./components/RazorPayPayment"
+import OrderSummary from "./components/OrderSummary"
+import CouponForm from "./components/CouponForm"
+import { formatUrl } from "@/utils/formatUrls"
 
 const CourseEnrollment = () => {
   const { courseId } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const [processingPayment, setProcessingPayment] = useState(false)
-  const [paymentStatus, setPaymentStatus] = useState(null) // null, 'success', 'failure'
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [couponCode, setCouponCode] = useState("")
   const [couponApplied, setCouponApplied] = useState(false)
   const course = location.state
+  
+  
+  const [couponDiscount, setCouponDiscount] = useState(null)
+  
+  
+  useEffect(() => {
+    if (!course) {
+      navigate("/");
+    }
+  }, [course, navigate]);
+  
+  if(!course) return null
+  
+  const decodedCourseName = formatUrl(course.title)
 
   const { data } = useUserFetchAppliedCouponQuery(course._id)
-
+  
   const appliedCoupon = data?.data
-
-  const [couponDiscount, setCouponDiscount] = useState(null)
-  console.log(couponDiscount)
-
+  
   useEffect(()=>{
+
     if(appliedCoupon){
       setCouponDiscount(appliedCoupon)
       setCouponApplied(true)
@@ -60,6 +69,8 @@ const CourseEnrollment = () => {
   const [createOrder] = useUserCreateOrderMutation()
 
   const { handlePayment } = useRazorpayPayment()
+
+  const [enrollCourse] = useUserEnrollCourseMutation()
 
 
   const  features = [
@@ -131,7 +142,13 @@ const CourseEnrollment = () => {
 
         const response = await handlePayment(orderData);
         if(response.success){
-          toast.success(response.message)
+          await enrollCourse({courseId}).unwrap()
+          navigate(`/explore/courses/${decodedCourseName}/checkout/payment-success`,{state : {
+            orderId : response.paymentDetails?.orderId,
+            transactionId : response.paymentDetails?.transactionId,
+            amountPaid : response.paymentDetails?.amountPaid,
+            courseTitle : course?.title
+          }})
         }else{
           toast.error(response.message)
         }
@@ -140,45 +157,9 @@ const CourseEnrollment = () => {
       toast.error('Error',{
         description : error?.data?.message
       })
-    } finally{
-      
     }
 
-    // // Simulate payment processing
-    // setTimeout(() => {
-    //   setProcessingPayment(false)
-
-    //   // Simulate success (90% chance) or failure (10% chance)
-    //   const isSuccess = Math.random() < 0.1
-    //   setPaymentStatus(isSuccess ? "success" : "failure")
-
-    //   // Scroll to top to show success/failure message
-    //   window.scrollTo({ top: 0, behavior: "smooth" })
-
-    //   // Redirect to course after a delay if payment was successful
-    //   if (isSuccess) {
-    //     setTimeout(() => {
-    //       navigate(`/course/${courseId}`)
-    //     }, 5000)
-    //   }
-    // }, 2000)
   }
-
-  if (paymentStatus === "success") {
-    return (
-      <PaymentSuccess
-        course={course}
-        pricing={pricing}
-        orderId={Math.random().toString(36).substring(2, 10).toUpperCase()}
-        onNavigate={() => navigate(`/course/${courseId}`)}
-      />
-    )
-  }
-
-  if (paymentStatus === "failure") {
-    return <PaymentFailure onRetry={() => setPaymentStatus(null)} onCancel={() => navigate("/courses")} />
-  }
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-5xl mx-auto">
@@ -193,7 +174,7 @@ const CourseEnrollment = () => {
             <UserInformation user={user} />
 
             <Card className="mb-8">
-              <RazorPayPayment processingPayment={processingPayment} />
+              <RazorPayPayment  />
 
               <Separator />
 
@@ -232,7 +213,6 @@ const CourseEnrollment = () => {
                 pricing={pricing}
                 couponDiscount={couponDiscount}
                 courseFeatures={features}
-                processingPayment={processingPayment}
                 onSubmitPayment={handleSubmitPayment}
               >
                 

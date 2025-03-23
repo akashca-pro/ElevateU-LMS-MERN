@@ -6,24 +6,26 @@ const enrollmentSchema = new mongoose.Schema({
         type: String,
         default: () => nanoid(12),
     },
-    user: {
+    userId: {
         type: String,
         ref: "User",
         required: true,
     },
-    course: {
+    paymentDetails : {
+        transactionId : { type : String , required : function(){ return this.paymentDetails?.amountPaid > 0 } },
+        amountPaid : { type : Number ,default : 0, required : true},
+        orderId : { type : String, ref : 'Order' }
+    },
+    courseId : {
         type: String,
         ref: "Course",
         required: true,
     },
-    paymentStatus: {
-        type: String,
-        enum: ["pending", "completed", "failed"],
-        default: "pending",
-    },
     progress: {
         type: Number,
-        default: 0, // Progress in percentage (0-100)
+        default: 0, // Progress in percentage (0-100),
+        min : [0,'Progress cannot be less than 0'],
+        max : [100,'Progress cannot be greater than 100']
     },
     completed: {
         type: Boolean,

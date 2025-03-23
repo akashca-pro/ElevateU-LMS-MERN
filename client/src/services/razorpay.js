@@ -15,8 +15,12 @@ export const useRazorpayPayment = () => {
                     description: "Course Enrollment",
                     handler: async (response) => {
                         try {
-                            await verifyPayment({ ...response, courseId : orderData?.courseId }).unwrap();
-                            resolve({ success: true, message: "Payment successful" });
+                            const res = await verifyPayment({ ...response, courseId : orderData?.courseId }).unwrap();
+                            resolve({ success: true, message: "Payment successful" , paymentDetails : {
+                                orderId : res?.data?.orderId,
+                                transactionId : res?.data?.transactionId,
+                                amountPaid : res?.data?.amountPaid
+                            }});
                         } catch (error) {
                             console.log(error);
                             resolve({ success: false, message: "Payment verification failed" });
@@ -24,8 +28,7 @@ export const useRazorpayPayment = () => {
                     },
                     prefill: {
                         name: orderData?.userData.name,
-                        email: orderData?.userData.email,
-                        contact: orderData?.userData.phone,
+                        email: orderData?.userData.email
                     },
                     theme: {
                         color: "#3399cc",

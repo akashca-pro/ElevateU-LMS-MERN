@@ -7,7 +7,7 @@ import {registerUser,loginUser,refreshToken,logoutUser,forgotPassword,verifyRese
 import {loadProfile,updateProfile,deleteAccount
 } from '../controllers/user/userOps.js'
 
-import {enrollInCourse, loadEnrolledCourses} from '../controllers/enrolledCourse/userOps.js'
+import {addToCart, enrollInCourse, getCartDetails, loadEnrolledCourse, loadEnrolledCourses} from '../controllers/enrolledCourse/userOps.js'
 
 import {verifyAccessToken,verifyRefreshToken} from '../utils/verifyToken.js'
 import {otpLimiter} from '../middleware/rateLimiting.js';
@@ -52,9 +52,15 @@ router.post('/verify-email',verifyAccessToken('user'),verifyEmail('user'))
 router.post('/update-profile/:id',validateForm('user','profile'),verifyAccessToken('user'),updateProfile)
 router.delete('/delete-account/:id',verifyAccessToken('user'),deleteAccount)
 
-// course enrollment
+//cart managing
+
+router.post('/cart',verifyAccessToken('user'),addToCart)
+router.get('/cart',verifyAccessToken('user'),getCartDetails)
+
+// course enrollment 
 
 router.post('/enroll-course',verifyAccessToken('user'),enrollInCourse)
+router.get('/enrolled-course/:id',verifyAccessToken('user'),loadEnrolledCourse)
 router.get('/enrolled-courses',verifyAccessToken('user'),loadEnrolledCourses)
 
 // notification

@@ -19,6 +19,7 @@ export const loadProfile = async (req,res) => {
             DATABASE_FIELDS.BIO,
             DATABASE_FIELDS.DOB,
             DATABASE_FIELDS.PHONE,
+            DATABASE_FIELDS.ENROLLED_COURSES
         ].join(' '));
     
         if(!userData)
