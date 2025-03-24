@@ -10,7 +10,7 @@ import { useSearchParams } from 'react-router-dom'
 
 const CourseDashboard = () => {
   const [searchParams] = useSearchParams();
-  const defaultTab = searchParams.get('tab') || 'ongoing'
+  const defaultTab = searchParams.get('tab') || 'enrolled'
   return (
     <div className="container mx-auto p-6 max-w-full overflow-x-auto">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -28,14 +28,13 @@ const CourseDashboard = () => {
 
       <Tabs defaultValue={defaultTab} className="" >
         <TabsList>
-          <TabsTrigger value='ongoing' >Ongoing </TabsTrigger>
-          <TabsTrigger value='finished' >Finished </TabsTrigger>
           <TabsTrigger value='enrolled' >Enrolled</TabsTrigger>
+          <TabsTrigger value='finished' >Finished </TabsTrigger>
           <TabsTrigger value='bookmark' >Bookmark</TabsTrigger>
         </TabsList>
 
-        <TabsContent value='ongoing' >
-          <Ongoing/>
+        <TabsContent value='enrolled' >
+        <Enrolled/> 
         </TabsContent>
 
         <TabsContent value='finished' >
@@ -44,10 +43,6 @@ const CourseDashboard = () => {
 
         <TabsContent value='bookmark' >
           <Bookmark/>
-        </TabsContent>
-
-        <TabsContent value='enrolled'>
-        <Enrolled/>
         </TabsContent>
 
       </Tabs>

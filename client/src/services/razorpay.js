@@ -15,7 +15,7 @@ export const useRazorpayPayment = () => {
                     description: "Course Enrollment",
                     handler: async (response) => {
                         try {
-                            const res = await verifyPayment({ ...response, courseId : orderData?.courseId }).unwrap();
+                            const res = await verifyPayment(response).unwrap();
                             resolve({ success: true, message: "Payment successful" , paymentDetails : {
                                 orderId : res?.data?.orderId,
                                 transactionId : res?.data?.transactionId,

@@ -10,6 +10,8 @@ import { DATABASE_FIELDS, STRING_CONSTANTS } from "../utils/stringConstants.js"
 import Category from "../model/category.js"
 import EnrolledCourse from "../model/enrolledCourses.js"
 import Course from "../model/course.js"
+import RefreshToken from "../model/refreshToken.js"
+import { generateRefreshToken } from "../utils/generateToken.js"
 
 const roleModals = {
     user : User,
@@ -23,6 +25,50 @@ const sortingConditions = {
     'price-high-low' : { price : -1 },
     'price-low-high' : { price : 1 },
     'rating-high-low': { rating : -1 }
+}
+
+
+// create and save refresh token in the db
+
+export const saveRefreshToken = (role) => async(req,res)=>{
+
+    try {
+        const id = req[role].id;
+        
+        const alreadyExist = await RefreshToken.findOne({ user : id, userType : role })
+
+        if(!alreadyExist)
+            return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NO_CONTENT);
+
+        const refreshToken = generateRefreshToken(id)
+
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + 7);
+   
+        await RefreshToken.create({
+            user : id,
+            userType : role,
+            token : refreshToken,
+            expiresAt : futureDate.toISOString()
+        })
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.TOKEN_ISSUE_ERROR,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+}
+
+// Verify Refresh token and issue new access token 
+
+export const refreshAccessToken = (role) => async(req,res) => {
+
+    try {
+        
+    } catch (error) {
+        
+    }
+
 }
 
 //Update Email
@@ -430,5 +476,3 @@ export const loadCourseTitles = async (req,res) => {
     }
 
 }
-
-

@@ -1,4 +1,5 @@
 import User from '../../model/user.js'
+import RefreshToken from '../../model/refreshToken.js'
 import OTP from '../../model/otp.js'
 import bcrypt from 'bcryptjs'
 import {generateAccessToken,generateRefreshToken} from '../../utils/generateToken.js'
@@ -17,7 +18,7 @@ export const registerUser = async (req,res) => {
     try {
 
         const { email, password ,
-            firstName, rememberMe  } = req.body;
+            firstName  } = req.body;
     
         const userExists = await User.findOne({email : email});
     
@@ -48,14 +49,10 @@ export const registerUser = async (req,res) => {
         ].join(' '))
 
         const accessToken = generateAccessToken(user._id);
-        const refreshToken = generateRefreshToken(user._id);
     
         // Set access token as cookie (24 hour)
-        sendToken(res, process.env.USER_ACCESS_TOKEN_NAME,accessToken, 1 * 24 * 60 * 60 * 1000)
+        sendToken(res, process.env.USER_ACCESS_TOKEN_NAME,accessToken, 1 * 24 * 60 * 60 * 1000);
     
-        // Set refresh token as cookie (only if "Remember Me" is checked)
-        if(rememberMe) sendToken(res, process.env.USER_REFRESH_TOKEN_NAME, refreshToken,7 * 24 * 60 * 60 * 1000);
-
         return ResponseHandler.success(res, STRING_CONSTANTS.REGISTRATION_SUCCESS, HttpStatus.OK,userData);
 
     } catch (error) {

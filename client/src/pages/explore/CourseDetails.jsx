@@ -15,11 +15,15 @@ import {
 import { format } from "date-fns"
 import { useLoadCourseDetailsQuery } from '@/services/commonApi.js'
 import { useUserLoadProfileQuery } from '@/services/userApi/userProfileApi.js'
+import { useUserAddToCartMutation, useUserLoadCartQuery } from '@/services/userApi/userCourseApi.js'
 import LoadingSpinner from "@/components/FallbackUI/LoadingSpinner"
 import VideoPlayer from "@/services/Cloudinary/VideoPlayer"
 import { formatUrl } from "@/utils/formatUrls"
+import { toast } from "sonner"
+import { useSelect } from "@/hooks/useSelect"
 
 const CourseDetails = () => {
+  const { tutor, admin } = useSelect()
   const [selectedLesson,setSelectedLesson] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false)
   const location = useLocation()
@@ -34,10 +38,14 @@ const CourseDetails = () => {
   const { data } = useUserLoadProfileQuery()
   const user = data?.data
 
+  const [addToCart] = useUserAddToCartMutation()
+
   const openModal = (lesson) =>{
     setSelectedLesson(lesson);
     setIsModalOpen(true)
   }
+
+  const {  refetch : refetchCartDetails } = useUserLoadCartQuery()
 
   useEffect(() => {
     if (course?.title) {
@@ -57,8 +65,19 @@ const CourseDetails = () => {
     // Add API call to save bookmark status
   }
 
-  const handleEnroll = () => {
-    navigate(`/explore/courses/${courseName}/checkout`,{state : course})
+  const handleEnroll = async() => {
+    try {
+      await addToCart({ courseId : course._id }).unwrap();
+      refetchCartDetails()
+      navigate(`/explore/courses/${courseName}/checkout`)
+    } catch (error) {
+      if(error?.status === 400){
+        navigate(`/explore/courses/${courseName}/checkout`)
+        refetchCartDetails()
+        return null
+      }
+      toast.error('Error',{description : 'Error adding to cart'})
+    }
   }
 
   const handleViewCourse = () => {
@@ -490,7 +509,9 @@ const CourseDetails = () => {
                       </div>
                     )}
 
-                    {<Button className="w-full text-lg py-6" size="lg" onClick={ isEnrolled ? handleViewCourse : handleEnroll}>
+                    {<Button 
+                    disabled = {tutor.isAuthenticated || admin.isAuthenticated}
+                    className="w-full text-lg py-6" size="lg" onClick={ isEnrolled ? handleViewCourse : handleEnroll}>
                     {isEnrolled ? 'View Course' : (course?.isFree ? "Enroll Now" : "Buy Now") }
                     </Button>}
 
@@ -519,12 +540,7 @@ const CourseDetails = () => {
                         </div>
                       </div>
                     </div>
-
-                    <div className="pt-4">
-                      <Button variant="outline" className="w-full">
-                        Gift This Course
-                      </Button>
-                    </div>
+                    
                   </div>
                 </CardContent>
               </Card>

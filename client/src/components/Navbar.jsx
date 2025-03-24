@@ -6,16 +6,20 @@ import { useUserAuthActions, useTutorAuthActions, useAdminAuthActions } from "@/
 import { useTutorLogoutMutation } from '@/services/TutorApi/tutorAuthApi';
 import { useAdminLogoutMutation } from '@/services/adminApi/adminAuthApi';
 import { useUserLogoutMutation } from '@/services/userApi/userAuthApi';
+import { useUserLoadCartQuery } from '@/services/userApi/userCourseApi.js'
 import Notification from "./Notification";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlobalSearch } from "./Search";
+import { formatUrl } from "@/utils/formatUrls";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(null);
+  const { data : cartDetails } = useUserLoadCartQuery(undefined,{ refetchOnMountOrArgChange : true })
+  const courseName = formatUrl(cartDetails?.data?.course?.title || 'courseName')
   const { user, tutor, admin } = useSelect();
 
   const role = user.isAuthenticated ? "user" : tutor.isAuthenticated ? "tutor" : admin.isAuthenticated ? 'admin' : 'none';
@@ -86,11 +90,11 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
           {user.isAuthenticated || tutor.isAuthenticated || admin.isAuthenticated ? (
             <>
-              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-                <Link to="/user/cart" className="hidden text-gray-600 hover:text-purple-600 md:block">
+              { user.isAuthenticated && <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                <Link to={`/explore/courses/${courseName}/checkout`} className="hidden text-gray-600 hover:text-purple-600 md:block">
                   <ShoppingCart className="h-6 w-6" />
                 </Link>
-              </motion.div>
+              </motion.div>}
 
               {!admin.isAuthenticated && (
                 <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>

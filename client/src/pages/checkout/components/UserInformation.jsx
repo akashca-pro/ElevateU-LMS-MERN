@@ -12,11 +12,11 @@ const UserInformation = ({ user }) => {
       <CardContent>
         <div className="flex items-center gap-4 mb-6">
           <div className="h-12 w-12 rounded-full overflow-hidden">
-            <img src={user?.profileImage || "/placeholder.svg"} alt={user?.firstName} className="w-full h-full object-cover" />
+            <img src={user?.profileImage || "/userProfileIcon.svg"} alt={user?.name} className="w-full h-full object-cover" />
           </div>
 
           <div>
-            <h3 className="font-medium">{user?.firstName}</h3>
+            <h3 className="font-medium">{user?.name}</h3>
             <p className="text-sm text-gray-600">{user?.email}</p>
           </div>
         </div>

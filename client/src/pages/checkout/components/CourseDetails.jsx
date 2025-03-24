@@ -50,7 +50,7 @@ const CourseDetails = ({ course }) => {
             <div className="flex items-center gap-4 mb-3">
               <div className="flex items-center">
                 <User className="h-3.5 w-3.5 text-gray-400 mr-1" />
-                <span className="text-sm text-gray-600">{course?.tutor?.firstName}</span>
+                <span className="text-sm text-gray-600">{course?.tutor}</span>
               </div>
 
               <div className="flex items-center">
@@ -69,12 +69,12 @@ const CourseDetails = ({ course }) => {
             <div className="grid grid-cols-2 gap-2">
             <div className="flex items-center text-sm">
             <BookOpen className="h-4 w-4 text-gray-400 mr-2" />
-            <span>{course?.modules?.length || 0} modules</span>
+            <span>{course?.modules} modules</span>
             </div>
               <div className="flex items-center text-sm">
             <Calendar className="h-4 w-4 text-gray-400 mr-2" />
             <span>
-            {course?.modules?.reduce((total, module) => total + (module.lessons?.length || 0), 0)} lessons
+            {course?.lessons} lessons
           </span>
           </div>
               <div className="flex items-center text-sm">

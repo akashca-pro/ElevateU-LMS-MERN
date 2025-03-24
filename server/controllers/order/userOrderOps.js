@@ -51,10 +51,6 @@ export const createOrder = async (req,res) => {
 
         const existOrder = await Order.findOne({ userId : userData._id , courseId})
         if(existOrder){
-
-            if(existOrder.price.couponCode){
-                return ResponseHandler.success(res,STRING_CONSTANTS.EXIST,HttpStatus.OK,existOrder)
-            }
             
             if(appliedCoupon){
     
@@ -93,6 +89,8 @@ export const createOrder = async (req,res) => {
             };
 
             existOrder.paymentDetails.orderId = razorpayOrderDetails.id;
+
+            await existOrder.save()
 
             return ResponseHandler.success(res,'Order already exist',HttpStatus.OK,existOrder);
        
@@ -137,7 +135,7 @@ export const verifyPayment = async (req,res) => {
     try {
         const userId = req.user.id;
 
-        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, courseId} = req.body;
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
 
         const order = await Order.findOne({ "paymentDetails.orderId": razorpay_order_id });
 

@@ -20,9 +20,11 @@ const userCourseApi = apiSlice.injectEndpoints({
             providesTags : ['User']
         }),
         userEnrolledCourses : builder.query({
-            query : () =>({
+            query : (queryParams) =>({
                 url : `user/enrolled-courses`,
-                method : 'GET'
+                method : 'GET',
+                params : queryParams
+                
             }),
             providesTags : ['User']
         }),
@@ -70,6 +72,21 @@ const userCourseApi = apiSlice.injectEndpoints({
                 body : credentials
             }),
             invalidatesTags :['User']
+        }),
+        userAddToCart : builder.mutation({
+            query : (credentials) => ({
+                url : `user/cart`,
+                method : 'POST',
+                body : credentials
+            }),
+            invalidatesTags : ['User']
+        }),
+        userLoadCart : builder.query({
+            query : ()=>({
+                url : `user/cart`,
+                method : 'GET'
+            }),
+            invalidatesTags : ['User']
         })
     })
 })
@@ -85,6 +102,9 @@ export const {
     useUserRemoveAppliedCouponMutation,
     useUserFetchAppliedCouponQuery,
     useUserCreateOrderMutation,
-    useUserVerifyPaymentMutation
+    useUserVerifyPaymentMutation,
+
+    useUserAddToCartMutation,
+    useUserLoadCartQuery
 
 } = userCourseApi

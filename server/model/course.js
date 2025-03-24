@@ -29,6 +29,8 @@ const courseSchema = new mongoose.Schema(
 
       category: { type: String, ref: "Category", default: null ,required: function () { return !this.draft }},
 
+      categoryName : { type : String },
+
       tutor: { type: String, ref: "Tutor", required: function () { return !this.draft } },
 
       price: { type: Number, required: function () { return !this.draft } },

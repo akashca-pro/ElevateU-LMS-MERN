@@ -6,10 +6,9 @@ import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Shield, Info } from "lucide-react"
 import { toast } from "sonner"
-import { useUserLoadProfileQuery } from '@/services/userApi/userProfileApi'
 import { useUserGetPricingQuery, useUserApplyCouponMutation,
    useUserRemoveAppliedCouponMutation, useUserFetchAppliedCouponQuery,
-   useUserCreateOrderMutation, useUserEnrollCourseMutation
+   useUserCreateOrderMutation, useUserEnrollCourseMutation, useUserLoadCartQuery
   } from '@/services/userApi/userCourseApi.js'
 import { useRazorpayPayment } from '@/services/razorpay.js'
 
@@ -19,34 +18,39 @@ import RazorPayPayment from "./components/RazorPayPayment"
 import OrderSummary from "./components/OrderSummary"
 import CouponForm from "./components/CouponForm"
 import { formatUrl } from "@/utils/formatUrls"
+import LoadingSpinner from "@/components/FallbackUI/LoadingSpinner"
+import ErrorComponent from "@/components/FallbackUI/ErrorComponent"
+import EmptyCartComponent from "@/components/FallbackUI/EmptyCartComponent"
 
 const CourseEnrollment = () => {
-  const { courseId } = useParams()
-  const location = useLocation()
   const navigate = useNavigate()
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [couponCode, setCouponCode] = useState("")
   const [couponApplied, setCouponApplied] = useState(false)
-  const course = location.state
-  
-  
   const [couponDiscount, setCouponDiscount] = useState(null)
-  
-  
-  useEffect(() => {
-    if (!course) {
-      navigate("/");
-    }
-  }, [course, navigate]);
-  
-  if(!course) return null
-  
-  const decodedCourseName = formatUrl(course.title)
+  const [user,setUser] = useState(null)
+  const [course,setCourse] = useState(null)
+  const { data : cartDetails, isFetching, isLoading } = useUserLoadCartQuery(undefined,{refetchOnMountOrArgChange : true})
 
-  const { data } = useUserFetchAppliedCouponQuery(course._id)
+
+  useEffect(() => {
+    if (cartDetails?.data) {
+      setUser(cartDetails.data.user);
+      setCourse(cartDetails.data.course);
+    }
+  }, [cartDetails]);
+
   
-  const appliedCoupon = data?.data
   
+const { data: couponDetails } = useUserFetchAppliedCouponQuery(course?._id, {
+  skip: !course?._id, // Prevents query execution if course._id is missing
+});
+
+  const appliedCoupon = couponDetails?.data
+
+
+  const decodedCourseName = course ? formatUrl(course.title) : "";
+
   useEffect(()=>{
 
     if(appliedCoupon){
@@ -54,9 +58,6 @@ const CourseEnrollment = () => {
       setCouponApplied(true)
     }
   },[appliedCoupon])
-
-  const { data : userDetails } = useUserLoadProfileQuery()
-  const user = userDetails?.data
 
   const { data : details } = useUserGetPricingQuery(course?._id)
 
@@ -132,13 +133,14 @@ const CourseEnrollment = () => {
     const courseId = course?._id
     const userData = {
       _id : user?._id,
-      name : user?.firstName,
+      name : user?.name,
       email : user?.email,
       phone : user?.phone
     }
     try {
         const responseOrderCreation = await createOrder({courseId, userData})
         const orderData = responseOrderCreation?.data?.data
+        console.log(orderData)
 
         const response = await handlePayment(orderData);
         if(response.success){
@@ -160,7 +162,7 @@ const CourseEnrollment = () => {
     }
 
   }
-  return (
+  return (<> {isLoading ? <LoadingSpinner/>  : course ? 
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-3xl font-bold mb-2">Complete Your Enrollment</h1>
@@ -232,7 +234,7 @@ const CourseEnrollment = () => {
         </div>
       </div>
     </div>
-  )
+  : <EmptyCartComponent/> } </>)
 }
 
 export default CourseEnrollment
