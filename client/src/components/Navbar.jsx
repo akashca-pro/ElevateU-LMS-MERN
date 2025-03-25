@@ -18,12 +18,16 @@ const Navbar = () => {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(null);
-  const { data : cartDetails } = useUserLoadCartQuery(undefined,{ refetchOnMountOrArgChange : true })
-  const courseName = formatUrl(cartDetails?.data?.course?.title || 'courseName')
   const { user, tutor, admin } = useSelect();
-
+  
   const role = user.isAuthenticated ? "user" : tutor.isAuthenticated ? "tutor" : admin.isAuthenticated ? 'admin' : 'none';
   const roleData = user.isAuthenticated ? user.userData : tutor.isAuthenticated ? tutor.tutorData : admin.isAuthenticated ? admin.adminData : 'none';
+  
+  const { data : cartDetails } = useUserLoadCartQuery(undefined,
+    { refetchOnMountOrArgChange : true ,
+      skip : tutor.isAuthenticated || admin.isAuthenticated })
+
+    const courseName = formatUrl(cartDetails?.data?.course?.title || 'courseName')
 
   const { logout: userLogout } = useUserAuthActions();
   const { logout: tutorLogout } = useTutorAuthActions();

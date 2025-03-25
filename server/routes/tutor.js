@@ -1,13 +1,13 @@
 import express from 'express'
 
-import {registerTutor, loginTutor, forgotPassword, verifyResetLink, logoutTutor, refreshToken ,
+import {registerTutor, loginTutor, forgotPassword, verifyResetLink, logoutTutor ,
     passportCallback,authFailure,authLoad, isTutorVerified
 } from '../controllers/tutor/tutorAuth.js'
 
 import {loadProfile,updateProfile,deleteAccount,requestVerification
 } from '../controllers/tutor/tutorOps.js'
 
-import {verifyAccessToken, verifyRefreshToken} from '../utils/verifyToken.js'
+import {refreshAccessToken, verifyAccessToken, verifyRefreshToken} from '../utils/verifyToken.js'
 import {otpLimiter} from '../middleware/rateLimiting.js';
 import { validateForm } from '../middleware/validation.js'
 
@@ -29,7 +29,7 @@ router.post('/login',validateForm('tutor','login'),loginTutor)
 router.post('/forgot-password',otpLimiter,forgotPassword)
 router.post('/reset-password',verifyResetLink)
 router.delete('/logout',logoutTutor)
-router.patch('/refresh-token',verifyRefreshToken('tutor'),refreshToken)
+router.patch('/refresh-token',verifyRefreshToken('Tutor'),refreshAccessToken)
 
 router.get('/google',passport.authenticate('google-tutor',{ scope: ["profile", "email"] }))
 

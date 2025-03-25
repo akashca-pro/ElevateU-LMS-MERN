@@ -6,6 +6,8 @@ import Admin from '../model/admin.js';
 import Tutor from '../model/tutor.js';
 import ResponseHandler from './responseHandler.js';
 import { STRING_CONSTANTS } from './stringConstants.js';
+import RefreshToken from '../model/refreshToken.js';
+import { generateAccessToken, generateRefreshToken } from './generateToken.js';
 
 const TOKEN_NAMES = {
     user: process.env.USER_ACCESS_TOKEN_NAME,
@@ -25,7 +27,10 @@ const roleModals = {
     admin : Admin
 }
 
+const getRoleModel = (role) => roleModals[role.toLowerCase()];
+
 export const verifyAccessToken = (role) => async(req, res, next) => {
+    try {
     const tokenName = TOKEN_NAMES[role];
 
     if (!tokenName) {
@@ -36,19 +41,23 @@ export const verifyAccessToken = (role) => async(req, res, next) => {
     if (!token) {
         return ResponseHandler.error(res, STRING_CONSTANTS.UNAUTHORIZED, HttpStatus.UNAUTHORIZED)
     }
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            req[role] = decoded;
+    
+            const db = getRoleModel(role);
+    
+            const data = await db.findById(decoded.id)
+            
+            if(data.isBlocked)
+                return ResponseHandler.error(res,STRING_CONSTANTS.NOT_ALLOWED, HttpStatus.FORBIDDEN)
+    
+            next();
+        } catch (error) {
+            console.log(STRING_CONSTANTS.TOKEN_ISSUE_ERROR,error);
+            return ResponseHandler.error(res, STRING_CONSTANTS.UNAUTHORIZED, HttpStatus.UNAUTHORIZED)
+        }
 
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req[role] = decoded;
-
-        const db = roleModals[role]
-
-        const data = await db.findById(decoded.id)
-        
-        if(data.isBlocked)
-            return ResponseHandler.error(res,STRING_CONSTANTS.NOT_ALLOWED, HttpStatus.FORBIDDEN)
-
-        next();
     } catch (error) {
         console.log(STRING_CONSTANTS.TOKEN_VERIFY_ERROR,HttpStatus.INTERNAL_SERVER_ERROR)
         return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
@@ -56,31 +65,93 @@ export const verifyAccessToken = (role) => async(req, res, next) => {
 };
 
 export const verifyRefreshToken = (role) => async(req,res,next)=>{
-    const tokenName = REFRESH_TOKEN[role]
     
-    if (!tokenName) {
-        return ResponseHandler.error(res, STRING_CONSTANTS.TOKEN_ISSUE_ERROR,HttpStatus.NOT_FOUND);  
+    try {
+        const id = req.params.id;
+
+        const db = getRoleModel(role);
+
+        const user = await db.findById(id)
+
+        if(user.isBlocked){
+            return ResponseHandler.error(res,STRING_CONSTANTS.BLOCKED, HttpStatus.FORBIDDEN)
+        }
+
+        const refreshToken = await RefreshToken.findOne({ user : id, userType : role })
+
+        if (!refreshToken) {
+            return ResponseHandler.error(res, STRING_CONSTANTS.TOKEN_NOT_FOUND, HttpStatus.FORBIDDEN);
+        }
+
+        try {
+            const decoded = jwt.verify(refreshToken.token, process.env.JWT_REFRESH);
+            req[role] =  decoded;
+            req.role = role
+            next();
+        } catch (error) {
+            console.log(STRING_CONSTANTS.TOKEN_ISSUE_ERROR,error);
+            return ResponseHandler.error(res, STRING_CONSTANTS.TOKEN_EXPIRED, HttpStatus.FORBIDDEN);
+        }
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.TOKEN_VERIFY_ERROR,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    const token = req.cookies[tokenName];
-    if (!token) {
-        return ResponseHandler.error(res, STRING_CONSTANTS.UNAUTHORIZED, HttpStatus.UNAUTHORIZED)
-    }
+}
+
+// create and save refresh token in the db
+
+export const saveRefreshToken = async(req,res,role)=>{
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_REFRESH);
-        req[role] = decoded;
+        const id = req[role]
 
-        const db = roleModels[role]
+        const alreadyExist = await RefreshToken.findOne({ user : id, userType : role })
 
-        const isBlocked = await db.findById(decoded,{ isBlocked : true })
-        
-        if(isBlocked)
-            return ResponseHandler.error(res,STRING_CONSTANTS.NOT_ALLOWED, HttpStatus.FORBIDDEN)
+        if(alreadyExist)
+            await RefreshToken.findOneAndDelete({ user : id, userType : role })
 
-        next();
+        const refreshToken = generateRefreshToken(id)
+
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + 7);
+   
+        await RefreshToken.create({
+            user : id,
+            userType : role,
+            token : refreshToken,
+            expiresAt : futureDate.toISOString()
+        })
+
+        return true;
+
     } catch (error) {
-        console.log(STRING_CONSTANTS.TOKEN_VERIFY_ERROR,HttpStatus.INTERNAL_SERVER_ERROR)
-        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
+        console.log(STRING_CONSTANTS.TOKEN_ISSUE_ERROR,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+}
+
+// Refresh Token End point (Reissue Access Token)
+
+export const refreshAccessToken = async (req,res) => {
+   
+    try {
+        const {decoded} = req.user;
+        const newAccessToken = generateAccessToken(decoded.id);
+
+        const tokenName = TOKEN_NAMES[role.toLowerCase()]
+
+        sendToken(res, tokenName, newAccessToken,1 * 24 * 60 * 60 * 1000)
+
+        await saveRefreshToken(req,res,req.role);
+    
+        return ResponseHandler.success(res, STRING_CONSTANTS.TOKEN_ISSUED, HttpStatus.OK)
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.TOKEN_ISSUE_ERROR, error);
+        return  ResponseHandler.error(res, STRING_CONSTANTS.TOKEN_ISSUE_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+    
 }

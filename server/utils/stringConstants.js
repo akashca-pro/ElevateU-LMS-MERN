@@ -10,6 +10,7 @@ export const STRING_CONSTANTS = {
     LOGOUT_SUCCESS : 'Logout successfully',
     LOGOUT_ERROR : 'Logout failed',
     TOKEN_ISSUED : 'Token issued',
+    TOKEN_EXPIRED : 'Token Expired',
     TOKEN_ISSUE_SUCCES : 'Token issued successfully',
     TOKEN_ISSUE_ERROR : 'Token issuing failed',
     TOKEN_VERIFY_ERROR : 'Token verification error',
@@ -45,7 +46,9 @@ export const STRING_CONSTANTS = {
     PRICING_SUCCESS : 'Pricing success',
     PRICING_FAILED : 'Pricing failed' ,
     PAYMENT_SUCCESS : 'Payment Success',
-    PAYMENT_FAILED : 'Payment Failed'
+    PAYMENT_FAILED : 'Payment Failed',
+    COURSE_SUSPENDED : 'Course is Suspended',
+    COURSE_ACTIVE : 'Course is Active'
   
 }
 

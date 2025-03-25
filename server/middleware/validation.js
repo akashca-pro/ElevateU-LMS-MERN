@@ -102,8 +102,8 @@ const roleValidations = {
 
         body('courseDetails.modules.*.lessons.*.title')
         .trim()
-        .isLength({ min : 5 })
-        .withMessage('Lesson title is required with atleast 5 character'),
+        .isLength({ min : 3 })
+        .withMessage('Lesson title is required with atleast 3 character'),
 
         body('courseDetails.modules.*.lessons.*.videoUrl')
         .trim()

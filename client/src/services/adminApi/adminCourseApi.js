@@ -19,9 +19,10 @@ const adminCourseApi = apiSlice.injectEndpoints({
             })
         }),
         adminLoadCourses : builder.query({
-            query : ({page,limit,search})=>({
-                url : `admin/view-courses?page=${page}&limit=${limit}&search=${search}`,
-                method : 'GET'
+            query : (queryParams)=>({
+                url : `admin/view-courses`,
+                method : 'GET',
+                params : queryParams
             }),
             providesTags : ['Admin']
         }),
@@ -39,6 +40,14 @@ const adminCourseApi = apiSlice.injectEndpoints({
                 method : 'DELETE'
             }),
             invalidatesTags : ['Admin']
+        }),
+        adminAllowOrSuspendCourse : builder.mutation({
+            query : (credentials)=> ({
+                url : `admin/course-status`,
+                method : 'POST',
+                body : credentials
+            }),
+            invalidatesTags : ['Admin']
         })
     })
 })
@@ -50,6 +59,7 @@ export const {
 
     useAdminLoadPendingRequestQuery,
     useAdminApproveOrRejectCourseMutation,
+    useAdminAllowOrSuspendCourseMutation,
 
     // course manage
 

@@ -13,15 +13,15 @@ import {
 import { toast } from "sonner"
   
   export function AlertDialogDelete({btnName, btnClass ,id, deleteApi,onSuccess}) {
-    const [deleteData] = deleteApi()
+    const [action] = deleteApi()
     const handleDelete = async(id) =>{
         const toastId = toast.loading('Please wait . . .')
         try {
-            const response = await deleteData(id).unwrap()
-            toast.success(response?.message || 'Data deleted successfully',{id : toastId});
+            const response = await action(id).unwrap()
+            toast.success(response?.message || 'Success',{id : toastId});
             onSuccess()
         } catch (error) {
-            toast.error(error?.data?.message || 'Error deleting data, try again later',{id : toastId})
+            toast.error(error?.data?.message || 'Failed',{id : toastId})
         }
     }
 
@@ -34,7 +34,7 @@ import { toast } from "sonner"
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the data
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

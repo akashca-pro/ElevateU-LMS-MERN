@@ -189,3 +189,24 @@ export const verifyPayment = async (req,res) => {
     }
 
 }
+
+export const failedPayment = async (req,res) => {
+    
+    try {
+        const orderId = req.params.id;
+
+        const order = await Order.findById(orderId);
+
+        if(!order)
+            return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NO_CONTENT);
+
+        await Order.findByIdAndUpdate(orderId, { $set : { paymentStatus : 'failed' } });
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.SUCCESS, HttpStatus.OK);
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.PAYMENT_FAILED, error);
+        return ResponseHandler.success(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+}

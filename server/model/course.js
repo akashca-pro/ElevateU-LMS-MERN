@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { nanoid } from "nanoid";
 import Tutor from "./tutor.js";
+import Category from "./category.js";
 
 const lessonSchema = new mongoose.Schema({
     _id :{ type : String, default : ()=> nanoid(12) },
@@ -47,7 +48,7 @@ const courseSchema = new mongoose.Schema(
 
       isPublished: { type: Boolean, default: false },
 
-      status: { type: String, enum: ["pending", "approved", "rejected", "draft"], default: "draft" },
+      status: { type: String, enum: ["pending", "approved", "rejected", "draft","suspended"], default: "draft" },
 
       reason: { type: String },
 
@@ -164,6 +165,21 @@ courseSchema.post("save", async function (doc) {
         console.log("Error updating course count:", error);
     }
 });
+
+courseSchema.pre("save", async function (next) {
+    try {
+        if (this.category) {
+            const category = await Category.findById(this.category);
+            if (category) {
+                this.categoryName = category.name;
+            }
+        }
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
+
 
 const Course = mongoose.model('Course',courseSchema)
 

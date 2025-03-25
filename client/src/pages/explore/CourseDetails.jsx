@@ -67,6 +67,14 @@ const CourseDetails = () => {
 
   const handleEnroll = async() => {
     try {
+
+      if(!user){ toast.info('Join to Enroll',{
+        description  : 'Please log in or sign up to purchase this course.',
+        duration : 4000
+      })
+      return null
+    }
+        
       await addToCart({ courseId : course._id }).unwrap();
       refetchCartDetails()
       navigate(`/explore/courses/${courseName}/checkout`)

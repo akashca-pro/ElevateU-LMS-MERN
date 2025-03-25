@@ -152,7 +152,7 @@ const { data: couponDetails } = useUserFetchAppliedCouponQuery(course?._id, {
             courseTitle : course?.title
           }})
         }else{
-          toast.error(response.message)
+          navigate(`/explore/courses/${decodedCourseName}/checkout/payment-failed`,{state : decodedCourseName})
         }
     } catch (error) {
       console.log(error)

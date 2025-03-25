@@ -67,7 +67,6 @@ const List = () => {
             <TableRow key={index} className="hover:bg-gray-50">
               <TableCell>{(currentPage - 1) * limit + index + 1}</TableCell>
               <TableCell 
-              onClick={() => navigate(`/admin/profile/category/${category.name.toLowerCase()}`)}
               className="font-semibold">
                 {category.name} </TableCell>
               <TableCell>{category.description}</TableCell>

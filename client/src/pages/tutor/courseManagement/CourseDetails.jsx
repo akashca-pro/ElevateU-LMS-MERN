@@ -167,7 +167,9 @@ const CourseDetails = () => {
     const toastId = toast.loading('Please Wait . . . ')
     try {
        const response = await publishCourse({ courseDetails : course }).unwrap()
-       toast.success(response?.message,{id : toastId , duration : 5000})
+       toast.success('Request Submitted',{id : toastId , duration : 5000 ,
+        description : response?.message
+       })
     } catch (error) {
       console.log(error)
       if (error?.status === 400 && Array.isArray(error?.data?.errors)) {

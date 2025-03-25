@@ -1,6 +1,6 @@
 import express from 'express'
 
-import {registerUser,loginUser,refreshToken,logoutUser,forgotPassword,verifyResetLink,
+import {registerUser,loginUser,logoutUser,forgotPassword,verifyResetLink,
     passportCallback, authFailure ,authLoad
 } from '../controllers/user/userAuth.js'
 
@@ -9,7 +9,7 @@ import {loadProfile,updateProfile,deleteAccount
 
 import {addToCart, enrollInCourse, getCartDetails, loadEnrolledCourse, loadEnrolledCourses} from '../controllers/enrolledCourse/userOps.js'
 
-import {verifyAccessToken,verifyRefreshToken} from '../utils/verifyToken.js'
+import {refreshAccessToken, verifyAccessToken,verifyRefreshToken} from '../utils/verifyToken.js'
 import {otpLimiter} from '../middleware/rateLimiting.js';
 import { validateForm } from '../middleware/validation.js'
 
@@ -18,7 +18,7 @@ import { updateEmail, verifyEmail , isBlock} from '../controllers/commonControll
 import passport from 'passport'
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js'
 import { applyCoupon, fetchCurrentAppliedCoupon, getPricing, removeAppliedCoupon } from '../controllers/course/userOps.js'
-import { createOrder, verifyPayment } from '../controllers/order/userOrderOps.js'
+import { createOrder, failedPayment, verifyPayment } from '../controllers/order/userOrderOps.js'
 
 
 const router =  express.Router();
@@ -30,7 +30,7 @@ router.post('/login',validateForm('user','login'),loginUser)
 router.post('/forgot-password',forgotPassword)
 router.post('/reset-password',verifyResetLink)
 router.delete('/logout',logoutUser)
-router.patch('/refresh-token',verifyRefreshToken('user'),refreshToken)
+router.patch('/refresh-token',verifyRefreshToken('User'),refreshAccessToken)
 
 router.get('/google',passport.authenticate("google-user",{ scope: ["profile", "email"] }))
 
@@ -79,5 +79,6 @@ router.delete('/remove-applied-coupon/:id',verifyAccessToken('user'),removeAppli
 
 router.post('/create-order',verifyAccessToken('user'),createOrder)
 router.post('/verify-payment',verifyAccessToken('user'),verifyPayment)
+router.patch('/failed-payment/:id',verifyAccessToken('user'),failedPayment)
 
 export default router

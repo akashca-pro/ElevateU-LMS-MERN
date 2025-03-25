@@ -109,6 +109,10 @@ export const enrollInCourse = async (req,res) => {
                 orderId : orderDetails._id
             }
         })
+
+        course.totalEnrollment += 1;
+
+        await course.save() 
         
         await User.findByIdAndUpdate(userId,{ $addToSet : { enrolledCourses : courseId } })
 
@@ -132,7 +136,7 @@ export const loadEnrolledCourses = async (req,res) => {
         const skip = (page-1) * limit
         const {search, filter} = req.query
 
-        let filterQuery = {};
+        let filterQuery = { isPublished : true };
         let sort = { createdAt: -1 }; // Default sorting (Newest first)
 
         if (filter === "oldest") {

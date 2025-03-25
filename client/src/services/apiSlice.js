@@ -1,67 +1,102 @@
-//  Base API configuration
-import {createApi,fetchBaseQuery} from '@reduxjs/toolkit/query/react';
-
-// use this if refreshtoken is invalid or anything error happens so the user will be logged out to log in page
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { removeAdminCredentials } from '@/features/auth/admin/adminAuthSlice.js';
 import { removeTutorCredentials } from '@/features/auth/tutor/tutorAuthSlice.js';
 import { removeUserCredentials } from '@/features/auth/user/userAuthSlice.js';
 
+// Helper function to get user ID based on role
+const getUserId = (state, role) => {
+    switch (role) {
+        case 'admin':
+            return state.adminAuth?.userData?._id;
+        case 'tutor':
+            return state.tutorAuth?.tutorData?._id;
+        case 'user':
+            return state.userAuth?.userData?._id;
+        default:
+            return null;
+    }
+};
+
+// Base query configuration
 const baseQuery = fetchBaseQuery({
-    baseUrl : import.meta.env.VITE_BASE_URL,
-   credentials : 'include',
+    baseUrl: import.meta.env.VITE_BASE_URL,
+    credentials: 'include',
 });
 
-// // Enhanced base query to handle token refresh
-// const baseQueryWithReauth = async (args, api, extraOptions) => {
-//   let result = await baseQuery(args, api, extraOptions);
+// Logout handler
+const handleLogout = async (dispatch, state) => {
+    if (state.adminAuth?.isAuthenticated) {
+        dispatch(removeAdminCredentials());
+        await baseQuery({url : "admin/logout", method : 'DELETE'},
+                 { dispatch, getState: () => state }, {});
+    }
+    if (state.tutorAuth?.isAuthenticated) {
+        dispatch(removeTutorCredentials());
+        await baseQuery({url : "tutor/logout", method : 'DELETE'},
+             { dispatch, getState: () => state }, {});
+    }
+    if (state.userAuth?.isAuthenticated) {
+        dispatch(removeUserCredentials());
+        await baseQuery({url : "user/logout", method : 'DELETE'}, 
+            { dispatch, getState: () => state }, {});
+    }
+};
 
-//   if (result.error && result.error.status === 401) {
-//       console.log(' Token expired, attempting refresh...');
+// Enhanced base query with re-authentication
+const baseQueryWithReauth = async (args, api, extraOptions) => {
+    let result = await baseQuery(args, api, extraOptions);
 
-//       const state = api.getState();
-//       let refreshResults = {};
+    // If unauthorized, attempt token refresh
+    if (result.error && result.error.status === 401) {
+        const state = api.getState();
+        const roles = [
+            { role: 'admin', authenticated: state.adminAuth?.isAuthenticated },
+            { role: 'tutor', authenticated: state.tutorAuth?.isAuthenticated },
+            { role: 'user', authenticated: state.userAuth?.isAuthenticated }
+        ];
 
-//       // Collect all active roles
-//       const roles = [];
-//       if (state.adminAuth?.isAuthenticated) roles.push({ role: "admin", url: "admin/refresh-token" });
-//       if (state.tutorAuth?.isAuthenticated) roles.push({ role: "tutor", url: "tutor/refresh-token" });
-//       if (state.userAuth?.isAuthenticated) roles.push({ role: "user", url: "user/refresh-token" });
+        // Filter authenticated roles
+        const authenticatedRoles = roles.filter(r => r.authenticated);
 
-//       if (roles.length === 0) {
-//           console.log(' No authenticated user, logging out...');
-//           api.dispatch(removeUserCredentials());
-//           return result;
-//       }
+        if (authenticatedRoles.length === 0) {
+            await handleLogout(api.dispatch, state);
+            return result;
+        }
 
-//       // Refresh tokens for all active roles
-//       for (const { role, url } of roles) {
-//           console.log(` Refreshing token for ${role}: ${url}`);
-//           refreshResults[role] = await baseQuery(`/${url}`, api, extraOptions);
-//       }
+        // Attempt token refresh for each authenticated role
+        for (const { role } of authenticatedRoles) {
+            const userId = getUserId(state, role);
+            if (!userId) continue;
 
-//       // Check if any refresh request succeeded
-//       const successfulRefresh = Object.entries(refreshResults).some(([role, res]) => res.data);
+            try {
+                const refreshResult = await baseQuery(
+                    `${role}/refresh-token/${userId}`, 
+                    api, 
+                    extraOptions
+                );
 
-//       if (successfulRefresh) {
-//           console.log(' At least one token refreshed, retrying original request...');
-//           return await baseQuery(args, api, extraOptions); // Retry the original request
-//       } else {
-//           console.log(' Refresh failed for all roles, logging out...');
-//           if (state.adminAuth?.isAuthenticated) api.dispatch(removeAdminCredentials());
-//           if (state.tutorAuth?.isAuthenticated) api.dispatch(removeTutorCredentials());
-//           if (state.userAuth?.isAuthenticated) api.dispatch(removeUserCredentials());
-//       }
-//   }
+                // If refresh successful, retry original request
+                if (refreshResult.data) {
+                    return await baseQuery(args, api, extraOptions);
+                }
+            } catch (refreshError) {
+                console.error(`Token refresh failed for ${role}:`, refreshError);
+            }
+        }
 
-//   return result;
-// };
+        // If all refresh attempts fail, logout
+        await handleLogout(api.dispatch, state);
+    }
 
+    return result;
+};
 
+// Create API slice
 export const apiSlice = createApi({
-    reducerPath : 'api',
-    baseQuery ,
-    tagTypes : ['Admin', 'User', 'Tutor','Common'],
-    endpoints: () => ({}), // Will be extended by other API files
-})
+    reducerPath: 'api',
+    baseQuery: baseQueryWithReauth,
+    tagTypes: ['Admin', 'User', 'Tutor', 'Common'],
+    endpoints: () => ({}),
+});
 
 export default apiSlice;

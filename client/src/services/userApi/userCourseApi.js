@@ -73,6 +73,13 @@ const userCourseApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags :['User']
         }),
+        userFailedPayment : builder.mutation({
+            query : (credentials) => ({
+                url : `user/failed-payment/${credentials}`,
+                method : 'PATCH',
+            }),
+            invalidatesTags :['User']
+        }),
         userAddToCart : builder.mutation({
             query : (credentials) => ({
                 url : `user/cart`,
@@ -102,7 +109,9 @@ export const {
     useUserRemoveAppliedCouponMutation,
     useUserFetchAppliedCouponQuery,
     useUserCreateOrderMutation,
+
     useUserVerifyPaymentMutation,
+    useUserFailedPaymentMutation,
 
     useUserAddToCartMutation,
     useUserLoadCartQuery

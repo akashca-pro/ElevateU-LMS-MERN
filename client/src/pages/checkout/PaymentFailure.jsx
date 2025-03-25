@@ -2,8 +2,12 @@
 import { Button } from "@/components/ui/button"
 import { AlertCircle, RefreshCw, ArrowLeft } from "lucide-react"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
+import { useLocation, useNavigate } from "react-router-dom"
 
-const PaymentFailure = ({ onRetry, onCancel }) => {
+const PaymentFailure = () => {
+  const navigate = useNavigate();
+  const location = useLocation()
+  const courseName = location.state
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-2xl mx-auto text-center">
@@ -25,11 +29,11 @@ const PaymentFailure = ({ onRetry, onCancel }) => {
         </Alert>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" className="gap-2" onClick={onRetry}>
+          <Button size="lg" className="gap-2" onClick={()=>navigate(`/explore/courses/${courseName}/checkout`,{replace : true})}>
             <RefreshCw className="h-4 w-4" /> Try Again
           </Button>
 
-          <Button variant="outline" size="lg" className="gap-2" onClick={onCancel}>
+          <Button variant="outline" size="lg" className="gap-2" onClick={()=>navigate('/explore',{replace : true})}>
             <ArrowLeft className="h-4 w-4" /> Back to Courses
           </Button>
         </div>

@@ -24,7 +24,7 @@ let readNotificationQuery;
   switch (role) {
     case 'user': { 
       queryResult = useUserLoadNotificationsQuery();
-      [readNotificationQuery] = useUserReadNotificationsMutation();
+      [readNotificationQuery,] = useUserReadNotificationsMutation();
       break;  
     }
 
@@ -47,8 +47,6 @@ let readNotificationQuery;
   }
 })();
 
-
-
   useEffect(() => {
 
     const apiNotifications = queryResult.data?.data || [];
@@ -56,7 +54,7 @@ let readNotificationQuery;
       ...notification,
       isRead: notification.isRead || false, 
     }));
-
+    queryResult.refetch();
     setNotifications(transformed);
     setUnreadCount(transformed.filter(n => !n.isRead).length);
   }, [queryResult.data]);
@@ -106,8 +104,9 @@ let readNotificationQuery;
       publish_request: "bg-blue-500",
       verify_profile: "bg-purple-500",
       new_enrollment: "bg-green-500",
-      payment_update: "bg-amber-500",
+      payment_update: "bg-green-500",
       publish_course: "bg-blue-500",
+      suspend_course:"bg-yellow-500",
       default: "bg-gray-500",
     };
     return colors[type] || colors.default;
@@ -119,8 +118,9 @@ let readNotificationQuery;
       publish_request: { label: "Course Request", variant: "blue" },
       verify_profile: { label: "Profile", variant: "purple" },
       new_enrollment: { label: "Enrollment", variant: "green" },
-      payment_update: { label: "Payment", variant: "yellow" },
-      publish_course: { label: "Approve course", variant: "blue" },
+      payment_update: { label: "Payment", variant: "green" },
+      publish_course: { label: "Course approved", variant: "blue" },
+      suspend_course : { label : "Course suspended", variant : "yellow" },
       default: { label: "Notification", variant: "default" },
     };
 

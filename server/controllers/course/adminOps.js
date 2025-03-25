@@ -4,32 +4,118 @@ import ResponseHandler from "../../utils/responseHandler.js";
 import HttpStatus from "../../utils/statusCodes.js";
 import { STRING_CONSTANTS } from "../../utils/stringConstants.js";
 import { saveNotification ,sendNotification } from '../../utils/LiveNotification.js'
+
 // view all courses
 
 export const loadCourses = async (req,res) => {
     
     try {
-        const page = parseInt(req.query.page)
-        const limit = parseInt(req.query.limit)
-        const { search } = req.query
-        const skip = (page - 1) * limit
+        const page = parseInt(req.query.page) || 1
+        const limit = parseInt(req.query.limit) || 5
+        const skip = (page-1) * limit
+        const {search, filter} = req.query
 
-        const searchQuery = {
-             title : {$regex : search , $options : "i"}
-        }
+        let sort = { createdAt: -1 }; // Default sorting (Newest first)
+        let filterQuery = {}; 
 
-        const allCourses = await Course.find(search ? searchQuery : {})
+                // Handle filter conditions
+                if (filter === "oldest") {
+                    sort = { createdAt: 1 }; // Oldest first
+                } else if (filter === "active") {
+                    filterQuery.isPublished = true;
+                } else if (filter === "Not-Active") {
+                    filterQuery.isPublished = false;
+                }
+
+                if (search) {
+                    filterQuery.title = { $regex : search , $options : "i"  }                 
+                }      
+        
+        const courses = await Course.find(filterQuery)
+        .select(`title category categoryName tutor price duration discount totalEnrollment thumbnail isPublished
+            status rating level badge hasCertification modules createdAt`)
+        .populate('tutor' , 'firstName email profileImage')
+        .populate({
+            path: 'modules',
+            select: 'title lessons', 
+            populate: {
+                path: 'lessons', 
+                select: 'title ' 
+            }
+        })
         .skip(skip)
         .limit(limit)
+        .sort(sort)
 
-        if(!allCourses || allCourses.length === 0) 
-            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
-        
-        return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, allCourses);
+        const modulesCount = courses.map((course)=>({
+            _id : course._id,
+            Count : course.modules.length
+        }))
+
+        const totalCourses = await Course.countDocuments(filterQuery)
+
+        if(!courses || courses.length === 0) 
+            return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK,{
+            courses,
+            modulesCount ,
+            total: totalCourses, 
+            currentPage: page,
+            totalPages: Math.ceil(totalCourses / limit),
+        })
 
     } catch (error) {
-        console.log(STRING_CONSTANTS.LOADING_ERROR, error);
-        return ResponseHandler.error(res,STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
+        console.log(STRING_CONSTANTS.LOADING_ERROR,error)
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER,HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// Suspend Course 
+
+export const allowOrSuspendCourse = async (req,res) => {
+    
+    try {
+        const { courseId, tutorId } = req.body
+
+        const course = await Course.findById(courseId)
+        
+        if(!course)
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+        if(course.status === 'suspended'){
+            course.status = 'draft';
+
+            await course.save()
+
+            const newNotification = await saveNotification(tutorId, 'Tutor', 'publish_course',
+                `Your ${course.title} course has been Published `
+             )
+    
+             sendNotification(req,newNotification)
+
+             return ResponseHandler.success(res, STRING_CONSTANTS.COURSE_ACTIVE,HttpStatus.OK)
+        }
+
+        if(course.status === 'approved'){
+            course.isPublished = false;
+            course.status = 'suspended';
+
+            await course.save()
+
+            const newNotification = await saveNotification(tutorId, 'Tutor', 'suspend_course',
+                `Your ${course.title} course has been suspended `
+             )
+    
+             sendNotification(req,newNotification)
+            
+             return ResponseHandler.success(res, STRING_CONSTANTS.COURSE_SUSPENDED,HttpStatus.OK)
+        }
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.SERVER,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

@@ -9,6 +9,7 @@ import HttpStatus from '../../utils/statusCodes.js'
 import { DATABASE_FIELDS, STRING_CONSTANTS } from '../../utils/stringConstants.js'
 import ResponseHandler from '../../utils/responseHandler.js'
 import OTP from '../../model/otp.js'
+import { saveRefreshToken } from '../../utils/verifyToken.js'
 
 // Tutor register with otp
 
@@ -17,7 +18,7 @@ export const registerTutor = async (req,res) => {
     try {
 
         const { email , password ,
-            firstName, rememberMe  } = req.body;
+            firstName  } = req.body;
     
         const tutorExists = await Tutor.findOne({email : email});
     
@@ -37,14 +38,11 @@ export const registerTutor = async (req,res) => {
         await tutor.save();
 
         const accessToken = generateAccessToken(tutor._id);
-        const refreshToken = generateRefreshToken(tutor._id);
     
         // Set access token as cookie (24 hour)
         sendToken(res, process.env.TUTOR_ACCESS_TOKEN_NAME, accessToken, 1 * 24 * 60 * 60 * 1000)
     
-        // Set refresh token as cookie (only if "Remember Me" is checked)
-        if(rememberMe) 
-            sendToken(res, process.env.TUTOR_REFRESH_TOKEN_NAME, refreshToken, 7 * 24 * 60 * 60 * 1000);
+         await saveRefreshToken(req,res,'Tutor')
     
         const data = await Tutor.findOne({email})
         .select([
@@ -76,7 +74,7 @@ export const registerTutor = async (req,res) => {
 export const loginTutor = async (req,res) => {
    
     try {
-        const {email,password,rememberMe} = req.body;
+        const {email,password} = req.body;
 
         const tutor = await Tutor.findOne({email});
     
@@ -90,14 +88,13 @@ export const loginTutor = async (req,res) => {
             return ResponseHandler.error(res,STRING_CONSTANTS.VERIFICATION_ERROR ,HttpStatus.NOT_ACCEPTABLE);
         
        const accessToken = generateAccessToken(tutor._id);
-       const refreshToken = generateRefreshToken(tutor._id);
     
         // Set access token as cookie (24 hour)
         sendToken(res, process.env.TUTOR_ACCESS_TOKEN_NAME, accessToken, 1 * 24 * 60 * 60 * 1000)
     
-        // Set refresh token as cookie (only if "Remember Me" is checked)
-        if(rememberMe) 
-            sendToken(res, process.env.TUTOR_REFRESH_TOKEN_NAME, refreshToken, 7 * 24 * 60 * 60 * 1000);
+        req.Tutor = tutor._id
+        
+        await saveRefreshToken(req,res,'Tutor')
     
         const data = await Tutor.findOne({email})
         .select([
@@ -189,25 +186,6 @@ export const verifyResetLink = async (req,res) => {
         return  ResponseHandler.error(res, STRING_CONSTANTS.PASSWORD_RESET_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
-}
-
-// Refresh Token End point (Reissue Access Token)
-
-export const refreshToken = async (req,res) => {
-   
-    try {
-        const {decoded} = req.tutor;
-        const newAccessToken = generateAccessToken(decoded);
-
-        sendToken(res, process.env.TUTOR_ACCESS_TOKEN_NAME, newAccessToken, 1 * 24 * 60 * 60 * 1000)
-    
-        return ResponseHandler.success(res, STRING_CONSTANTS.TOKEN_ISSUED, HttpStatus.OK)
-
-    } catch (error) {
-        console.log(STRING_CONSTANTS.TOKEN_ISSUE_ERROR, error);
-        return  ResponseHandler.error(res, STRING_CONSTANTS.TOKEN_ISSUE_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-    
 }
 
 // clear Token 

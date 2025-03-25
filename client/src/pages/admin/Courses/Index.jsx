@@ -1,39 +1,39 @@
 import { ChevronLeft, ChevronRight, Delete, Edit, Search, Trash, Trash2 } from 'lucide-react'
 import React, { use, useState } from 'react'
-import FormModal from './components/FormModal'
+// import FormModal from './components/FormModal'
 import { FilterBox } from '@/components/FilterBox'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { useAdminCreateCouponMutation, useAdminLoadCouponsQuery,
-     useAdminDeleteCouponMutation, useAdminUpdateCouponMutation} from '@/services/adminApi/adminCouponApi.js'  
+import {  } from '@/services/adminApi/adminCourseApi.js'
+
+import { useAdminLoadCoursesQuery, useAdminAllowOrSuspendCourseMutation } from '@/services/adminApi/adminCourseApi.js'
 import { useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
 import LoadingSpinner from '@/components/FallbackUI/LoadingSpinner'
-import { Button } from '@/components/ui/button'
 import { AlertDialogDelete } from '@/components/AlertDialog'
 
 const Index = () => {
     const [searchQuery, setSearchQuery] = useState("")
     const [currentPage, setCurrentPage] = useState(1)
     const [filteredQuery,setFilteredQuery] = useState('latest')
-    const [createCoupon] = useAdminCreateCouponMutation()
-    const [updateCoupon] = useAdminUpdateCouponMutation()
     const limit = 7;
     const navigate = useNavigate()
-    const {data : coupon, isLoading , error ,refetch} = useAdminLoadCouponsQuery({
+    const {data : coupon, isLoading , error ,refetch} = useAdminLoadCoursesQuery({
     page : currentPage,
     search : searchQuery,
     limit,
     filter : filteredQuery
   })
 
+  
   const data = coupon?.data
+  console.log(data)
 
   if(isLoading) return(<LoadingSpinner/>)
  
   return (
     <div className='container mx-auto p-6 max-w-full overflow-x-auto'>
-    <h1 className="mb-8 text-2xl font-bold text-center md:text-left">Coupon Management</h1>
+    <h1 className="mb-8 text-2xl font-bold text-center md:text-left">Course Management</h1>
 
     <div className="mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
     <div className="relative w-full md:w-96">
@@ -47,54 +47,55 @@ const Index = () => {
           <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
         </div >
         <div className="flex flex-wrap justify-end gap-2 w-full md:w-auto">
-            <FormModal useAction={useAdminCreateCouponMutation} refetch={refetch}/> 
+            {/* <FormModal useAction={useAdminCreateCouponMutation} refetch={refetch}/>  */}
           <FilterBox onSelect={setFilteredQuery} selectValue={'Not-Active'}/>
         </div>
     </div>
 
     <div className="overflow-x-auto">
-    { error ? <p className="text-center">No coupon found</p> :
+    { error ? <p className="text-center">No course found</p> :
         <Table>
-            <TableCaption>List of available coupons</TableCaption>
+            <TableCaption>List of available course</TableCaption>
             <TableHeader>
                 <TableRow>
                 <TableHead className="w-12">SI</TableHead>
-                <TableHead >Coupon Code</TableHead>
-                <TableHead >Discount Type</TableHead>
-                <TableHead >Discount Value</TableHead>
-                <TableHead >Min Purchase</TableHead>
-                <TableHead >Max Discount</TableHead>
-                <TableHead >Usage Limit</TableHead>
-                <TableHead >Expiry</TableHead>
+                <TableHead >Title</TableHead>
+                <TableHead >Category</TableHead>
+                <TableHead >Tutor</TableHead>
+                <TableHead >price</TableHead>
+                <TableHead >duration</TableHead>
+                <TableHead >totalEnrollment</TableHead>
+                <TableHead >Created Date</TableHead>
                 <TableHead >Status</TableHead>
                 <TableHead colSpan={2} className='text-center' >Actions</TableHead>
 
                 </TableRow>
             </TableHeader>
             <TableBody>
-               {data?.coupons?.map((coupon,index)=>(
+               {data?.courses?.map((course,index)=>(
                 <TableRow key={index} className="hover:bg-gray-100">
 
                 <TableCell>{(currentPage - 1) * limit + index + 1}</TableCell>
-                <TableCell>{coupon.code}</TableCell>
-                <TableCell>{coupon.discountType}</TableCell>
-                <TableCell>{`${coupon.discountValue}${coupon.discountType === 'percentage' ? '%' : ''}`}</TableCell>
-                <TableCell>{coupon.minPurchaseAmount}</TableCell>
-                <TableCell>{coupon.maxDiscount}</TableCell>
-                <TableCell>{coupon.usageLimit}</TableCell>
-                <TableCell>{format(new Date(coupon.expiryDate),'PPP')}</TableCell>
-                <TableCell>{coupon.isActive ? 'Active' : 'InActive'}</TableCell>
-                <TableCell>   
+                <TableCell>{course.title}</TableCell>
+                <TableCell>{course.categoryName}</TableCell>
+                <TableCell>{course.tutor.firstName}</TableCell>
+                <TableCell>{course.price}</TableCell>
+                <TableCell>{course.duration}</TableCell>
+                <TableCell>{course.totalEnrollment}</TableCell>
+                <TableCell>{format(new Date(course.createdAt),'PPP')}</TableCell>
+                <TableCell>{course.isPublished ? 'Active' : 'InActive'}</TableCell>
+                {/* <TableCell>   
                     <FormModal useAction={useAdminUpdateCouponMutation} existValues={data?.coupons[index]} refetch={refetch}/> 
-                </TableCell>
+                </TableCell> */}
                 <TableCell>
-                <AlertDialogDelete
+                { course.status === 'draft' || course.status === 'pending' ? 'Awaiting approval' : <AlertDialogDelete
                 onSuccess={refetch}
-                id={coupon._id}
-                btnName={  <Trash2 />} 
-                btnClass={"bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"}
-                deleteApi={useAdminDeleteCouponMutation}
-                />  
+                id={{courseId : course?._id , tutorId : course?.tutor._id}}
+                btnName={`${course.status === 'suspended' ? 'Go Live' : 'Suspend'}`} 
+                btnClass={`${course.status === 'suspended' ? 'bg-green-600' : 'bg-red-600' }
+                 text-white px-3 py-1 rounded text-sm hover:${course.status === 'suspended' ? 'bg-green-700' : 'bg-red-700' }`}
+                deleteApi={useAdminAllowOrSuspendCourseMutation}
+                />  }
                 </TableCell>
                 </TableRow>
                ))}

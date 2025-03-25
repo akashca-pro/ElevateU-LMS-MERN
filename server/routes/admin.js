@@ -1,6 +1,6 @@
 import express from 'express'
 
-import {registerAdmin, loginAdmin, logoutAdmin, refreshToken, loadProfile, updateProfile
+import {registerAdmin, loginAdmin, logoutAdmin, loadProfile, updateProfile
 } from '../controllers/admin/adminAuth.js'   // Admin Auth
 
 import {addUser,loadUsers,loadUserDetails,updateUserDetails,deleteUser,toggleUserBlock    
@@ -13,10 +13,10 @@ loadRequests,approveOrRejectrequest,toggleTutorBlock
 import {loadCategory, addCategory, updateCategory, deleteCategory , loadCategoryDetails
 } from '../controllers/admin/adminCategoryOps.js' // Admin - category CRUD
 
-import {loadPendingRequest, deleteCourse, loadCourses, assignCategory, approveOrRejectCourse
+import {loadPendingRequest, deleteCourse, loadCourses, assignCategory, approveOrRejectCourse, allowOrSuspendCourse
 } from '../controllers/course/adminOps.js' // Admin manage course approval and course Manage
 
-import {verifyAccessToken,verifyRefreshToken} from '../utils/verifyToken.js'
+import {refreshAccessToken, verifyAccessToken,verifyRefreshToken} from '../utils/verifyToken.js'
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js'
 import { validateForm } from '../middleware/validation.js'
 import { createCoupon, deleteCoupon, loadCoupons, updateCoupons } from '../controllers/admin/adminCouponOps.js'
@@ -28,7 +28,7 @@ const router = express.Router()
 router.post('/signup',validateForm('admim','register'),registerAdmin);
 router.post('/login',validateForm('admin','login'),loginAdmin);
 router.delete('/logout',logoutAdmin)
-router.patch('/refresh-token',verifyRefreshToken('admin'),refreshToken)
+router.patch('/refresh-token',verifyRefreshToken('Admin'),refreshAccessToken)
 
 // Admin profile CRUD
 
@@ -83,6 +83,7 @@ router.post('/verify-course',verifyAccessToken('admin'),approveOrRejectCourse)
 
 router.get('/view-courses',verifyAccessToken('admin'),loadCourses)
 router.post('/assign-category',verifyAccessToken('admin'),assignCategory)
+router.post('/course-status',verifyAccessToken('admin'),allowOrSuspendCourse);
 router.delete('/delete-course/:id',verifyAccessToken('admin'),deleteCourse)
 
 // notification

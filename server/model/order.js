@@ -13,7 +13,7 @@ const orderSchema = new mongoose.Schema({
 
     courseId : { type : String, ref : 'Course', required : true },
 
-    paymentStatus : { type : String, enum : ['pending','success','failed','cancelled'] , default : 'pending'},
+    paymentStatus : { type : String, enum : ['pending','success','failed'] , default : 'pending'},
 
     price : { 
         originalPrice : { type : Number, required : true },

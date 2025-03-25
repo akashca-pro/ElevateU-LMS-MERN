@@ -1,8 +1,9 @@
-import { useUserVerifyPaymentMutation} from '@/services/userApi/userCourseApi.js'
+import { useUserVerifyPaymentMutation, useUserFailedPaymentMutation} from '@/services/userApi/userCourseApi.js'
 
 export const useRazorpayPayment = () => {
 
     const [verifyPayment] = useUserVerifyPaymentMutation(); 
+    const [failedPayment] = useUserFailedPaymentMutation();
 
     const handlePayment = async (orderData) => {
             return new Promise((resolve) => {
@@ -33,6 +34,18 @@ export const useRazorpayPayment = () => {
                     theme: {
                         color: "#3399cc",
                     },
+                    modal : {
+                        ondismiss : async() => {
+
+                            try {
+                                await failedPayment(orderData._id).unwrap()
+                            } catch (error) {
+                                console.error("Failed to update failed transactions:", error);
+                            }
+                            resolve({ success: false, message: "Payment verification failed" });
+                        }
+                        
+                    }
                 };
 
                 const rzp = new window.Razorpay(options);

@@ -10,6 +10,7 @@ import 'dotenv/config'
 import HttpStatus from '../../utils/statusCodes.js'
 import ResponseHandler from '../../utils/responseHandler.js'
 import { STRING_CONSTANTS , DATABASE_FIELDS} from '../../utils/stringConstants.js'
+import { saveRefreshToken } from '../../utils/verifyToken.js'
 
 // User Registration with OTP
 
@@ -52,6 +53,8 @@ export const registerUser = async (req,res) => {
     
         // Set access token as cookie (24 hour)
         sendToken(res, process.env.USER_ACCESS_TOKEN_NAME,accessToken, 1 * 24 * 60 * 60 * 1000);
+
+        await saveRefreshToken(req,res,'User')
     
         return ResponseHandler.success(res, STRING_CONSTANTS.REGISTRATION_SUCCESS, HttpStatus.OK,userData);
 
@@ -67,7 +70,7 @@ export const registerUser = async (req,res) => {
 export const loginUser = async (req,res) => {
    
     try {
-        const {email,password,rememberMe} = req.body;
+        const {email,password} = req.body;
 
         const user = await User.findOne({email})
     
@@ -83,13 +86,13 @@ export const loginUser = async (req,res) => {
             return ResponseHandler.error(res,STRING_CONSTANTS.VERIFICATION_ERROR ,HttpStatus.NOT_ACCEPTABLE);
         
        const accessToken = generateAccessToken(user._id);
-       const refreshToken = generateRefreshToken(user._id);
     
         // Set access token as cookie (24 hour)
         sendToken(res, process.env.USER_ACCESS_TOKEN_NAME,accessToken, 1 * 24 * 60 * 60 * 1000)
-    
-        // Set refresh token as cookie (only if "Remember Me" is checked)
-        if(rememberMe) sendToken(res, process.env.USER_REFRESH_TOKEN_NAME, refreshToken,7 * 24 * 60 * 60 * 1000);
+        
+        req.User = user._id
+
+        await saveRefreshToken(req,res,'User')
 
         const data = await User.findOne({email})
         .select([
@@ -177,25 +180,6 @@ export const verifyResetLink = async (req,res) => {
         return  ResponseHandler.error(res, STRING_CONSTANTS.PASSWORD_RESET_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
-}
-
-// Refresh Token End point (Reissue Access Token)
-
-export const refreshToken = async (req,res) => {
-   
-    try {
-        const {decoded} = req.user;
-        const newAccessToken = generateAccessToken(decoded);
-
-        sendToken(res, process.env.USER_ACCESS_TOKEN_NAME, newAccessToken,1 * 24 * 60 * 60 * 1000)
-    
-        return ResponseHandler.success(res, STRING_CONSTANTS.TOKEN_ISSUED, HttpStatus.OK)
-
-    } catch (error) {
-        console.log(STRING_CONSTANTS.TOKEN_ISSUE_ERROR, error);
-        return  ResponseHandler.error(res, STRING_CONSTANTS.TOKEN_ISSUE_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-    
 }
 
 // clear Token 

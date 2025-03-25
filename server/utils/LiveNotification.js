@@ -1,7 +1,7 @@
 import Notification from "../model/notification.js"
 import { connectedUsers } from "../services/socketServer.js"
 
-export const saveNotification = async (recipientId, recipientType, type, message, senderId, senderType,) => {
+export const saveNotification = async (recipientId, recipientType, type, message, senderId=null, senderType=null) => {
     
     try {
         const newNotification = await Notification.create({
