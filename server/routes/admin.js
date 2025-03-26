@@ -20,6 +20,7 @@ import {refreshAccessToken, verifyAccessToken,verifyRefreshToken} from '../utils
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js'
 import { validateForm } from '../middleware/validation.js'
 import { createCoupon, deleteCoupon, loadCoupons, updateCoupons } from '../controllers/admin/adminCouponOps.js'
+import { loadOrderDetails } from '../controllers/order/adminOrderOps.js'
 
 const router = express.Router()
 
@@ -90,6 +91,11 @@ router.delete('/delete-course/:id',verifyAccessToken('admin'),deleteCourse)
 
 router.get('/load-notifications',verifyAccessToken('admin'),loadNotifications('admin'))
 router.post('/read-notifications',verifyAccessToken('admin'),readNotifications)
+
+// order manage
+
+router.get('/orders',verifyAccessToken('admin'),loadOrderDetails);
+
 
 
 export default router

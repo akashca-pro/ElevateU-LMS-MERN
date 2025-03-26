@@ -38,14 +38,14 @@ export const loadCoupons = async (req,res) => {
         let sort = { createdAt: -1 }; // Default sorting (Newest first)
         let filterQuery = {}; 
 
-                // Handle filter conditions
-                if (filter === "oldest") {
-                    sort = { createdAt: 1 }; // Oldest first
-                } else if (filter === "active") {
-                    filterQuery.isActive = true;
-                } else if (filter === "Not-Active") {
-                    filterQuery.isActive = false;
-                }
+            // Handle filter conditions
+            if (filter === "oldest") {
+            sort = { createdAt: 1 }; // Oldest first
+            } else if (filter === "active") {
+            filterQuery.isActive = true;
+            } else if (filter === "Not-Active") {
+            filterQuery.isActive = false;
+            }
 
                 if (search) {
                     filterQuery.code = { $regex : search.toUpperCase() , $options : "i"  }                 
