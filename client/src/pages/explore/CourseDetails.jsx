@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useLocation } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
+import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -15,7 +16,8 @@ import {
 import { format } from "date-fns"
 import { useLoadCourseDetailsQuery } from '@/services/commonApi.js'
 import { useUserLoadProfileQuery } from '@/services/userApi/userProfileApi.js'
-import { useUserAddToCartMutation, useUserLoadCartQuery } from '@/services/userApi/userCourseApi.js'
+import { useUserAddToCartMutation, useUserLoadCartQuery,
+  useUserBookmarkCourseMutation, useUserRemoveBookmarkCourseMutation, useUserIsBookmarkedQuery } from '@/services/userApi/userCourseApi.js'
 import LoadingSpinner from "@/components/FallbackUI/LoadingSpinner"
 import VideoPlayer from "@/services/Cloudinary/VideoPlayer"
 import { formatUrl } from "@/utils/formatUrls"
@@ -26,11 +28,23 @@ const CourseDetails = () => {
   const { tutor, admin } = useSelect()
   const [selectedLesson,setSelectedLesson] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const location = useLocation()
-  const courseId = location.state
+  const { courseId } = useParams()
+  console.log(courseId)
   const navigate = useNavigate()
   const { data : details, isLoading, error } = useLoadCourseDetailsQuery(courseId)
   const course = details?.data
+
+  const { data : bookmarked } = useUserIsBookmarkedQuery(courseId)
+  const [bookmarkCourse] = useUserBookmarkCourseMutation()
+  const [removeBookmark] = useUserRemoveBookmarkCourseMutation()
+  
+  useEffect(()=>{
+
+    if(bookmarked){
+      setIsBookmarked(true)
+    }
+
+  },[navigate, bookmarked])
 
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [isEnrolled,setIsEnrolled] = useState(false)
@@ -58,11 +72,30 @@ const CourseDetails = () => {
         setIsEnrolled(true);
       }
     }
+
   }, [user, course]);
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked)
-    // Add API call to save bookmark status
+  const handleBookmark = async() => {
+
+    try {
+      if(!isBookmarked){
+        await bookmarkCourse({ courseId }).unwrap();
+        setIsBookmarked(true)
+        toast.info('Course Bookmarked',{
+          description : `${course?.title} is added to your bookmarked collection`
+        })
+      }else{
+        await removeBookmark(courseId).unwrap();
+        setIsBookmarked(false)
+        toast.info('Bookmark removed',{
+          description : `${course?.title} is removed from your bookmarked collection`
+        })
+      }
+
+    } catch (error) {
+      console.log('Error bookmarking course')
+      toast.error('Something went wrong');
+    }
   }
 
   const handleEnroll = async() => {
@@ -497,18 +530,6 @@ const CourseDetails = () => {
                           </span>
                         )}
                       </div>}
-                      { !isEnrolled && <Button
-                        variant="outline"
-                        size="icon"
-                        className={isBookmarked ? "text-primary" : ""}
-                        onClick={handleBookmark}
-                      >
-                        {isBookmarked ? (
-                          <Bookmark className="h-5 w-5 fill-primary" />
-                        ) : (
-                          <BookmarkPlus className="h-5 w-5" />
-                        )}
-                      </Button>}
                     </div>
 
                     { !isEnrolled && !course?.isFree && course?.discount > 0 && (
@@ -517,11 +538,30 @@ const CourseDetails = () => {
                       </div>
                     )}
 
-                    {<Button 
-                    disabled = {tutor.isAuthenticated || admin.isAuthenticated}
-                    className="w-full text-lg py-6" size="lg" onClick={ isEnrolled ? handleViewCourse : handleEnroll}>
-                    {isEnrolled ? 'View Course' : (course?.isFree ? "Enroll Now" : "Buy Now") }
-                    </Button>}
+                <div className="flex items-center gap-2">
+
+                  <Button 
+                    disabled={tutor.isAuthenticated || admin.isAuthenticated}
+                    className="flex-grow text-lg py-6"
+                    size="lg"
+                    onClick={isEnrolled ? handleViewCourse : handleEnroll}
+                  >
+                    {isEnrolled ? 'View Course' : (course?.isFree ? "Enroll Now" : "Buy Now")}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className={`w-12 h-12 flex items-center justify-center ${isBookmarked ? "text-primary" : ""}`}
+                    onClick={handleBookmark}
+                  >
+                    {isBookmarked ? (
+                      <Bookmark className="h-5 w-5 fill-primary" />
+                    ) : (
+                      <BookmarkPlus className="h-5 w-5" />
+                    )}
+                  </Button>
+                </div>
 
                     <div className="space-y-3">
                       <h3 className="font-semibold">This course includes:</h3>

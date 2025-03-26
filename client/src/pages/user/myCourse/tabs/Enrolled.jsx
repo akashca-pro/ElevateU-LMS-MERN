@@ -1,14 +1,12 @@
 import { FilterBox } from '@/components/FilterBox'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { DropdownMenuItem } from '@radix-ui/react-dropdown-menu'
-import { BarChart3, ChevronLeft, ChevronRight, MoreHorizontal, Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { motion } from "framer-motion";
 import { useUserEnrolledCoursesQuery } from '@/services/userApi/userCourseApi.js'
 import { useLoadCategoriesQuery } from '@/services/commonApi.js'
 import LoadingSpinner from "@/components/FallbackUI/LoadingSpinner";
 import ErrorComponent from "@/components/FallbackUI/ErrorComponent";
-import { useEffect, useState } from 'react'
+import {  useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const Enrolled = () => {
@@ -34,7 +32,7 @@ const Enrolled = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex justify-between items-center" >
-          Enrolled courses
+          Enrolled Courses
         <div className="relative flex gap-4 w-full max-w-md">
         <input
          type="text"
@@ -44,7 +42,7 @@ const Enrolled = () => {
         onChange={(e) => setSearchQuery(e.target.value)}
         />
         <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-        <FilterBox onSelect={setFilteredQuery} />
+        <FilterBox onSelect={setFilteredQuery} disable={true}/>
       </div>
         </CardTitle>
       </CardHeader>

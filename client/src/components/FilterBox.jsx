@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-export function FilterBox({onSelect ,selectValue}) {
+export function FilterBox({onSelect ,selectValue, disable=null}) {
   return (
     <Select onValueChange={onSelect}>
       <SelectTrigger className="w-[130px] flex items-center gap-2">
@@ -21,7 +21,7 @@ export function FilterBox({onSelect ,selectValue}) {
         <SelectGroup >
           <SelectItem value="latest">Latest</SelectItem>
           <SelectItem value="oldest">Oldest</SelectItem>
-          <SelectItem value="active">Active</SelectItem>
+          { !disable && <SelectItem value="active">Active</SelectItem>}
           {selectValue && <SelectItem value={selectValue}>{selectValue}</SelectItem>}
         </SelectGroup>
       </SelectContent>

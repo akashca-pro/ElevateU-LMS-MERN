@@ -550,7 +550,7 @@ const CourseCard = ({ course, renderStars }) => {
      {course.price === 0 ? "Free" : `₹${course.price}`}
     </span>
     <Button
-    onClick = {()=>navigate(`/explore/courses/${decodedCourseName}`,{state : course._id})}
+    onClick = {()=>navigate(`/explore/courses/${course._id}`)}
     >View Course</Button>
     </CardFooter>
     </Card>

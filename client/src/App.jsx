@@ -36,7 +36,7 @@ const App = () => {
         <Route path='/explore' element={<Explore/>}>
         <Route index element={<ExplorePage/>}/>
         {/* <Route path='categories/:categoryName' element={}/> */}
-        <Route path='courses/:courseName' element={<CourseDetails/>} />
+        <Route path='courses/:courseId' element={<CourseDetails/>} />
         </Route>
 
         <Route path='/explore/courses/:courseName/checkout' element={

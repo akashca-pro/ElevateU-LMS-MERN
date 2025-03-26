@@ -94,6 +94,36 @@ const userCourseApi = apiSlice.injectEndpoints({
                 method : 'GET'
             }),
             invalidatesTags : ['User']
+        }),
+        userBookmarkCourse : builder.mutation({
+            query : (credentials) => ({
+                url : `user/bookmark-course`,
+                method : 'POST',
+                body : credentials
+            }),
+            invalidatesTags : ['User']
+        }),
+        userBookmarkedCourses : builder.query({
+            query : (queryParams) => ({
+                url : `user/bookmark-course`,
+                method : 'GET',
+                params : queryParams
+            }),
+            providesTags : ['User']
+        }),
+        userRemoveBookmarkCourse : builder.mutation({
+            query  : (id)=>({
+                url : `user/bookmark-course/${id}`,
+                method : 'PATCH',
+            }),
+            invalidatesTags : ['User']
+        }),
+        userIsBookmarked : builder.query({
+            query : (id)=>({
+                url : `user/isBookmarked-course/${id}`,
+                method : 'GET',
+            }),
+            providesTags : ['User']
         })
     })
 })
@@ -114,6 +144,11 @@ export const {
     useUserFailedPaymentMutation,
 
     useUserAddToCartMutation,
-    useUserLoadCartQuery
+    useUserLoadCartQuery,
+
+    useUserBookmarkCourseMutation,
+    useUserBookmarkedCoursesQuery,
+    useUserRemoveBookmarkCourseMutation,
+    useUserIsBookmarkedQuery
 
 } = userCourseApi

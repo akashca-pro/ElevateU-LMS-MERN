@@ -1,11 +1,8 @@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TabsContent } from '@radix-ui/react-tabs'
-import { Search } from 'lucide-react'
 import React from 'react'
 import Enrolled from './tabs/Enrolled'
-import Finished from './tabs/Finished'
 import Bookmark from './tabs/Bookmark'
-import Ongoing from './tabs/Ongoing'
 import { useSearchParams } from 'react-router-dom'
 
 const CourseDashboard = () => {
