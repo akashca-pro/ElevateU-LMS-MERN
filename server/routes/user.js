@@ -17,7 +17,7 @@ import { updateEmail, verifyEmail , isBlock} from '../controllers/commonControll
 
 import passport from 'passport'
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js'
-import { applyCoupon, fetchCurrentAppliedCoupon, getPricing, removeAppliedCoupon } from '../controllers/course/userOps.js'
+import { applyCoupon, bookmarkCourse, fetchCurrentAppliedCoupon, getPricing, isBookMarked, loadBookmarkCourses, removeAppliedCoupon, removeBookmarkCourse } from '../controllers/course/userOps.js'
 import { createOrder, failedPayment, verifyPayment } from '../controllers/order/userOrderOps.js'
 
 
@@ -51,6 +51,13 @@ router.post('/update-email/:id',otpLimiter,verifyAccessToken('user'),updateEmail
 router.post('/verify-email',verifyAccessToken('user'),verifyEmail('user'))
 router.post('/update-profile/:id',validateForm('user','profile'),verifyAccessToken('user'),updateProfile)
 router.delete('/delete-account/:id',verifyAccessToken('user'),deleteAccount)
+
+// course bookmark
+
+router.post('/bookmark-course',verifyAccessToken('user'),bookmarkCourse)
+router.get('/isBookmarked-course/:id',verifyAccessToken('user'),isBookMarked)
+router.get('/bookmark-course',verifyAccessToken('user'),loadBookmarkCourses)
+router.patch('/bookmark-course/:id',verifyAccessToken('user'),removeBookmarkCourse)
 
 //cart managing
 
