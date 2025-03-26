@@ -21,7 +21,6 @@ const CourseDashboard = () => {
     
 
       <div className="flex justify-end gap-2 w-full md:w-auto">
-        {/* <FilterBox onSelect={setFilteredQuery} selectValue={'Draft'}/> */}
       </div>
     </div>
     <div>
@@ -29,16 +28,11 @@ const CourseDashboard = () => {
       <Tabs defaultValue={defaultTab} className="" >
         <TabsList>
           <TabsTrigger value='enrolled' >Enrolled</TabsTrigger>
-          <TabsTrigger value='finished' >Finished </TabsTrigger>
           <TabsTrigger value='bookmark' >Bookmark</TabsTrigger>
         </TabsList>
 
         <TabsContent value='enrolled' >
         <Enrolled/> 
-        </TabsContent>
-
-        <TabsContent value='finished' >
-          <Finished/>
         </TabsContent>
 
         <TabsContent value='bookmark' >

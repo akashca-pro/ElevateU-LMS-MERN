@@ -53,12 +53,11 @@ const menuItems = [
   { id: 1, title: "Profile", icon: SquareUser, path: "/user/profile" },
   { id: 2, title: "My Courses", icon: BookOpen, path: "/user/profile/my-courses" },
   { id: 4, title: "Messages", icon: MessagesSquare, path: "/user/profile/messages" },
-  { id: 5, title: "Notifications", icon: BellRing, path: "/user/profile/notification" },
-  { id: 6, title: "Community", icon: Handshake, path: "/user/profile/community" },
-  { id: 7, title: "Assignments", icon: Paperclip, path: "/user/profile/assignments" },
-  { id: 8, title: "Quiz", icon: ClipboardCheck, path: "/user/profile/quiz" },
-  { id: 9, title: "Certificates", icon: Trophy, path: "/user/profile/certificates" },
-  { id: 10, title: "Settings", icon: Settings, path: "/user/profile/settings" },
+  { id: 5, title: "Community", icon: Handshake, path: "/user/profile/community" },
+  { id: 6, title: "Assignments", icon: Paperclip, path: "/user/profile/assignments" },
+  { id: 7, title: "Quiz", icon: ClipboardCheck, path: "/user/profile/quiz" },
+  { id: 8, title: "Certificates", icon: Trophy, path: "/user/profile/certificates" },
+  { id: 9, title: "Settings", icon: Settings, path: "/user/profile/settings" },
 ];
 
 
@@ -117,7 +116,6 @@ const UserRoutes = () => {
             <Route path=':courseName' element={<CourseDetails/>}/>
           </Route>
           <Route path='messages' element={<Messages/>}/>
-          <Route path='notification' element={<Notification/>}/>
           <Route path='community' element={<Community/>}/>
           <Route path='assignments' element={<Assignments/>}/>
           <Route path='quiz' element={<Quiz/>}/>

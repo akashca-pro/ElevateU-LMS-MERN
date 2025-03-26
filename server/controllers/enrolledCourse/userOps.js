@@ -5,6 +5,7 @@ import { STRING_CONSTANTS } from "../../utils/stringConstants.js";
 import ResponseHandler from "../../utils/responseHandler.js";
 import Order from "../../model/order.js";
 import User from "../../model/user.js";
+import { saveNotification, sendNotification } from "../../utils/LiveNotification.js";
 
 
 // add to cart
@@ -87,6 +88,8 @@ export const enrollInCourse = async (req,res) => {
         const course  = await Course.findOne({_id : courseId , isPublished : true})
         if(!course) 
             return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NO_CONTENT);
+
+        const tutorId = course.tutor;
         
         const alreadyEnrolled = await EnrolledCourse.findOne({user : userId , course : courseId})
 
@@ -97,8 +100,6 @@ export const enrollInCourse = async (req,res) => {
 
         if(!orderDetails.paymentStatus === 'success')
             return ResponseHandler.error(res, 'Payment is not done', HttpStatus.BAD_REQUEST);
-
-        await User.findByIdAndUpdate(userId, { $set : { cart : null } })
 
         await EnrolledCourse.create({
             userId,
@@ -114,7 +115,17 @@ export const enrollInCourse = async (req,res) => {
 
         await course.save() 
         
-        await User.findByIdAndUpdate(userId,{ $addToSet : { enrolledCourses : courseId } })
+        const user = await User.findByIdAndUpdate(userId,{ $addToSet : { enrolledCourses : courseId } ,
+             $set : { cart : null } },{new : true});
+
+             const newNotification = await saveNotification(
+                tutorId, 
+                'Tutor', 
+                'new_enrollment', 
+                `A new student, ${user.firstName}, has enrolled in your course: ${course.title}.`
+            );
+            
+        sendNotification(req,newNotification)
 
         return ResponseHandler.success(res, STRING_CONSTANTS.CREATION_SUCCESS, HttpStatus.CREATED);
 

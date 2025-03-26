@@ -44,7 +44,7 @@ const Enrolled = () => {
         onChange={(e) => setSearchQuery(e.target.value)}
         />
         <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-        <FilterBox onSelect={setFilteredQuery} selectValue={'Draft'}/>
+        <FilterBox onSelect={setFilteredQuery} />
       </div>
         </CardTitle>
       </CardHeader>

@@ -22,7 +22,7 @@ export function FilterBox({onSelect ,selectValue}) {
           <SelectItem value="latest">Latest</SelectItem>
           <SelectItem value="oldest">Oldest</SelectItem>
           <SelectItem value="active">Active</SelectItem>
-          <SelectItem value={selectValue}>{selectValue}</SelectItem>
+          {selectValue && <SelectItem value={selectValue}>{selectValue}</SelectItem>}
         </SelectGroup>
       </SelectContent>
     </Select>
