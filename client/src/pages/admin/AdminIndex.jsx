@@ -53,7 +53,7 @@ const menuItems = [
   { id: 3, title: "Category Management", icon: ListCollapse, path: "/admin/profile/category" },
   { id: 4, title: "Course Management", icon: BookOpen, path: "/admin/profile/courses" },
   { id: 5, title: "Coupon Management", icon: Sticker, path: "/admin/profile/coupon" },
-  { id: 6, title: "Order Management", icon: ClockArrowUp, path: "/admin/profile/orders" },
+  { id: 6, title: "Order List", icon: ClockArrowUp, path: "/admin/profile/orders" },
   { id: 7, title: "Notifications", icon: BellRing, path: "/admin/profile/notification" },
   { id: 8, title: "Students", icon: GraduationCap, path: "/admin/profile/students" },
   { id: 9, title: "Tutors", icon: Contact, path: "/admin/profile/tutors" },
