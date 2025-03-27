@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { format } from "date-fns"
 import ConfirmDialog from "./ConfirmDialog";
+import { useNavigate } from "react-router-dom"
 
 const CoursePublishRequests = ({ publishRequests, courseApproveOrReject, refetchPublishRequest }) => {
   const [activeFilter, setActiveFilter] = useState("all")
@@ -193,7 +194,7 @@ const CourseRequestCard = ({ course, courseApproveOrReject, refetchPublishReques
           variant="outline"
           size="sm"
           className="flex-1 h-8 gap-1.5"
-          onClick={() => window.open(`/admin/courses/${courseId}`, "_blank")}
+          onClick={() => window.open('/admin/profile/courses')}
         >
           <Eye className="h-3.5 w-3.5" />
           View Course
@@ -202,7 +203,7 @@ const CourseRequestCard = ({ course, courseApproveOrReject, refetchPublishReques
           variant="outline"
           size="sm"
           className="flex-1 h-8 gap-1.5"
-          onClick={() => window.open(`/admin/tutors/${tutor._id}`, "_blank")}
+          onClick={() => window.open(`/admin/profile/tutors/${tutor?._id}`)}
         >
           <User className="h-3.5 w-3.5" />
           View Tutor

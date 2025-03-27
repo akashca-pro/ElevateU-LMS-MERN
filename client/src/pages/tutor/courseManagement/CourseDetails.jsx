@@ -42,7 +42,9 @@ const CourseDetails = () => {
   const [formErrors,setFormErrors] = useState(null)
   const editSectionRef = useRef(null)
 
-  const { data: courseDetails, isLoading, isError, refetch } = useTutorLoadCourseQuery(courseId)
+  const { data: courseDetails, isLoading, isError, refetch } = useTutorLoadCourseQuery(courseId,{
+    refetchOnMountOrArgChange : true
+  })
   const { data : categoryDetails } = useLoadCategoriesQuery()
 
   useEffect(() => {
@@ -65,7 +67,6 @@ const CourseDetails = () => {
        
       const errors = validateUpdatedData(course)
       setFormErrors(errors)
-      console.log(course)
       await updateCourse({formData : course}).unwrap()
       toast.success('Data updated successfully',{id : toastId});
       setIsEditing(false)
@@ -166,6 +167,12 @@ const CourseDetails = () => {
   const handleSubmitApproval = async() =>{
     const toastId = toast.loading('Please Wait . . . ')
     try {
+
+      if(course?.isSuspended){
+        toast.error('Course Suspended',{ description : `You can't initiate publish request ` , id  : toastId});
+        return null
+      }
+
        const response = await publishCourse({ courseDetails : course }).unwrap()
        toast.success('Request Submitted',{id : toastId , duration : 5000 ,
         description : response?.message
@@ -362,13 +369,15 @@ const CourseDetails = () => {
               {course.status !== "approved" && (
                 <Button 
                 onClick={handleSubmitApproval}
-                disabled = {course?.status === 'pending' || course?.status === 'approved' || isEditing}
+                disabled = {course?.status === 'pending' || course?.status === 'approved' || isEditing || course?.status === 'suspended'}
                 className="w-full justify-start" variant="default">
                   <Clock className="mr-2 h-4 w-4" />
                    {course?.status === 'pending' 
                    ? 'Request Pending' 
                    : course?.status === 'approved'
                    ? 'Already approved' 
+                   : course?.status === 'suspended'
+                   ? 'Suspended'
                    : 'Submit for Approval'}
                 </Button>
               )}

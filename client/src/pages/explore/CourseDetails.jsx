@@ -29,12 +29,13 @@ const CourseDetails = () => {
   const [selectedLesson,setSelectedLesson] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { courseId } = useParams()
-  console.log(courseId)
   const navigate = useNavigate()
   const { data : details, isLoading, error } = useLoadCourseDetailsQuery(courseId)
   const course = details?.data
 
-  const { data : bookmarked } = useUserIsBookmarkedQuery(courseId)
+  const { data : bookmarked } = useUserIsBookmarkedQuery(courseId,{
+    skip  : !tutor.isAuthenticated || !admin.isAuthenticated
+   })
   const [bookmarkCourse] = useUserBookmarkCourseMutation()
   const [removeBookmark] = useUserRemoveBookmarkCourseMutation()
   
@@ -49,7 +50,9 @@ const CourseDetails = () => {
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [isEnrolled,setIsEnrolled] = useState(false)
   const [courseName,setCourseName] = useState('')
-  const { data } = useUserLoadProfileQuery()
+  const { data } = useUserLoadProfileQuery(undefined,{
+    skip  : !tutor.isAuthenticated || !admin.isAuthenticated
+  })
   const user = data?.data
 
   const [addToCart] = useUserAddToCartMutation()
@@ -59,7 +62,9 @@ const CourseDetails = () => {
     setIsModalOpen(true)
   }
 
-  const {  refetch : refetchCartDetails } = useUserLoadCartQuery()
+  const {  refetch : refetchCartDetails } = useUserLoadCartQuery(undefined,{
+    skip  : !tutor.isAuthenticated || !admin.isAuthenticated
+  })
 
   useEffect(() => {
     if (course?.title) {

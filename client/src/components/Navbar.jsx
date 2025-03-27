@@ -20,12 +20,12 @@ const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState(null);
   const { user, tutor, admin } = useSelect();
   
-  const role = user.isAuthenticated ? "user" : tutor.isAuthenticated ? "tutor" : admin.isAuthenticated ? 'admin' : 'none';
-  const roleData = user.isAuthenticated ? user.userData : tutor.isAuthenticated ? tutor.tutorData : admin.isAuthenticated ? admin.adminData : 'none';
+  const role = user.isAuthenticated ? "user" : tutor.isAuthenticated ? "tutor" : admin.isAuthenticated ? 'admin' : null;
+  const roleData = user.isAuthenticated ? user.userData : tutor.isAuthenticated ? tutor.tutorData : admin.isAuthenticated ? admin.adminData : null;
   
   const { data : cartDetails } = useUserLoadCartQuery(undefined,
     { refetchOnMountOrArgChange : true ,
-      skip : tutor.isAuthenticated || admin.isAuthenticated })
+      skip : !tutor.isAuthenticated || !admin.isAuthenticated })
 
     const courseName = formatUrl(cartDetails?.data?.course?.title || 'courseName')
 
@@ -63,7 +63,7 @@ const Navbar = () => {
   };
 
   const handleSearch = (course) => {
-    navigate(`/explore/courses/${course.title}`, { state: course._id });
+    navigate(`/explore/courses/${course._id}`);
     setSearchTerm(""); 
     setMenuOpen(false); 
   };

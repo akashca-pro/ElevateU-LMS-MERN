@@ -42,7 +42,7 @@ const handleLogout = async (dispatch, state) => {
     }
 };
 
-// Enhanced base query with re-authentication
+// // Enhanced base query with re-authentication
 const baseQueryWithReauth = async (args, api, extraOptions) => {
     let result = await baseQuery(args, api, extraOptions);
 
@@ -94,7 +94,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 // Create API slice
 export const apiSlice = createApi({
     reducerPath: 'api',
-    baseQuery: baseQueryWithReauth,
+    baseQuery : baseQueryWithReauth,
     tagTypes: ['Admin', 'User', 'Tutor', 'Common'],
     endpoints: () => ({}),
 });

@@ -107,6 +107,7 @@ let readNotificationQuery;
       payment_update: "bg-green-500",
       publish_course: "bg-blue-500",
       suspend_course:"bg-yellow-500",
+      suspension_removed : "bg-green-500",
       default: "bg-gray-500",
     };
     return colors[type] || colors.default;
@@ -121,6 +122,7 @@ let readNotificationQuery;
       payment_update: { label: "Payment", variant: "green" },
       publish_course: { label: "Course approved", variant: "blue" },
       suspend_course : { label : "Course suspended", variant : "yellow" },
+      suspension_removed : { label : "Suspention removed", variant : "green" },
       default: { label: "Notification", variant: "default" },
     };
 

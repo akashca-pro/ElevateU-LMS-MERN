@@ -164,6 +164,10 @@ export const requestPublish = async (req, res) => {
             return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
         }
 
+        if(course.status === 'suspended') {
+            return ResponseHandler.error(res, STRING_CONSTANTS.COURSE_SUSPENDED, HttpStatus.NOT_ACCEPTABLE);
+        }
+
         const adminId = await Admin.findOne()
 
         course.status = "pending";

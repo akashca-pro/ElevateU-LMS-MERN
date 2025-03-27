@@ -33,7 +33,7 @@ export const loadCourses = async (req,res) => {
         
         const courses = await Course.find(filterQuery)
         .select(`title category categoryName tutor price duration discount totalEnrollment thumbnail isPublished
-            status rating level badge hasCertification modules createdAt`)
+            status rating level badge hasCertification modules createdAt isSuspended`)
         .populate('tutor' , 'firstName email profileImage')
         .populate({
             path: 'modules',
@@ -84,13 +84,14 @@ export const allowOrSuspendCourse = async (req,res) => {
         if(!course)
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
-        if(course.status === 'suspended'){
+        if(course.isSuspended){
             course.status = 'draft';
+            course.isSuspended = false;
 
             await course.save()
 
-            const newNotification = await saveNotification(tutorId, 'Tutor', 'publish_course',
-                `Your ${course.title} course has been Published `
+            const newNotification = await saveNotification(tutorId, 'Tutor', 'suspension_removed',
+                `Suspension has removed from your course ${course.title}. You can now initiate publish request `
              )
     
              sendNotification(req,newNotification)
@@ -100,7 +101,8 @@ export const allowOrSuspendCourse = async (req,res) => {
 
         if(course.status === 'approved'){
             course.isPublished = false;
-            course.status = 'suspended';
+            course.isSuspended = true;
+            course.status = 'suspended'
 
             await course.save()
 
@@ -195,7 +197,6 @@ export const approveOrRejectCourse = async (req,res) => {
     }
 
 }
-
 
 // delete course 
 

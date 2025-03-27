@@ -7,5 +7,4 @@ export const registerSocket = (userId, role) => {
     socket.emit('register', {userId, role});
 } 
 
-
 export default socket
