@@ -115,7 +115,7 @@ const CourseDetails = () => {
         
       await addToCart({ courseId : course._id }).unwrap();
       refetchCartDetails()
-      navigate(`/explore/courses/${course._}/checkout`)
+      navigate(`/explore/courses/${course._id}/checkout`)
     } catch (error) {
       if(error?.status === 400){
         navigate(`/explore/courses/${courseName}/checkout`)

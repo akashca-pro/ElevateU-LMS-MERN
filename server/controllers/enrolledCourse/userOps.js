@@ -6,7 +6,7 @@ import ResponseHandler from "../../utils/responseHandler.js";
 import Order from "../../model/order.js";
 import User from "../../model/user.js";
 import { saveNotification, sendNotification } from "../../utils/LiveNotification.js";
-
+import ProgressTracker from "../../model/progressTracker.js";
 
 // add to cart
 
@@ -95,12 +95,14 @@ export const enrollInCourse = async (req,res) => {
         const alreadyEnrolled = await EnrolledCourse.findOne({user : userId , course : courseId})
 
         if(alreadyEnrolled) 
-            return ResponseHandler.success(res, STRING_CONSTANTS.EXIST, HttpStatus.ALREADY_REPORTED);
+            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
 
         const orderDetails = await Order.findOne({ userId, courseId })
 
         if(!orderDetails.paymentStatus === 'success')
             return ResponseHandler.error(res, 'Payment is not done', HttpStatus.BAD_REQUEST);
+
+        // save enrollment
 
         await EnrolledCourse.create({
             userId,
@@ -115,9 +117,39 @@ export const enrollInCourse = async (req,res) => {
         course.totalEnrollment += 1;
 
         await course.save() 
-        
+
+
+        // add enrolled course to user schema
         const user = await User.findByIdAndUpdate(userId,{ $addToSet : { enrolledCourses : courseId } ,
              $set : { cart : null } },{new : true});
+
+        // start progress tracking
+
+        const progressTrackerAlreadyExist = await ProgressTracker.findOne({ userId, courseId })
+
+        if(progressTrackerAlreadyExist)
+            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST,HttpStatus.CONFLICT);
+
+        const modules = course.modules.map((module) => ({
+            moduleId: module._id,   
+            lessonsCompleted: [],   
+            isCompleted: false      
+        }));
+
+        const totalModules = course.modules.length || 0
+        const levelSize = Math.ceil(totalModules / 5);
+
+        const level = {
+            currentLevel: 1, 
+            levelSize: levelSize
+        };
+
+        await ProgressTracker.create({
+            userId,
+            courseId,
+            modules,
+            level
+        })       
 
              const newNotification = await saveNotification(
                 tutorId, 

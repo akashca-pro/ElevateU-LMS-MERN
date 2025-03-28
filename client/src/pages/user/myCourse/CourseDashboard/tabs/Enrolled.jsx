@@ -69,7 +69,7 @@ const Enrolled = () => {
               <CardContent className="p-4">
                 <CardHeader className="p-0 mb-2">
                   <CardTitle
-                  onClick={()=>navigate(`/user/profile/my-courses/${course.title.replace(/\s+/g, "-")}-${course._id}`)}
+                  onClick={()=>navigate(`/user/profile/my-courses/${course._id}`)}
                    className="text-lg font-semibold cursor-pointer ">{course?.title}</CardTitle>
                  <p className="text-sm text-gray-500">
                     Category : {categoryData?.find(cat => cat._id === course?.category)?.name || "Unknown"}

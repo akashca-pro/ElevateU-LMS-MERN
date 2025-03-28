@@ -23,7 +23,7 @@ import ErrorComponent from "@/components/FallbackUI/ErrorComponent"
 import EmptyCartComponent from "@/components/FallbackUI/EmptyCartComponent"
 
 const CourseEnrollment = () => {
-  const courseId = useParams();
+  const {courseId} = useParams();
   const navigate = useNavigate()
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [couponCode, setCouponCode] = useState("")
