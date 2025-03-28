@@ -34,7 +34,7 @@ const CourseDetails = () => {
   const course = details?.data
 
   const { data : bookmarked } = useUserIsBookmarkedQuery(courseId,{
-    skip  : !tutor.isAuthenticated || !admin.isAuthenticated
+    skip  : tutor.isAuthenticated || admin.isAuthenticated
    })
   const [bookmarkCourse] = useUserBookmarkCourseMutation()
   const [removeBookmark] = useUserRemoveBookmarkCourseMutation()
@@ -51,7 +51,7 @@ const CourseDetails = () => {
   const [isEnrolled,setIsEnrolled] = useState(false)
   const [courseName,setCourseName] = useState('')
   const { data } = useUserLoadProfileQuery(undefined,{
-    skip  : !tutor.isAuthenticated || !admin.isAuthenticated
+    skip  : tutor.isAuthenticated || admin.isAuthenticated
   })
   const user = data?.data
 
@@ -63,7 +63,7 @@ const CourseDetails = () => {
   }
 
   const {  refetch : refetchCartDetails } = useUserLoadCartQuery(undefined,{
-    skip  : !tutor.isAuthenticated || !admin.isAuthenticated
+    skip  : tutor.isAuthenticated || admin.isAuthenticated
   })
 
   useEffect(() => {
@@ -115,7 +115,7 @@ const CourseDetails = () => {
         
       await addToCart({ courseId : course._id }).unwrap();
       refetchCartDetails()
-      navigate(`/explore/courses/${courseName}/checkout`)
+      navigate(`/explore/courses/${course._}/checkout`)
     } catch (error) {
       if(error?.status === 400){
         navigate(`/explore/courses/${courseName}/checkout`)

@@ -14,7 +14,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -50,13 +52,14 @@ import { useLoadCoursesQuery } from "@/services/commonApi";
 import { useNavigate } from "react-router-dom";
 import { formatUrl } from "@/utils/formatUrls";
 
-const CoursesListing = () => {
+const CoursesListing = ({ categories }) => {
   const [queryParams, setQueryParams] = useState({
     page: 1,
     limit: 9,
     filter: {
       sort : 'newest',
       search: "",
+      category : '',
       tutors: [],
       rating: 0,
       levels: [],
@@ -67,11 +70,8 @@ const CoursesListing = () => {
   });
 
 
-
-
   // Fetch courses using RTK Query
   const { data: allCourses, isLoading, isError , refetch} = useLoadCoursesQuery(queryParams);
-
 
   const coursesData = allCourses?.data
 
@@ -102,6 +102,7 @@ const CoursesListing = () => {
       ...prev,
       filter: {
         search: "",
+        category : '',
         tutors: [],
         rating: 0,
         levels: [],
@@ -114,6 +115,17 @@ const CoursesListing = () => {
     }));
     refetch()
   };
+
+  // select category
+
+  const handleSelect = (value) => {
+    setQueryParams((prev)=>{
+     return {
+      ...prev,
+      filter : { ...prev.filter, category : value  }
+     } 
+    })
+  }
 
   // Toggle level selection
   const toggleLevel = (level) => {
@@ -173,8 +185,14 @@ const uniqueTutors = coursesData?.courses
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <p className="text-gray-600 mb-8">Discover the perfect course to enhance your skills</p>
+    <div className="container mx-auto ">
+<p className="text-gray-700 mb-6">
+  Discover a diverse range of courses tailored to different skill levels and career paths. Whether you're a beginner, intermediate, or advanced learner, we’ve got the right course for you!  
+</p>
+
+<p  className="text-gray-500 mb-6" >
+  Refine your search with advanced filters to find the perfect course for you.</p>
+
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Mobile Filter Toggle */}
@@ -222,6 +240,27 @@ const uniqueTutors = coursesData?.courses
                     onChange={(e) => handleFilterChange("search", e.target.value)}
                   />
                 </div>
+              </div>
+
+              <Separator/>
+
+              {/* category based filter */}
+              <div>
+                <label className="text-sm font font-medium mb-3 block" >Categories</label>
+                <Select value={queryParams.filter.category} onValueChange={handleSelect} >
+                  <SelectTrigger>
+                    <SelectValue placeholder='Choose a category' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel> Available Categories </SelectLabel>
+                      {categories.map((category,index)=>(
+                        <SelectItem key={index} value={category?._id} >{category?.name}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+
               </div>
 
               <Separator />
@@ -329,6 +368,7 @@ const uniqueTutors = coursesData?.courses
               <Separator />
 
               {/* Certification Filter */}
+
               <div>
                 <div className="flex items-center">
                   <Checkbox

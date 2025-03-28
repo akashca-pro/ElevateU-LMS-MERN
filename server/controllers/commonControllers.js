@@ -338,6 +338,10 @@ export const loadCourses = async (req,res) => {
               if (parsedFilter.search) {
                 filter.title = { $regex: parsedFilter.search, $options: "i" };
               }
+
+              if(parsedFilter.category){
+                filter.category = parsedFilter.category
+              }
           
               if (parsedFilter.tutors && parsedFilter.tutors.length > 0) {
                 filter.tutor = { $in: parsedFilter.tutors };

@@ -86,6 +86,7 @@ export const enrollInCourse = async (req,res) => {
         const { courseId } = req.body;
         const userId = req.user.id;
         const course  = await Course.findOne({_id : courseId , isPublished : true})
+       
         if(!course) 
             return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NO_CONTENT);
 

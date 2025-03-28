@@ -23,6 +23,7 @@ import ErrorComponent from "@/components/FallbackUI/ErrorComponent"
 import EmptyCartComponent from "@/components/FallbackUI/EmptyCartComponent"
 
 const CourseEnrollment = () => {
+  const courseId = useParams();
   const navigate = useNavigate()
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [couponCode, setCouponCode] = useState("")
@@ -42,8 +43,8 @@ const CourseEnrollment = () => {
 
   
   
-const { data: couponDetails } = useUserFetchAppliedCouponQuery(course?._id, {
-  skip: !course?._id, // Prevents query execution if course._id is missing
+const { data: couponDetails } = useUserFetchAppliedCouponQuery(courseId, {
+  skip: !courseId, // Prevents query execution if course._id is missing
 });
 
   const appliedCoupon = couponDetails?.data
