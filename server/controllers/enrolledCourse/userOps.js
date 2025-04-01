@@ -131,8 +131,12 @@ export const enrollInCourse = async (req,res) => {
             return ResponseHandler.error(res, STRING_CONSTANTS.EXIST,HttpStatus.CONFLICT);
 
         const modules = course.modules.map((module) => ({
-            moduleId: module._id,   
-            lessonsCompleted: [],   
+            moduleId: module._id,
+            moduleTitle : module.title,   
+            lessons: module.lessons.map((lesson)=>({
+                lessonId : lesson._id,
+                isCompleted : false           
+            })),   
             isCompleted: false      
         }));
 

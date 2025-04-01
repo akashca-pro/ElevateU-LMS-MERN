@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ChevronLeft } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
-
+import { useUserCourseDetailsQuery,useUserCourseCurrentStatusQuery } from '@/services/userApi/userLearningCourseApi.js'
 import VideoPlayer from "./components/VideoPlayer"
 import ModuleAccordion from "./components/ModuleAccordion"
 import ProgressTracker from "./components/ProgressTracker"
@@ -18,6 +18,15 @@ const CourseLearningPage = () => {
   const navigate = useNavigate()
   const { courseId, lessonId } = useParams()
 
+  const { data } = useUserCourseDetailsQuery(courseId)
+  const { data : progress } = useUserCourseCurrentStatusQuery(courseId)
+  console.log(data)
+  console.log(progress)
+
+  const [courseDetails,setCourseDetails] = useState(null)
+  const [moduleDetails,setModuleDetails] = useState(null)
+  const [progressDetails, setProgressDetails] = useState(null)
+
   const [loading, setLoading] = useState(true)
   const [course, setCourse] = useState(null)
   const [currentLesson, setCurrentLesson] = useState(null)
@@ -25,6 +34,19 @@ const CourseLearningPage = () => {
   const [showAchievement, setShowAchievement] = useState(false)
   const [achievementMessage, setAchievementMessage] = useState("")
   const [activeTab, setActiveTab] = useState("progress")
+
+  useEffect(()=>{
+    if(data){
+      setCourseDetails(data?.data?.courseDetails)
+      setModuleDetails(data?.data?.moduleDetails)
+    }
+  },[data])
+
+  useEffect(()=>{
+    if(progress){
+      setProgressDetails(progress?.data)
+    }
+  },[progress])
 
   // Fetch course data
   useEffect(() => {
@@ -412,12 +434,12 @@ const CourseLearningPage = () => {
       {/* Course Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">
-          <Button variant="ghost" size="sm" className="gap-1" onClick={() => navigate(`/courses/${courseId}`)}>
+          <Button variant="ghost" size="sm" className="gap-1" onClick={() => navigate(-1)}>
             <ChevronLeft className="h-4 w-4" />
             <span>Back to Course</span>
           </Button>
           <Badge variant="outline" className="bg-primary/10 text-primary">
-            {calculateProgress()}% Complete
+            {courseDetails?.courseProgress}% Complete
           </Badge>
         </div>
         <h1 className="text-2xl md:text-3xl font-bold">{course.title}</h1>
@@ -427,7 +449,7 @@ const CourseLearningPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 z-50">
         {/* Video Player */}
         <div className="lg:col-span-2">
           <Card className="overflow-hidden border-0 shadow-lg">
@@ -471,11 +493,8 @@ const CourseLearningPage = () => {
 
           <TabsContent value="progress" className="p-4 md:p-6">
             <ProgressTracker
-              course={course}
-              completedLessons={completedLessons}
-              currentModule={getCurrentModule()}
-              nextModule={getNextModule()}
-              progressPercentage={calculateProgress()}
+              module={moduleDetails}
+              progress={progressDetails}
             />
           </TabsContent>
 

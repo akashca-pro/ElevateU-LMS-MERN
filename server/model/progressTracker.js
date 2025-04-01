@@ -12,7 +12,13 @@ const progressTrackerSchema = new mongoose.Schema({
     modules : [{
         _id : false,
         moduleId : { type : String ,ref : 'Course.modules'},
-        lessonsCompleted : [{ type : String, ref : 'Course.modules.lessons' }],
+        moduleTitle : { type : String },
+        moduleProgress : { type : Number, default : 0 },
+        lessons : [{ 
+            _id : false,
+            lessonId : {type : String, ref : 'Course.modules.lessons' },
+            isCompleted : { type : Boolean, default : false }
+        }],
         isCompleted : { type : Boolean, default : false }
     }],
 

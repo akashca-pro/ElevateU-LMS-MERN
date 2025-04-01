@@ -5,49 +5,34 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { CheckCircle, ChevronRight, Star, Trophy } from "lucide-react"
 
-const ProgressTracker = ({ course, completedLessons, currentModule, nextModule, progressPercentage }) => {
+const ProgressTracker = ({ module, progress }) => {
   const svgRef = useRef(null)
+  const currentLevelIndex = progress.currentLevel - 1 // Convert to 0-based index
 
   // Define level thresholds and names
   const levels = [
-    { threshold: 0, name: "Beginner", description: "Starting your journey" },
-    { threshold: 20, name: "Explorer", description: "Building foundations" },
-    { threshold: 40, name: "Practitioner", description: "Gaining confidence" },
-    { threshold: 60, name: "Specialist", description: "Mastering concepts" },
-    { threshold: 80, name: "Expert", description: "Ready to apply skills" },
+    { level: 1, name: "Beginner", threshold: 0, description: "Starting your journey" },
+    { level: 2, name: "Explorer", threshold: 25, description: "Building foundations" },
+    { level: 3, name: "Practitioner", threshold: 50, description: "Gaining confidence" },
+    { level: 4, name: "Specialist", threshold: 75, description: "Mastering concepts" },
+    { level: 5, name: "Expert", threshold: 100, description: "Ready to apply skills" },
   ]
 
-  // Get current level based on progress
-  const getCurrentLevel = () => {
-    for (let i = levels.length - 1; i >= 0; i--) {
-      if (progressPercentage >= levels[i].threshold) {
-        return levels[i]
-      }
-    }
-    return levels[0]
-  }
+  // Get current level data
+  const currentLevel = levels[currentLevelIndex]
+  const nextLevel = levels[currentLevelIndex + 1]
 
-  // Get next level based on progress
-  const getNextLevel = () => {
-    for (let i = 0; i < levels.length; i++) {
-      if (progressPercentage < levels[i].threshold) {
-        return levels[i]
-      }
-    }
-    return null // Already at max level
-  }
-
-  // Calculate total lessons
-  const totalLessons = course.modules.reduce((total, module) => total + module.lessons.length, 0)
+  // Calculate progress percentage
+  const progressPercentage = progress.courseProgress || 0
 
   // Calculate achievement message
-  const getAchievementMessage = () => {
+  const getAchievementMessage = (progressPercentage) => {
     if (progressPercentage === 100) {
-      return "Congratulations! You've completed the entire course! 🏆"
+      return "Congratulations! You've completed the entire course! �"
     } else if (progressPercentage >= 75) {
       return "You're in the final stretch! Keep going strong! 💪"
     } else if (progressPercentage >= 50) {
-      return "Halfway there! You're making excellent progress! 🚀"
+      return "Halfway there! You're making excellent progress! �"
     } else if (progressPercentage >= 25) {
       return "Great start! You're well on your way to mastery! 🌟"
     } else {
@@ -65,8 +50,10 @@ const ProgressTracker = ({ course, completedLessons, currentModule, nextModule, 
               <Trophy className="h-8 w-8 text-primary" />
             </div>
             <div className="text-center md:text-left">
-              <h3 className="text-xl font-bold mb-1">{getCurrentLevel().name} Level</h3>
-              <p className="text-gray-600 dark:text-gray-400">{getAchievementMessage()}</p>
+              <h3 className="text-xl font-bold mb-1">{currentLevel.name} Level</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                {getAchievementMessage(progressPercentage)}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -94,7 +81,7 @@ const ProgressTracker = ({ course, completedLessons, currentModule, nextModule, 
               strokeLinecap="round"
               initial={{ pathLength: 0 }}
               animate={{ pathLength: progressPercentage / 100 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
+              transition={{ duration: 1.5, ease: "easeInOut" }}
             />
 
             {/* Gradient Definition */}
@@ -108,9 +95,9 @@ const ProgressTracker = ({ course, completedLessons, currentModule, nextModule, 
 
           {/* Level Markers */}
           {levels.map((level, index) => {
-            const xPosition = (level.threshold / 100) * 1000
-            const yPosition = index % 2 === 0 ? 100 + 40 : 100 - 40
-            const isReached = progressPercentage >= level.threshold
+            const isReached = index <= currentLevelIndex
+            const isCurrent = index === currentLevelIndex
+            const isTextAbove = level.name === "Explorer" || level.name === "Specialist"
 
             return (
               <div
@@ -125,40 +112,46 @@ const ProgressTracker = ({ course, completedLessons, currentModule, nextModule, 
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.5 + index * 0.1, duration: 0.5, type: "spring" }}
-                  className={`flex flex-col items-center`}
+                  className="flex flex-col items-center"
                 >
+                  {/* Level Circle */}
                   <div
-                    className={`rounded-full p-2 ${isReached ? "bg-primary text-white" : "bg-gray-200 text-gray-500"}`}
+                    className={`rounded-full p-2 ${
+                      isReached ? "bg-primary text-white" : "bg-gray-200 text-gray-500"
+                    }`}
                   >
                     {isReached ? (
                       <CheckCircle className="h-6 w-6" />
                     ) : (
-                      <span className="h-6 w-6 flex items-center justify-center font-bold">{index + 1}</span>
+                      <span className="h-6 w-6 flex items-center justify-center font-bold">
+                        {index + 1}
+                      </span>
                     )}
                   </div>
-                  <div className="mt-2 text-center">
-                    <p className={`font-medium ${isReached ? "text-primary" : "text-gray-500"}`}>{level.name}</p>
+
+                  {/* Level Text */}
+                  <div className={`mt-2 text-center ${isTextAbove ? "order-first mb-2" : "mt-2"}`}>
+                    <p className={`font-medium ${isReached ? "text-primary" : "text-gray-500"}`}>
+                      {level.name}
+                    </p>
                     <p className="text-xs text-gray-500">{level.threshold}%</p>
                   </div>
+
+                  {/* Current Level Marker */}
+                  {isCurrent && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 1, type: "spring" }}
+                      className="absolute -top-12 bg-white rounded-full border-4 border-primary shadow-lg p-1"
+                    >
+                      <Star className="h-5 w-5 text-primary fill-primary" />
+                    </motion.div>
+                  )}
                 </motion.div>
               </div>
             )
           })}
-
-          {/* Current Progress Marker */}
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 1, type: "spring" }}
-            className="absolute bg-white rounded-full border-4 border-primary shadow-lg p-1"
-            style={{
-              left: `${progressPercentage}%`,
-              top: "50%",
-              transform: "translate(-50%, -50%)",
-            }}
-          >
-            <Star className="h-5 w-5 text-primary fill-primary" />
-          </motion.div>
         </div>
       </div>
 
@@ -179,12 +172,12 @@ const ProgressTracker = ({ course, completedLessons, currentModule, nextModule, 
               <TableRow>
                 <TableCell className="font-medium">Current Module</TableCell>
                 <TableCell>
-                  {currentModule ? (
+                  {progress.currentModule ? (
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="bg-primary/10 text-primary">
                         In Progress
                       </Badge>
-                      <span>{currentModule.title}</span>
+                      <span>{progress.currentModule.title}</span>
                     </div>
                   ) : (
                     "Not started"
@@ -194,10 +187,10 @@ const ProgressTracker = ({ course, completedLessons, currentModule, nextModule, 
               <TableRow>
                 <TableCell className="font-medium">Upcoming Module</TableCell>
                 <TableCell>
-                  {nextModule ? (
+                  {progress.upcomingModule._id ? (
                     <div className="flex items-center gap-2">
                       <ChevronRight className="h-4 w-4 text-gray-400" />
-                      <span>{nextModule.title}</span>
+                      <span>{progress.upcomingModule.title}</span>
                     </div>
                   ) : (
                     "Course completion"
@@ -223,22 +216,24 @@ const ProgressTracker = ({ course, completedLessons, currentModule, nextModule, 
               <TableRow>
                 <TableCell className="font-medium">Lessons Completed</TableCell>
                 <TableCell>
-                  {completedLessons.length} of {totalLessons} lessons
+                  {} of {console.log(module.find(m=>m._id === progress.currentLesson._id)?.totalLessons)} lessons
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="font-medium">Current Level</TableCell>
                 <TableCell>
-                  <Badge className="bg-primary">{getCurrentLevel().name}</Badge>
-                  <span className="ml-2 text-sm text-gray-500">{getCurrentLevel().description}</span>
+                  <Badge className="bg-primary">{currentLevel.name}</Badge>
+                  <span className="ml-2 text-sm text-gray-500">{currentLevel.description}</span>
                 </TableCell>
               </TableRow>
-              {getNextLevel() && (
+              {nextLevel && (
                 <TableRow>
                   <TableCell className="font-medium">Next Level</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{getNextLevel().name}</Badge>
-                    <span className="ml-2 text-sm text-gray-500">at {getNextLevel().threshold}% completion</span>
+                    <Badge variant="outline">{nextLevel.name}</Badge>
+                    <span className="ml-2 text-sm text-gray-500">
+                      at {nextLevel.threshold}% completion
+                    </span>
                   </TableCell>
                 </TableRow>
               )}

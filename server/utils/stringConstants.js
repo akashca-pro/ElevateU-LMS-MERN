@@ -48,7 +48,14 @@ export const STRING_CONSTANTS = {
     PAYMENT_SUCCESS : 'Payment Success',
     PAYMENT_FAILED : 'Payment Failed',
     COURSE_SUSPENDED : 'Course is Suspended',
-    COURSE_ACTIVE : 'Course is Active'
+    COURSE_ACTIVE : 'Course is Active',
+    COURSE_DETAILS_ERROR : 'Error loading course details',
+    COURSE_DETAILS_SUCCESS : 'Loading course details successfully',
+    PROGRESS_CHANGE_LESSON_STATUS_ERROR : 'change lesson status failed',
+    PROGRESS_CHANGE_LESSON_STATUS_SUCCESS : 'change lesson status success',
+    PROGRESS_CHANGE_MODULE_STATUS_ERROR : 'change module status failed',
+    PROGRESS_CHANGE_MODULE_STATUS_SUCCESS : 'change module status success',
+    
   
 }
 

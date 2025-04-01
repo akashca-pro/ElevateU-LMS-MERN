@@ -41,6 +41,10 @@ const tutorSchema = mongoose.Schema({
         type : String,
         trim : true
     },
+    tagLine : {
+        type : String,
+        default : ''
+    },
     dob : {
         type : String,
         default : ''
