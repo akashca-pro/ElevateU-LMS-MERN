@@ -151,6 +151,13 @@ const CourseDetails = () => {
     setCourse(courseCopy);
     setIsDataChanged(true)
   }
+
+  const handleLessonAttachment = (moduleIndex, lessonIndex, updatedAttachments ) =>{
+    const courseCopy = JSON.parse(JSON.stringify(course))
+    courseCopy.modules[moduleIndex].lessons[lessonIndex].attachments = updatedAttachments;
+    setCourse(courseCopy);
+    setIsDataChanged(true)
+  }
   
   const handleDeleteCourse = async() =>{
     const toastId = toast.loading('Deleting course . . .');
@@ -544,11 +551,14 @@ const CourseDetails = () => {
             <CardHeader>
             <CardTitle className="flex justify-between items-center">
                 Course Content
-                {!isEditing && (
+                {!isEditing ? (
                   <Button onClick={handleEdit}>
                     <Edit2 className="mr-2 h-4 w-4" /> Edit
                   </Button>
-                )}
+                ) : ( <div className="flex gap-2" >
+                  <Button disabled = {!isDataChanged} onClick={handleSave}>Save Changes</Button>
+                  <Button variant='destructive' onClick={()=>(setIsEditing((prev)=>!prev) , setIsDataChanged(false))}>Cancel</Button>
+                </div> )}
                 
               </CardTitle>
             </CardHeader>
@@ -619,12 +629,17 @@ const CourseDetails = () => {
 
                           <div>
                             <Label>Attachments</Label>
-                            <FileUpload
-                             value={lesson.attachments || []}
-                              onChange={(urls)=> handleLessonChange(moduleIndex, lessonIndex, 'attachments' , urls)}
-                              disabled={!isEditing ? true : false}
-                            />
+                          <FileUpload
+                            value={lesson.attachments} // Array of {link, title} objects
+                            onChange={(updatedAttachments) => {
+                              // updatedAttachments is array of {link, title}
+                              handleLessonAttachment(moduleIndex, lessonIndex, updatedAttachments);
+                            }}
+                            disabled={!isEditing}
+                            multiple={true}
+                          />
                           </div>
+
                           <div>
                         <Label htmlFor="duration">Duration ( In minutes )</Label>
                         <Input
@@ -665,11 +680,14 @@ const CourseDetails = () => {
             <CardHeader>
             <CardTitle className="flex justify-between items-center">
                 Pricing
-                {!isEditing && (
+                {!isEditing ? (
                   <Button onClick={handleEdit}>
                     <Edit2 className="mr-2 h-4 w-4" /> Edit
                   </Button>
-                )}
+                ) : ( <div className="flex gap-2" >
+                  <Button disabled = {!isDataChanged} onClick={handleSave}>Save Changes</Button>
+                  <Button variant='destructive' onClick={()=>(setIsEditing((prev)=>!prev) , setIsDataChanged(false))}>Cancel</Button>
+                </div> )}
               </CardTitle>
             </CardHeader>
             <CardContent>

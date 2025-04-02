@@ -1,11 +1,22 @@
-import { useRef } from "react"
+import { useEffect, useRef, useState } from "react"
+import Confetti from "react-confetti";
 import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { CheckCircle, ChevronRight, Star, Trophy } from "lucide-react"
 
-const ProgressTracker = ({ module, progress }) => {
+const ProgressTracker = ({ progress }) => {
+  const [showConfetti, setShowConfetti] = useState(false);
+    
+  useEffect(() => {
+    if (progress.courseProgress === 100) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000); // Stop after 5 seconds
+    }
+  }, [progress.courseProgress]);
+
+
   const svgRef = useRef(null)
   const currentLevelIndex = progress.currentLevel - 1 // Convert to 0-based index
 
@@ -42,6 +53,7 @@ const ProgressTracker = ({ module, progress }) => {
 
   return (
     <div className="space-y-8">
+      {showConfetti && <Confetti />}
       {/* Achievement Box */}
       <Card className="border-0 bg-gradient-to-r from-primary/10 to-purple-500/10 shadow-md">
         <CardContent className="p-6">
@@ -52,7 +64,7 @@ const ProgressTracker = ({ module, progress }) => {
             <div className="text-center md:text-left">
               <h3 className="text-xl font-bold mb-1">{currentLevel.name} Level</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                {getAchievementMessage(progressPercentage)}
+                {levels[currentLevelIndex].description}
               </p>
             </div>
           </div>
@@ -60,7 +72,7 @@ const ProgressTracker = ({ module, progress }) => {
       </Card>
 
       {/* S-Curve Progress Path */}
-      <div className="relative">
+      {progress.levelSize === 5 && <div className="relative">
         <div className="w-full h-[200px] overflow-hidden">
           <svg ref={svgRef} width="100%" height="100%" viewBox="0 0 1000 200" preserveAspectRatio="none">
             {/* S-Curve Path Background */}
@@ -153,7 +165,7 @@ const ProgressTracker = ({ module, progress }) => {
             )
           })}
         </div>
-      </div>
+      </div>}
 
       {/* Progress Stats Table */}
       <Card className="border-0 shadow-md">
@@ -205,18 +217,18 @@ const ProgressTracker = ({ module, progress }) => {
                       <motion.div
                         className="h-full bg-primary"
                         initial={{ width: 0 }}
-                        animate={{ width: `${progressPercentage}%` }}
+                        animate={{ width: `${progress.moduleProgress}%` }}
                         transition={{ duration: 0.8 }}
                       />
                     </div>
-                    <span className="font-medium">{progressPercentage}%</span>
+                    <span className="font-medium">{progress.moduleProgress}%</span>
                   </div>
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="font-medium">Lessons Completed</TableCell>
                 <TableCell>
-                  {} of {console.log(module.find(m=>m._id === progress.currentLesson._id)?.totalLessons)} lessons
+                  {progress.completedLessons} of {progress.totalLessons} lessons
                 </TableCell>
               </TableRow>
               <TableRow>

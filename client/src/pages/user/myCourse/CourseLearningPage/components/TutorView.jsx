@@ -21,9 +21,9 @@ const TutorView = ({ tutor }) => {
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
               >
                 <Avatar className="h-24 w-24 border-4 border-white shadow-md">
-                  <AvatarImage src={tutor.profileImage} alt={tutor.name} />
+                  <AvatarImage src={tutor.profileImage} alt={tutor.firstName} />
                   <AvatarFallback className="text-2xl">
-                    {tutor.name
+                    {tutor.firstName
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
@@ -34,8 +34,8 @@ const TutorView = ({ tutor }) => {
 
             <div className="space-y-2 pt-2">
               <div>
-                <h2 className="text-2xl font-bold">{tutor.name}</h2>
-                <p className="text-gray-500">{tutor.title}</p>
+                <h2 className="text-2xl font-bold">{tutor.firstName}</h2>
+                <p className="text-gray-500">{tutor?.tagLine || ''}</p>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -46,8 +46,8 @@ const TutorView = ({ tutor }) => {
                 ))}
               </div>
 
-              <div className="flex gap-2 pt-2">
-                {tutor.socialLinks.website && (
+              {tutor.socialLinks && <div className="flex gap-2 pt-2">
+                {tutor?.socialLinks.website && (
                   <Button variant="outline" size="icon" asChild>
                     <a href={tutor.socialLinks.website} target="_blank" rel="noopener noreferrer">
                       <Globe className="h-4 w-4" />
@@ -75,7 +75,7 @@ const TutorView = ({ tutor }) => {
                     </a>
                   </Button>
                 )}
-              </div>
+              </div>}
             </div>
           </div>
         </CardContent>

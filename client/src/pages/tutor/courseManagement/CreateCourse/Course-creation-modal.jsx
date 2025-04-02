@@ -18,7 +18,7 @@ const courseFormSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   category: z.string().min(1, "Please select a category"),
-  thumbnail: z.string().optional(),
+  thumbnail: z.string().min(1, 'Thumbnail is required'),
   modules: z
     .array(
       z.object({
@@ -27,7 +27,12 @@ const courseFormSchema = z.object({
           z.object({
             title: z.string().min(1, "Lesson title is required"),
             videoUrl: z.string().min(1,'Video file is required'),
-            attachments: z.array(z.string()).optional(),
+            attachments: z.array(
+              z.object({
+                link: z.string(),
+                title: z.string()
+              })
+            ).optional(),
             duration : z.number().min(0,'Duration is required')
           }),
         ),
@@ -40,7 +45,6 @@ const courseFormSchema = z.object({
   level: z.enum(["Beginner", "Intermediate", "Advanced"]).default("Beginner"),
   requirements: z.array(z.string()).default([]),
 })
-
 
 
 export function CourseCreationModal({ isOpen, onClose }) {
@@ -92,7 +96,7 @@ export function CourseCreationModal({ isOpen, onClose }) {
     const toastId = toast.loading('Please wait . . . ');
     try {
       console.log("Form submitted:", data)
-      await createCourse({formData : data , draft : false}).unwrap()
+      // await createCourse({formData : data , draft : false}).unwrap()
       reset(defaultValues);
       toast.success("Course created successfully! Awaiting approval.",{id : toastId})
       onClose()

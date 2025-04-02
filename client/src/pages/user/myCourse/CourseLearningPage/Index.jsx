@@ -175,44 +175,6 @@ const CourseLearningPage = () => {
     }, 5000)
   }
 
-  // Calculate current progress
-  const calculateProgress = () => {
-    if (!course) return 0
-
-    const totalLessons = course.modules.reduce((total, module) => total + module.lessons.length, 0)
-
-    return Math.round((completedLessons.length / totalLessons) * 100)
-  }
-
-  // Get current module
-  const getCurrentModule = () => {
-    if (!course || !currentLesson) return null
-
-    for (const module of course.modules) {
-      for (const lesson of module.lessons) {
-        if (lesson.id === currentLesson.id) {
-          return module
-        }
-      }
-    }
-
-    return null
-  }
-
-  // Get next module
-  const getNextModule = () => {
-    if (!course || !currentLesson) return null
-
-    const currentModule = getCurrentModule()
-    if (!currentModule) return null
-
-    const currentModuleIndex = course.modules.findIndex((m) => m.id === currentModule.id)
-    if (currentModuleIndex < course.modules.length - 1) {
-      return course.modules[currentModuleIndex + 1]
-    }
-
-    return null
-  }
 
   // Generate mock course data
   const generateMockCourse = () => {
@@ -467,9 +429,12 @@ const CourseLearningPage = () => {
         <div>
           <Card className="border-0 shadow-lg h-full">
             <ModuleAccordion
+              course={courseDetails}
+              moduleDetails={moduleDetails}
+              progress={progressDetails}
               modules={course.modules}
               currentLessonId={currentLesson?.id}
-              completedLessons={completedLessons}
+              completedLessons={progress.completedLessons}
               onLessonSelect={handleLessonSelect}
             />
           </Card>
@@ -493,13 +458,12 @@ const CourseLearningPage = () => {
 
           <TabsContent value="progress" className="p-4 md:p-6">
             <ProgressTracker
-              module={moduleDetails}
               progress={progressDetails}
             />
           </TabsContent>
 
           <TabsContent value="tutor" className="p-4 md:p-6">
-            <TutorView tutor={course.tutor} />
+            <TutorView tutor={courseDetails?.tutor} />
           </TabsContent>
 
           <TabsContent value="attachments" className="p-4 md:p-6">

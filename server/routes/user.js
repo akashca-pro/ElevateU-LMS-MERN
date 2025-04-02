@@ -19,7 +19,7 @@ import passport from 'passport'
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js'
 import { applyCoupon, bookmarkCourse, fetchCurrentAppliedCoupon, getPricing, isBookMarked, loadBookmarkCourses, removeAppliedCoupon, removeBookmarkCourse } from '../controllers/course/userOps.js'
 import { createOrder, failedPayment, verifyPayment } from '../controllers/order/userOrderOps.js'
-import { changeLessonOrModuleStatus, courseDetails, progressStatus } from '../controllers/enrolledCourse/userLearningOps.js'
+import { changeLessonOrModuleStatus, courseDetails, loadCurrentLesson, progressStatus } from '../controllers/enrolledCourse/userLearningOps.js'
 
 
 const router =  express.Router();
@@ -94,5 +94,7 @@ router.patch('/failed-payment/:id',verifyAccessToken('user'),failedPayment)
 router.get('/enrolled-course/course-details/:id',verifyAccessToken('user'),courseDetails)
 router.get('/enrolled-course/current-status/:id',verifyAccessToken('user'),progressStatus)
 router.put('/enrolled-course/lesson-status',verifyAccessToken('user'),changeLessonOrModuleStatus)
+router.get('/lesson',loadCurrentLesson)
+
 
 export default router

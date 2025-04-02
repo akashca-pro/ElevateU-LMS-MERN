@@ -8,7 +8,11 @@ const lessonSchema = new mongoose.Schema({
     title : { type :String,  },
     videoUrl : {type : String, }, // cloudinary video url
     duration : {type : Number, default : 0},
-    attachments : [{type : String}],
+    attachments : [{
+        _id : false,
+        title : { type : String },
+        link : { type : String }
+    }],
 
 })
 

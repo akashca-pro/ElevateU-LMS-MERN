@@ -135,6 +135,7 @@ export const enrollInCourse = async (req,res) => {
             moduleTitle : module.title,   
             lessons: module.lessons.map((lesson)=>({
                 lessonId : lesson._id,
+                lessonTitle : lesson.title,
                 isCompleted : false           
             })),   
             isCompleted: false      

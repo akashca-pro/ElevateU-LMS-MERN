@@ -46,6 +46,9 @@ export const courseDetails = async (req,res) => {
             };
         });
 
+        const totalLessons = moduleDetails.reduce((total,module)=>{
+            return total + module.totalLessons
+        },0)
 
         const responseData = {
             courseDetails : {
@@ -54,6 +57,8 @@ export const courseDetails = async (req,res) => {
                 description : courseDetails.description,
                 tutor : courseDetails.tutor,
                 attachments : allAttachments,
+                totalModules : courseDetails.modules.length || 0,
+                totalLessons 
             },
             moduleDetails,
         }
@@ -79,15 +84,18 @@ export const progressStatus = async (req,res) => {
         if(!progressTracker)
             return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NO_CONTENT);
 
+        let totalLessons;
+        let completedLessons;
+
         const currentModuleStatus = () => {
             const currentModule = progressTracker.modules.find(module => !module.isCompleted);
         
             if (!currentModule) return { currentModule: null, currentLesson: null, moduleProgress: 100 };
 
-            const totalLessons = currentModule.lessons.length;
-            const completedLessons = currentModule.lessons.filter(lesson=>lesson.isCompleted).length
+            totalLessons = currentModule.lessons.length;
+            const completedLessonsLength = currentModule.lessons.filter(lesson=>lesson.isCompleted).length
 
-            const moduleProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+            const moduleProgress = totalLessons > 0 ? Math.round((completedLessonsLength / totalLessons) * 100) : 0;
         
             const currentLesson = currentModule.lessons.find(lesson => !lesson.isCompleted);
         
@@ -101,7 +109,12 @@ export const progressStatus = async (req,res) => {
         const { currentModule, currentLesson, moduleProgress } = currentModuleStatus();
 
         const totalModules = progressTracker.modules.length;
-        const completedModules = progressTracker.modules.filter(module=>module.isCompleted).length;
+        const completedModules = progressTracker.modules.map(m=>{
+            if(m.isCompleted){
+                return m.moduleId
+            }
+        })
+        // const completedModules = progressTracker.modules.filter(module=>module.isCompleted).length;
 
         const courseProgress = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
 
@@ -130,7 +143,10 @@ export const progressStatus = async (req,res) => {
             moduleProgress,
             courseProgress,
             currentLevel : progressTracker.level.currentLevel,
-            levelSize : progressTracker.level.levelSize
+            levelSize : progressTracker.level.levelSize,
+            totalLessons,
+            completedLessons,
+            completedModules
         }
 
         return ResponseHandler.success(res, STRING_CONSTANTS.PROGRESS_STATUS_SUCCESS, HttpStatus.OK,currentProgress);
@@ -180,10 +196,61 @@ export const changeLessonOrModuleStatus = async (req,res) => {
             }
         }
 
+        const completedModules = progressTracker.modules.filter(m=>m.isCompleted).length
+        const totalModules = progressTracker.modules.length
+
+        const getCurrentLevel = (completedModules, totalModules) => {
+            if (totalModules === 0) return 1; // Prevent division by zero
+        
+            const modulesPerLevel = Math.ceil(totalModules / 5); // Split modules into 5 levels
+            let level = Math.floor(completedModules / modulesPerLevel) + 1; // Ensure next level only if completed full modules
+        
+            return Math.min(level, 5); // Cap at level 5
+        };
+        
+        updatedProgress.level.currentLevel = getCurrentLevel(completedModules, totalModules)
+
+        await updatedProgress.save()
+
         return ResponseHandler.success(res, STRING_CONSTANTS.PROGRESS_CHANGE_LESSON_STATUS_SUCCESS, HttpStatus.OK,updatedProgress)
 
     } catch (error) {
         console.log(STRING_CONSTANTS.PROGRESS_CHANGE_LESSON_STATUS_ERROR,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+}
+
+export const loadCurrentLesson = async (req,res) => {
+    
+    try {
+        const {userId} = req.query;
+        const {courseId, lessonId, moduleId} = req.query
+
+        if(!courseId || !lessonId || !moduleId)
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.BAD_REQUEST);
+
+        const isEnrolled = await EnrolledCourse.findOne({ courseId, userId })
+
+        if(!isEnrolled)
+            return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NO_CONTENT);
+        
+        const lessonData = await Course.aggregate([
+            { $match : { _id : courseId } },
+            { $unwind : '$modules' },
+            { $match  : { 'modules._id' : moduleId } },
+            { $unwind : '$modules.lessons' },
+            { $match : { 'modules.lessons._id' : lessonId } },
+            { $project : { _id : 0, lesson : '$modules.lessons' } }
+        ]);
+
+        if(!lessonData || lessonData.length === 0 )
+            return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NO_CONTENT)
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_CURRENT_LESSON_SUCCESS, HttpStatus.OK,lessonData)        
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.LOADING_CURRENT_LESSON_ERROR,error);
         return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

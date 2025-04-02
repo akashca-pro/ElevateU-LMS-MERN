@@ -6,11 +6,11 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, Play, PlayCircle, ChevronLeft, ChevronRight } from "lucide-react"
 
-const ModuleAccordion = ({ modules, currentLessonId, completedLessons, onLessonSelect }) => {
+const ModuleAccordion = ({ course ,moduleDetails, progress, modules, currentLessonId, completedLessons, onLessonSelect }) => {
   const [openModules, setOpenModules] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
-  const modulesPerPage = 5
-  const totalPages = Math.ceil(modules.length / modulesPerPage)
+  const modulesPerPage = 3
+  const totalPages = Math.ceil(course.totalModules / modulesPerPage)
 
   // Find which module contains the current lesson and open it
   useEffect(() => {
@@ -48,24 +48,17 @@ const ModuleAccordion = ({ modules, currentLessonId, completedLessons, onLessonS
     }
   }
 
-  // Calculate module progress
-  const calculateModuleProgress = (module) => {
-    const totalLessons = module.lessons.length
-    const completedCount = module.lessons.filter((lesson) => completedLessons.includes(lesson.id)).length
-
-    return Math.round((completedCount / totalLessons) * 100)
-  }
 
   // Check if module is completed
-  const isModuleCompleted = (module) => {
-    return module.lessons.every((lesson) => completedLessons.includes(lesson.id))
+  const isModuleCompleted = (moduleId) => {
+    return progress?.completedModules.includes(moduleId)
   }
 
   // Get current page modules
   const getCurrentPageModules = () => {
     const startIndex = (currentPage - 1) * modulesPerPage
     const endIndex = startIndex + modulesPerPage
-    return modules.slice(startIndex, endIndex)
+    return moduleDetails.slice(startIndex, endIndex)
   }
 
   // Handle page navigation
@@ -88,7 +81,7 @@ const ModuleAccordion = ({ modules, currentLessonId, completedLessons, onLessonS
           <div>
             <h2 className="text-lg font-semibold">Course Content</h2>
             <p className="text-sm text-gray-500 mt-1">
-              {modules.length} modules • {modules.reduce((total, module) => total + module.lessons.length, 0)} lessons
+              {course.totalModules} modules • {course.totalLessons} lessons
             </p>
           </div>
 
@@ -108,7 +101,7 @@ const ModuleAccordion = ({ modules, currentLessonId, completedLessons, onLessonS
             const absoluteModuleIndex = (currentPage - 1) * modulesPerPage + moduleIndex
 
             return (
-              <AccordionItem key={module.id} value={module.id} className="border-b last:border-b-0">
+              <AccordionItem key={module._id} value={module.id} className="border-b last:border-b-0">
                 <AccordionTrigger
                   onClick={() => toggleModule(module.id)}
                   className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
@@ -116,7 +109,7 @@ const ModuleAccordion = ({ modules, currentLessonId, completedLessons, onLessonS
                   <div className="flex flex-col items-start text-left">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">Module {absoluteModuleIndex + 1}:</span>
-                      {isModuleCompleted(module) && (
+                      {isModuleCompleted(module._id) && (
                         <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
                           <CheckCircle className="h-3 w-3 mr-1" />
                           Completed
@@ -126,17 +119,12 @@ const ModuleAccordion = ({ modules, currentLessonId, completedLessons, onLessonS
                     <span className="text-sm">{module.title}</span>
 
                     <div className="w-full mt-2">
-                      <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full bg-primary rounded-full"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${calculateModuleProgress(module)}%` }}
-                          transition={{ duration: 0.5, ease: "easeOut" }}
-                        />
-                      </div>
                       <div className="flex justify-between mt-1 text-xs text-gray-500">
-                        <span>{calculateModuleProgress(module)}% complete</span>
-                        <span>{module.lessons.length} lessons</span>
+                        <span>{moduleDetails.filter(m=>{
+                            if(m._id === module._id){
+                                return m.totalLessons
+                            }
+                        })} lessons</span>
                       </div>
                     </div>
                   </div>
@@ -144,13 +132,13 @@ const ModuleAccordion = ({ modules, currentLessonId, completedLessons, onLessonS
 
                 <AccordionContent className="px-0 py-0">
                   <div className="bg-gray-50 dark:bg-gray-800/50">
-                    {module.lessons.map((lesson, lessonIndex) => {
+                    {module.lessonDetails.map((lesson, lessonIndex) => {
                       const isCompleted = completedLessons.includes(lesson.id)
                       const isCurrent = lesson.id === currentLessonId
 
                       return (
                         <Button
-                          key={lesson.id}
+                          key={lesson._id}
                           variant="ghost"
                           className={`w-full justify-start rounded-none border-l-2 px-4 py-3 text-left h-auto ${
                             isCurrent

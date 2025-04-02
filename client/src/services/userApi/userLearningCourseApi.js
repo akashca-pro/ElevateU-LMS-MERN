@@ -26,6 +26,18 @@ const userCourseLearningApi = apiSlice.injectEndpoints({
                 body : credentials
             }),
             invalidatesTags : ['User']
+        }),
+        loadLessonDetails : builder.query({
+            query : (credentials) => ({
+                url : `user/lesson`,
+                method : 'GET',
+                params : {
+                    courseId: credentials.courseId,
+                    lessonId: credentials.lessonId,
+                    moduleId: credentials.moduleId,
+                }
+            }),
+            providesTags : ['User']
         })
     })
 })
@@ -35,6 +47,7 @@ export const {
 
     useUserCourseDetailsQuery,
     useUserCourseCurrentStatusQuery,
-    useLessonOrModuleStatusChangeMutation
+    useLessonOrModuleStatusChangeMutation,
+    useLoadLessonDetailsQuery
 
 } = userCourseLearningApi
