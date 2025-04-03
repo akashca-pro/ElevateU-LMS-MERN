@@ -10,15 +10,15 @@ const ProgressTracker = ({ progress }) => {
   const [showConfetti, setShowConfetti] = useState(false);
     
   useEffect(() => {
-    if (progress.courseProgress === 100) {
+    if (progress?.courseProgress === 100) {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 5000); // Stop after 5 seconds
     }
-  }, [progress.courseProgress]);
+  }, [progress?.courseProgress]);
 
 
   const svgRef = useRef(null)
-  const currentLevelIndex = progress.currentLevel - 1 // Convert to 0-based index
+  const currentLevelIndex = progress?.currentLevel - 1 // Convert to 0-based index
 
   // Define level thresholds and names
   const levels = [
@@ -34,7 +34,7 @@ const ProgressTracker = ({ progress }) => {
   const nextLevel = levels[currentLevelIndex + 1]
 
   // Calculate progress percentage
-  const progressPercentage = progress.courseProgress || 0
+  const progressPercentage = progress?.courseProgress || 0
 
   // Calculate achievement message
   const getAchievementMessage = (progressPercentage) => {
@@ -62,9 +62,9 @@ const ProgressTracker = ({ progress }) => {
               <Trophy className="h-8 w-8 text-primary" />
             </div>
             <div className="text-center md:text-left">
-              <h3 className="text-xl font-bold mb-1">{currentLevel.name} Level</h3>
+              <h3 className="text-xl font-bold mb-1">{currentLevel?.name} Level</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                {levels[currentLevelIndex].description}
+                {levels[currentLevelIndex]?.description}
               </p>
             </div>
           </div>
@@ -72,7 +72,7 @@ const ProgressTracker = ({ progress }) => {
       </Card>
 
       {/* S-Curve Progress Path */}
-      {progress.levelSize === 5 && <div className="relative">
+      {progress?.levelSize === 5 && <div className="relative">
         <div className="w-full h-[200px] overflow-hidden">
           <svg ref={svgRef} width="100%" height="100%" viewBox="0 0 1000 200" preserveAspectRatio="none">
             {/* S-Curve Path Background */}
@@ -184,12 +184,12 @@ const ProgressTracker = ({ progress }) => {
               <TableRow>
                 <TableCell className="font-medium">Current Module</TableCell>
                 <TableCell>
-                  {progress.currentModule ? (
+                  {progress?.currentModule ? (
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="bg-primary/10 text-primary">
                         In Progress
                       </Badge>
-                      <span>{progress.currentModule.title}</span>
+                      <span>{progress?.currentModule?.moduleTitle}</span>
                     </div>
                   ) : (
                     "Not started"
@@ -199,10 +199,10 @@ const ProgressTracker = ({ progress }) => {
               <TableRow>
                 <TableCell className="font-medium">Upcoming Module</TableCell>
                 <TableCell>
-                  {progress.upcomingModule._id ? (
+                  {progress?.upcomingModule._id ? (
                     <div className="flex items-center gap-2">
                       <ChevronRight className="h-4 w-4 text-gray-400" />
-                      <span>{progress.upcomingModule.title}</span>
+                      <span>{progress?.upcomingModule.title}</span>
                     </div>
                   ) : (
                     "Course completion"
@@ -217,34 +217,34 @@ const ProgressTracker = ({ progress }) => {
                       <motion.div
                         className="h-full bg-primary"
                         initial={{ width: 0 }}
-                        animate={{ width: `${progress.moduleProgress}%` }}
+                        animate={{ width: `${progress?.moduleProgress}%` }}
                         transition={{ duration: 0.8 }}
                       />
                     </div>
-                    <span className="font-medium">{progress.moduleProgress}%</span>
+                    <span className="font-medium">{progress?.moduleProgress}%</span>
                   </div>
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="font-medium">Lessons Completed</TableCell>
                 <TableCell>
-                  {progress.completedLessons} of {progress.totalLessons} lessons
+                  {progress?.completedLessons} of {progress?.totalLessons} lessons
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="font-medium">Current Level</TableCell>
                 <TableCell>
-                  <Badge className="bg-primary">{currentLevel.name}</Badge>
-                  <span className="ml-2 text-sm text-gray-500">{currentLevel.description}</span>
+                  <Badge className="bg-primary">{currentLevel?.name}</Badge>
+                  <span className="ml-2 text-sm text-gray-500">{currentLevel?.description}</span>
                 </TableCell>
               </TableRow>
               {nextLevel && (
                 <TableRow>
                   <TableCell className="font-medium">Next Level</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{nextLevel.name}</Badge>
+                    <Badge variant="outline">{nextLevel?.name}</Badge>
                     <span className="ml-2 text-sm text-gray-500">
-                      at {nextLevel.threshold}% completion
+                      at {nextLevel?.threshold}% completion
                     </span>
                   </TableCell>
                 </TableRow>

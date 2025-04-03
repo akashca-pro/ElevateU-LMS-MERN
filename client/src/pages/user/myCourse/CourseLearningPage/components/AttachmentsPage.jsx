@@ -5,58 +5,11 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Search, Download, FileText, FileImage, FileArchive, FileCode, Filter } from "lucide-react"
+import { Search, Download, FileText, FileImage, FileArchive, FileCode, Filter, FileJson } from "lucide-react"
 
 const AttachmentsPage = ({ course, currentLesson }) => {
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("current")
-
-  // Get all attachments from the course
-  const getAllAttachments = () => {
-    const allAttachments = []
-
-    course.modules.forEach((module) => {
-      module.lessons.forEach((lesson) => {
-        if (lesson.attachments && lesson.attachments.length > 0) {
-          lesson.attachments.forEach((attachment) => {
-            allAttachments.push({
-              ...attachment,
-              lessonTitle: lesson.title,
-              moduleTitle: module.title,
-            })
-          })
-        }
-      })
-    })
-
-    return allAttachments
-  }
-
-  // Get current lesson attachments
-  const getCurrentLessonAttachments = () => {
-    if (!currentLesson || !currentLesson.attachments) return []
-
-    return currentLesson.attachments.map((attachment) => ({
-      ...attachment,
-      lessonTitle: currentLesson.title,
-      moduleTitle: getCurrentModuleTitle(),
-    }))
-  }
-
-  // Get current module title
-  const getCurrentModuleTitle = () => {
-    if (!currentLesson) return ""
-
-    for (const module of course.modules) {
-      for (const lesson of module.lessons) {
-        if (lesson.id === currentLesson.id) {
-          return module.title
-        }
-      }
-    }
-
-    return ""
-  }
 
   // Filter attachments based on search query
   const filterAttachments = (attachments) => {
@@ -84,6 +37,8 @@ const AttachmentsPage = ({ course, currentLesson }) => {
       case "zip":
       case "rar":
         return <FileArchive className="h-5 w-5 text-yellow-500" />
+      case 'json' :
+        return <FileJson className="h-5 w-5 text-gray-500" />
       case "js":
       case "html":
       case "css":
@@ -93,11 +48,8 @@ const AttachmentsPage = ({ course, currentLesson }) => {
     }
   }
 
-  const allAttachments = getAllAttachments()
-  const currentAttachments = getCurrentLessonAttachments()
-
   const filteredAttachments =
-    activeTab === "current" ? filterAttachments(currentAttachments) : filterAttachments(allAttachments)
+    activeTab === "current" ? filterAttachments(currentLesson) : filterAttachments(course?.attachments)
 
   return (
     <div className="space-y-6">
@@ -134,7 +86,7 @@ const AttachmentsPage = ({ course, currentLesson }) => {
             >
               {filteredAttachments.map((attachment, index) => (
                 <motion.div
-                  key={attachment.id}
+                  key={index}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05, duration: 0.3 }}
@@ -147,7 +99,8 @@ const AttachmentsPage = ({ course, currentLesson }) => {
                         </div>
                         <div className="flex-grow">
                           <h3 className="font-medium">{attachment.title}</h3>
-                          <p className="text-sm text-gray-500 mt-1">{attachment.lessonTitle}</p>
+                          <p className="text-sm text-gray-500 mt-1">Module : {attachment.moduleTitle}</p>
+                          <p className="text-xs text-gray-500 mt-1">Lesson : {attachment.lessonTitle}</p>
                           <div className="flex items-center justify-between mt-2">
                             <Badge variant="outline" className="text-xs">
                               {attachment.fileType.toUpperCase()}
@@ -158,7 +111,7 @@ const AttachmentsPage = ({ course, currentLesson }) => {
                               className="h-8 gap-1 text-primary hover:text-primary/80"
                               asChild
                             >
-                              <a href={attachment.fileUrl} download>
+                              <a href={attachment.link} download>
                                 <Download className="h-4 w-4" />
                                 <span>Download</span>
                               </a>

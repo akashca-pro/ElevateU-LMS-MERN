@@ -19,6 +19,16 @@ const VideoPlayer = ({ lesson, onComplete, isCompleted }) => {
   // Control visibility timer
   let controlsTimer = null
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.pause(); 
+      video.load();
+      setCurrentTime(0);
+      setIsPlaying(false);
+    }
+  }, [lesson]);
+
   // Initialize video
   useEffect(() => {
     const video = videoRef.current
@@ -209,6 +219,7 @@ const VideoPlayer = ({ lesson, onComplete, isCompleted }) => {
     <div ref={containerRef} className="relative w-full aspect-video bg-black overflow-hidden group">
       {/* Video Element */}
       <video
+        key={lesson.videoUrl}
         ref={videoRef}
         className="w-full h-full object-contain"
         onClick={togglePlay}

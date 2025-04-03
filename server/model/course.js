@@ -187,6 +187,8 @@ courseSchema.pre("save", async function (next) {
 });
 
 
+
+
 const Course = mongoose.model('Course',courseSchema)
 
 export default Course

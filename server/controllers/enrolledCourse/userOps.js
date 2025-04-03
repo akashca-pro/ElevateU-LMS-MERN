@@ -153,7 +153,8 @@ export const enrollInCourse = async (req,res) => {
             userId,
             courseId,
             modules,
-            level
+            level,
+            lastCourseUpdate : course.updatedAt
         })       
 
              const newNotification = await saveNotification(

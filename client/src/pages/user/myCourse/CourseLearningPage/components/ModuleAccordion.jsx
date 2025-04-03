@@ -6,38 +6,38 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, Play, PlayCircle, ChevronLeft, ChevronRight } from "lucide-react"
 
-const ModuleAccordion = ({ course ,moduleDetails, progress, modules, currentLessonId, completedLessons, onLessonSelect }) => {
+const ModuleAccordion = ({ course ,moduleDetails, progress, currentLessonId, onLessonSelect }) => {
   const [openModules, setOpenModules] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
   const modulesPerPage = 3
-  const totalPages = Math.ceil(course.totalModules / modulesPerPage)
+  const totalPages = Math.ceil(course?.totalModules / modulesPerPage)
 
   // Find which module contains the current lesson and open it
-  useEffect(() => {
-    if (currentLessonId) {
-      let foundModuleIndex = -1
+//   useEffect(() => {
+//     if (currentLessonId) {
+//       let foundModuleIndex = -1
 
-      for (let i = 0; i < modules.length; i++) {
-        const module = modules[i]
-        for (const lesson of module.lessons) {
-          if (lesson.id === currentLessonId) {
-            foundModuleIndex = i
-            if (!openModules.includes(module.id)) {
-              setOpenModules((prev) => [...prev, module.id])
-            }
-            break
-          }
-        }
-        if (foundModuleIndex !== -1) break
-      }
+//       for (let i = 0; i < modules.length; i++) {
+//         const module = modules[i]
+//         for (const lesson of module.lessons) {
+//           if (lesson.id === currentLessonId) {
+//             foundModuleIndex = i
+//             if (!openModules.includes(module.id)) {
+//               setOpenModules((prev) => [...prev, module.id])
+//             }
+//             break
+//           }
+//         }
+//         if (foundModuleIndex !== -1) break
+//       }
 
-      // If found, navigate to the page containing this module
-      if (foundModuleIndex !== -1) {
-        const pageForModule = Math.floor(foundModuleIndex / modulesPerPage) + 1
-        setCurrentPage(pageForModule)
-      }
-    }
-  }, [currentLessonId, modules])
+//       // If found, navigate to the page containing this module
+//       if (foundModuleIndex !== -1) {
+//         const pageForModule = Math.floor(foundModuleIndex / modulesPerPage) + 1
+//         setCurrentPage(pageForModule)
+//       }
+//     }
+//   }, [currentLessonId, modules])
 
   // Toggle module open/close
   const toggleModule = (moduleId) => {
@@ -58,7 +58,7 @@ const ModuleAccordion = ({ course ,moduleDetails, progress, modules, currentLess
   const getCurrentPageModules = () => {
     const startIndex = (currentPage - 1) * modulesPerPage
     const endIndex = startIndex + modulesPerPage
-    return moduleDetails.slice(startIndex, endIndex)
+    return moduleDetails?.slice(startIndex, endIndex)
   }
 
   // Handle page navigation
@@ -81,7 +81,7 @@ const ModuleAccordion = ({ course ,moduleDetails, progress, modules, currentLess
           <div>
             <h2 className="text-lg font-semibold">Course Content</h2>
             <p className="text-sm text-gray-500 mt-1">
-              {course.totalModules} modules • {course.totalLessons} lessons
+              {course?.totalModules} modules • {course?.totalLessons} lessons
             </p>
           </div>
 
@@ -97,13 +97,13 @@ const ModuleAccordion = ({ course ,moduleDetails, progress, modules, currentLess
 
       <ScrollArea className="flex-grow">
         <Accordion type="multiple" value={openModules} className="w-full">
-          {getCurrentPageModules().map((module, moduleIndex) => {
+          {getCurrentPageModules()?.map((module, moduleIndex) => {
             const absoluteModuleIndex = (currentPage - 1) * modulesPerPage + moduleIndex
 
             return (
-              <AccordionItem key={module._id} value={module.id} className="border-b last:border-b-0">
+              <AccordionItem key={moduleIndex} value={module._id} className="border-b last:border-b-0">
                 <AccordionTrigger
-                  onClick={() => toggleModule(module.id)}
+                  onClick={() => toggleModule(module._id)}
                   className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   <div className="flex flex-col items-start text-left">
@@ -120,11 +120,7 @@ const ModuleAccordion = ({ course ,moduleDetails, progress, modules, currentLess
 
                     <div className="w-full mt-2">
                       <div className="flex justify-between mt-1 text-xs text-gray-500">
-                        <span>{moduleDetails.filter(m=>{
-                            if(m._id === module._id){
-                                return m.totalLessons
-                            }
-                        })} lessons</span>
+                        <span>{moduleDetails.filter(m=>(m._id === module._id)).map(les=>les.totalLessons)} lessons</span>
                       </div>
                     </div>
                   </div>
@@ -133,8 +129,8 @@ const ModuleAccordion = ({ course ,moduleDetails, progress, modules, currentLess
                 <AccordionContent className="px-0 py-0">
                   <div className="bg-gray-50 dark:bg-gray-800/50">
                     {module.lessonDetails.map((lesson, lessonIndex) => {
-                      const isCompleted = completedLessons.includes(lesson.id)
-                      const isCurrent = lesson.id === currentLessonId
+                      const isCompleted = lesson?.completedLessons.includes(lesson._id)
+                      const isCurrent = lesson._id === currentLessonId
 
                       return (
                         <Button
@@ -145,7 +141,7 @@ const ModuleAccordion = ({ course ,moduleDetails, progress, modules, currentLess
                               ? "border-l-primary bg-primary/5 text-primary"
                               : "border-l-transparent hover:border-l-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                           }`}
-                          onClick={() => onLessonSelect(lesson)}
+                          onClick={() => onLessonSelect({ lessonId : lesson._id , moduleId : module._id })}
                         >
                           <div className="flex items-start gap-3">
                             <div className="mt-0.5">

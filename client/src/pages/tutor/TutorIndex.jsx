@@ -127,7 +127,8 @@ return (
             <Route index element={
                 <CourseDashboard/>}
               />
-            <Route path=':courseId' element={<CourseDetails/>}/>
+            <Route path=':courseId' element={ <CourseDetails/>
+              }/>
           </Route>
           <Route path='messages' element={<Messages/>}/>
           <Route path='revenue' element={<Revenue/>}/>
