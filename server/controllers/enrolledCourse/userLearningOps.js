@@ -21,6 +21,28 @@ const calculateProgress = (modules) => {
     return totalLessons === 0 ? 0 : Math.round((completedLessons / totalLessons) * 100);
 };
 
+// protect Course Learning page 
+
+export const isCourseEnrolled = async (req,res) => {
+    
+    try {
+        const userId = req.user.id;
+        const courseId = req.params.id
+
+        const isEnrolled = await EnrolledCourse.findOne({ userId, courseId })
+
+        if(!isEnrolled)
+            return ResponseHandler.error(res, STRING_CONSTANTS.COURSE_NOT_ENROLLED, HttpStatus.NOT_FOUND)
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.COURSE_IS_ENROLLED, HttpStatus.OK);
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.COURSE_NOT_ENROLLED,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+}
+
 // load course and module details
 
 export const courseDetails = async (req,res) => {
@@ -137,13 +159,6 @@ export const progressStatus = async (req,res) => {
             return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NO_CONTENT);
 
         let totalLessons;
-
-        // const allModulesCompleted = progressTracker.modules.every(module => module.isCompleted);
-        // if (allModulesCompleted) {
-        // return ResponseHandler.success(res, STRING_CONSTANTS.COURSE_COMPLETED, HttpStatus.OK, {
-        //     courseProgress: 100,
-        // });
-        // }
 
         const currentModuleStatus = () => {
             const currentModule = progressTracker.modules.find(module => !module.isCompleted);

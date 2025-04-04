@@ -150,7 +150,7 @@ const { data: couponDetails } = useUserFetchAppliedCouponQuery(courseId, {
             orderId : response.paymentDetails?.orderId,
             transactionId : response.paymentDetails?.transactionId,
             amountPaid : response.paymentDetails?.amountPaid,
-            courseTitle : course?.title
+            courseId
           }})
         }else{
           navigate(`/explore/courses/${decodedCourseName}/checkout/payment-failed`,{state : decodedCourseName})

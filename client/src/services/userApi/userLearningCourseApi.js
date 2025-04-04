@@ -45,6 +45,13 @@ const userCourseLearningApi = apiSlice.injectEndpoints({
                 method : 'PUT',
             }),
             invalidatesTags : ['User']
+        }),
+        checkEnrollment : builder.query({
+            query : (id) => ({
+                url : `user/check-enrollment/${id}`,
+                method : 'GET',
+            }),
+            providesTags : ['User']
         })
     })
 })
@@ -56,6 +63,7 @@ export const {
     useUserCourseCurrentStatusQuery,
     useLessonOrModuleStatusChangeMutation,
     useLoadLessonDetailsQuery,
-    useResetCourseProgressMutation
+    useResetCourseProgressMutation,
+    useCheckEnrollmentQuery
 
 } = userCourseLearningApi

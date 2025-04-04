@@ -8,7 +8,6 @@ const PaymentSuccess = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const orderDetails = location.state
-  const decodedCourseName = formatUrl(orderDetails?.courseTitle)
 
   setTimeout(()=>{
 
@@ -57,7 +56,7 @@ const PaymentSuccess = () => {
         </p>
 
         <div className="flex flex-row gap-4">
-        <Button size="lg" className="flex-1 " onClick={()=>navigate(`/user/profile/my-courses/${decodedCourseName}`,{replace : true})}>
+        <Button size="lg" className="flex-1 " onClick={()=>navigate(`/user/profile/my-courses/${orderDetails?.courseId}`,{replace : true})}>
          Learn Now <BookOpen className="h-4 w-4" />
         </Button>
         <Button size="lg" className="flex-1 " onClick={()=>navigate(`/user/profile/my-courses?tab=enrolled`,{replace : true})}>

@@ -59,7 +59,9 @@ export const STRING_CONSTANTS = {
     LOADING_CURRENT_LESSON_SUCCESS :'Loading current lesson success',
     COURSE_PROGRESS_RESET_SUCCESS : 'Course Progress Reset Success',
     COURSE_PROGRESS_RESET_ERROR : 'Course progress reset failed',
-    COURSE_COMPLETED : 'Course completed'
+    COURSE_COMPLETED : 'Course completed',
+    COURSE_IS_ENROLLED : 'Course is enrolled',
+    COURSE_NOT_ENROLLED : 'Course is not enrolled'
 }
 
 export const DATABASE_FIELDS = {

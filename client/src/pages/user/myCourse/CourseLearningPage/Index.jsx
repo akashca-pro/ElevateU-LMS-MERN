@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { ChevronLeft } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useUserCourseDetailsQuery,useUserCourseCurrentStatusQuery, useLoadLessonDetailsQuery
-  ,useLessonOrModuleStatusChangeMutation, useResetCourseProgressMutation
+  ,useLessonOrModuleStatusChangeMutation, useResetCourseProgressMutation, useCheckEnrollmentQuery
  } from '@/services/userApi/userLearningCourseApi.js'
 import VideoPlayer from "./components/VideoPlayer"
 import ModuleAccordion from "./components/ModuleAccordion"
@@ -30,6 +30,7 @@ const CourseLearningPage = () => {
 
   const { data } = useUserCourseDetailsQuery(courseId)
   const { data : progress } = useUserCourseCurrentStatusQuery(courseId)
+  const { data : isEnrolled  } = useCheckEnrollmentQuery(courseId)
 
   const [courseDetails,setCourseDetails] = useState(null)
   const [moduleDetails,setModuleDetails] = useState(null)
@@ -139,8 +140,8 @@ const CourseLearningPage = () => {
     }, 5000)
   }
 
-  if (!courseDetails) {
-    return <NotEnrolledCard />
+  if(!isEnrolled){
+    return <NotEnrolledCard courseId={courseId} />
   }
 
   if (loading) {
