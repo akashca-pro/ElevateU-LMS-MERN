@@ -57,6 +57,9 @@ export const STRING_CONSTANTS = {
     PROGRESS_CHANGE_MODULE_STATUS_SUCCESS : 'change module status success',
     LOADING_CURRENT_LESSON_ERROR : 'Loading current lesson error',
     LOADING_CURRENT_LESSON_SUCCESS :'Loading current lesson success',
+    COURSE_PROGRESS_RESET_SUCCESS : 'Course Progress Reset Success',
+    COURSE_PROGRESS_RESET_ERROR : 'Course progress reset failed',
+    COURSE_COMPLETED : 'Course completed'
 }
 
 export const DATABASE_FIELDS = {

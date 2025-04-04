@@ -38,6 +38,13 @@ const userCourseLearningApi = apiSlice.injectEndpoints({
                 }
             }),
             providesTags : ['User']
+        }),
+        resetCourseProgress : builder.mutation({
+            query : (id) => ({
+                url : `user/reset-progress/${id}`,
+                method : 'PUT',
+            }),
+            invalidatesTags : ['User']
         })
     })
 })
@@ -48,6 +55,7 @@ export const {
     useUserCourseDetailsQuery,
     useUserCourseCurrentStatusQuery,
     useLessonOrModuleStatusChangeMutation,
-    useLoadLessonDetailsQuery
+    useLoadLessonDetailsQuery,
+    useResetCourseProgressMutation
 
 } = userCourseLearningApi

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { AnimatePresence } from "framer-motion"
+import Confetti from "react-confetti";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -7,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { ChevronLeft } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useUserCourseDetailsQuery,useUserCourseCurrentStatusQuery, useLoadLessonDetailsQuery
-  ,useLessonOrModuleStatusChangeMutation
+  ,useLessonOrModuleStatusChangeMutation, useResetCourseProgressMutation
  } from '@/services/userApi/userLearningCourseApi.js'
 import VideoPlayer from "./components/VideoPlayer"
 import ModuleAccordion from "./components/ModuleAccordion"
@@ -16,13 +17,16 @@ import TutorView from "./components/TutorView"
 import AttachmentsPage from "./components/AttachmentsPage"
 import AchievementNotification from "./components/AchievementNotification"
 import NotEnrolledCard from "@/components/FallbackUI/NotEnrolledCard"
-import { toast } from "sonner"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { toast } from "sonner";
 
 const CourseLearningPage = () => {
   
   const navigate = useNavigate()
   const { courseId } = useParams()
+
   const [updateLessonProgress] = useLessonOrModuleStatusChangeMutation()
+  const [resetCourseProgress] = useResetCourseProgressMutation()
 
   const { data } = useUserCourseDetailsQuery(courseId)
   const { data : progress } = useUserCourseCurrentStatusQuery(courseId)
@@ -33,7 +37,6 @@ const CourseLearningPage = () => {
 
   const [loading, setLoading] = useState(false)
 
-  const [course, setCourse] = useState(null)
   const [selectedModule, setSelectedModule] = useState(null)
   const [currentLesson, setCurrentLesson] = useState(null)
 
@@ -47,13 +50,11 @@ const CourseLearningPage = () => {
 
   const [showAchievement, setShowAchievement] = useState(false)
   const [achievementMessage, setAchievementMessage] = useState("")
+  const [isModalOpen,setIsModalOpen] = useState(false)
+  const [showConfetti, setShowConfetti] = useState(false);
   const [activeTab, setActiveTab] = useState("progress")
 
   useEffect(()=>{
-
-    if(!courseId){
-      return <NotEnrolledCard/>
-    }
 
     if(data){
       setCourseDetails(data?.data?.courseDetails)
@@ -70,7 +71,27 @@ const CourseLearningPage = () => {
     }
     
   },[data, progress, lessonDetails, courseId])
-  
+
+  useEffect(() => {
+    if (progressDetails?.courseProgress === 100) {
+      setShowConfetti(true);
+      setTimeout(() => setIsModalOpen(true), 4000); // Stop after 5 seconds
+    }
+  }, [progressDetails?.courseProgress]);
+
+  // Handle reset progress
+  const handleResetProgress = async()=>{
+    try {
+      await resetCourseProgress(courseDetails?._id).unwrap()
+      toast.success('Course Progress Resetted',{
+        description : 'Now you can start over again !'
+      })
+      setShowConfetti(false)
+      setIsModalOpen(false)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   // Handle lesson completion
   const handleLessonComplete = async(lesson) => {
@@ -82,13 +103,12 @@ const CourseLearningPage = () => {
     }
 
     try {
-      // const response = await updateLessonProgress({...credentials}).unwrap()
+       await updateLessonProgress({...credentials}).unwrap()
     } catch (error) {
       console.log(error)
     }
 
   }
-
 
   // Handle lesson selection
   const handleLessonSelect = (moduleDetails) => {
@@ -97,7 +117,7 @@ const CourseLearningPage = () => {
 
   // Check for achievements
   const checkForAchievements = (progressPercentage) => {
-    if (progressPercentage === 25) {
+    if (progressPercentage === 25 ) {
       showAchievementNotification("25% Completed! You're making great progress! 🎉")
     } else if (progressPercentage === 50) {
       showAchievementNotification("Halfway there! Keep up the good work! 🚀")
@@ -119,6 +139,9 @@ const CourseLearningPage = () => {
     }, 5000)
   }
 
+  if (!courseDetails) {
+    return <NotEnrolledCard />
+  }
 
   if (loading) {
     return (
@@ -136,12 +159,37 @@ const CourseLearningPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {showConfetti && <Confetti />}
       {/* Achievement Notification */}
       <AnimatePresence>
         {showAchievement && (
           <AchievementNotification message={achievementMessage} onClose={() => setShowAchievement(false)} />
         )}
       </AnimatePresence>
+
+        {/* Progress reset */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Course Completed</DialogTitle>
+            <DialogDescription>
+              Congrats for yours completion of course
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2">
+          <Button className='flex-1' 
+          onClick={()=>navigate('/user/profile/my-courses')}
+          >
+            Back to Courses
+          </Button>
+          <Button className='flex-1'
+          onClick={handleResetProgress} >
+            Start Over
+          </Button>
+          </div>
+
+        </DialogContent>
+      </Dialog>
 
       {/* Course Header */}
       <div className="mb-6">
@@ -207,6 +255,7 @@ const CourseLearningPage = () => {
           <TabsContent value="progress" className="p-4 md:p-6">
             <ProgressTracker
               progress={progressDetails}
+              setIsModalOpen={setIsModalOpen}
             />
           </TabsContent>
 

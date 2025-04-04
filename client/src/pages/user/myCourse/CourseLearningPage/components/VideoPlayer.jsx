@@ -14,10 +14,10 @@ const VideoPlayer = ({ lesson, onComplete, isCompleted }) => {
   const [isMuted, setIsMuted] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [showControls, setShowControls] = useState(true)
-  const [hasWatched75Percent, setHasWatched75Percent] = useState(false)
 
   // Control visibility timer
   let controlsTimer = null
+
 
   useEffect(() => {
     const video = videoRef.current;
@@ -93,14 +93,6 @@ const VideoPlayer = ({ lesson, onComplete, isCompleted }) => {
     const video = videoRef.current
     if (video) {
       setCurrentTime(video.currentTime)
-
-      // Check if watched 75% of the video
-      if (!hasWatched75Percent && video.currentTime > video.duration * 0.75) {
-        setHasWatched75Percent(true)
-        if (!isCompleted) {
-          onComplete()
-        }
-      }
     }
   }
 

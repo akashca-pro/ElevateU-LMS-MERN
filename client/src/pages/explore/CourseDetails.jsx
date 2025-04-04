@@ -111,14 +111,13 @@ const CourseDetails = () => {
         duration : 4000
       })
       return null
-    }
-        
+    }  
       await addToCart({ courseId : course._id }).unwrap();
       refetchCartDetails()
       navigate(`/explore/courses/${course._id}/checkout`)
     } catch (error) {
       if(error?.status === 400){
-        navigate(`/explore/courses/${courseName}/checkout`)
+        navigate(`/explore/courses/${course._id}/checkout`)
         refetchCartDetails()
         return null
       }
@@ -127,7 +126,7 @@ const CourseDetails = () => {
   }
 
   const handleViewCourse = () => {
-    navigate(`/user/profile/my-courses/${courseName}`)
+    navigate(`/user/profile/my-courses/${course._id}`)
   }
 
   if (isLoading) {

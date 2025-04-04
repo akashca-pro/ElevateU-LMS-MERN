@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-import Confetti from "react-confetti";
 import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -7,15 +6,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { CheckCircle, ChevronRight, Star, Trophy } from "lucide-react"
 
 const ProgressTracker = ({ progress }) => {
-  const [showConfetti, setShowConfetti] = useState(false);
-    
-  useEffect(() => {
-    if (progress?.courseProgress === 100) {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 5000); // Stop after 5 seconds
-    }
-  }, [progress?.courseProgress]);
 
+    // Calculate achievement message
+    const getAchievementMessage = (progressPercentage) => {
+        if (progressPercentage === 100) {
+        return "Congratulations! You've completed the entire course! "
+        } else if (progressPercentage >= 75) {
+        return "You're in the final stretch! Keep going strong! 💪"
+        } else if (progressPercentage >= 50) {
+        return "Halfway there! You're making excellent progress! "
+        } else if (progressPercentage >= 25) {
+        return "Great start! You're well on your way to mastery! 🌟"
+        } else {
+        return "Welcome to the course! Your learning journey begins here! 🎓"
+        }
+    }
 
   const svgRef = useRef(null)
   const currentLevelIndex = progress?.currentLevel - 1 // Convert to 0-based index
@@ -36,24 +41,10 @@ const ProgressTracker = ({ progress }) => {
   // Calculate progress percentage
   const progressPercentage = progress?.courseProgress || 0
 
-  // Calculate achievement message
-  const getAchievementMessage = (progressPercentage) => {
-    if (progressPercentage === 100) {
-      return "Congratulations! You've completed the entire course! �"
-    } else if (progressPercentage >= 75) {
-      return "You're in the final stretch! Keep going strong! 💪"
-    } else if (progressPercentage >= 50) {
-      return "Halfway there! You're making excellent progress! �"
-    } else if (progressPercentage >= 25) {
-      return "Great start! You're well on your way to mastery! 🌟"
-    } else {
-      return "Welcome to the course! Your learning journey begins here! 🎓"
-    }
-  }
 
   return (
     <div className="space-y-8">
-      {showConfetti && <Confetti />}
+      
       {/* Achievement Box */}
       <Card className="border-0 bg-gradient-to-r from-primary/10 to-purple-500/10 shadow-md">
         <CardContent className="p-6">
@@ -66,6 +57,7 @@ const ProgressTracker = ({ progress }) => {
               <p className="text-gray-600 dark:text-gray-400">
                 {levels[currentLevelIndex]?.description}
               </p>
+              <p className="text-gray-600 dark:text-gray-400">{getAchievementMessage(progress?.courseProgress)}</p>
             </div>
           </div>
         </CardContent>
@@ -210,7 +202,7 @@ const ProgressTracker = ({ progress }) => {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell className="font-medium">Progress</TableCell>
+                <TableCell className="font-medium">Current Module Progress</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <div className="w-full max-w-[200px] h-2 bg-gray-100 rounded-full overflow-hidden">

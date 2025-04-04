@@ -28,7 +28,9 @@ const progressTrackerSchema = new mongoose.Schema({
         levelSize : { type : Number, required : true },
     },
 
-    lastCourseUpdate : { type : Date, default : null }
+    lastCourseUpdate : { type : Date, default : null },
+
+    resetCount : { type : Number, default : 0 }
 
 },{timestamps : true})
 
