@@ -48,6 +48,7 @@ export const STRING_CONSTANTS = {
     PAYMENT_SUCCESS : 'Payment Success',
     PAYMENT_FAILED : 'Payment Failed',
     COURSE_SUSPENDED : 'Course is Suspended',
+    COURSE_NOT_FOUND : 'Course not found',
     COURSE_ACTIVE : 'Course is Active',
     COURSE_DETAILS_ERROR : 'Error loading course details',
     COURSE_DETAILS_SUCCESS : 'Loading course details successfully',
@@ -61,7 +62,11 @@ export const STRING_CONSTANTS = {
     COURSE_PROGRESS_RESET_ERROR : 'Course progress reset failed',
     COURSE_COMPLETED : 'Course completed',
     COURSE_IS_ENROLLED : 'Course is enrolled',
-    COURSE_NOT_ENROLLED : 'Course is not enrolled'
+    COURSE_NOT_ENROLLED : 'Course is not enrolled',
+    PROGRESS_TRACKER_UPDATED_SUCCESS : 'Progress tracker updation success',
+    PROGRESS_TRACKER_UPDATED_ERROR : 'Progress tracker is updation failed',
+    PROGRESS_TRACKER_ALREADY_UPDATED : 'Progress tracker is already updated',
+    COURSE_IS_UPDATED : 'Course is updated'
 }
 
 export const DATABASE_FIELDS = {

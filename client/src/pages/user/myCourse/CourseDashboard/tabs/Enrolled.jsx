@@ -1,6 +1,6 @@
 import { FilterBox } from '@/components/FilterBox'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import { BarChart2, CheckCircle, ChevronLeft, ChevronRight, Clock, Search, User } from 'lucide-react'
 import { motion } from "framer-motion";
 import { useUserEnrolledCoursesQuery } from '@/services/userApi/userCourseApi.js'
 import { useLoadCategoriesQuery } from '@/services/commonApi.js'
@@ -75,15 +75,35 @@ const Enrolled = () => {
                     Category : {categoryData?.find(cat => cat._id === course?.category)?.name || "Unknown"}
                   </p>
                 </CardHeader>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Tutor : {course?.tutor?.firstName}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Progress : {data?.extraDetails?.[course?._id]?.progress}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">{data?.extraDetails?.[course._id]?.completed ? 'Completed' : 'Ongoing'}</span>
-                </div>
+                <div className="space-y-3 border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-900 shadow-sm">
+              <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                <User className="h-4 w-4 text-blue-500" />
+                <span className="font-medium">Tutor:</span>
+                <span>{course?.tutor?.firstName}</span>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                <BarChart2 className="h-4 w-4 text-green-500" />
+                <span className="font-medium">Progress:</span>
+                <span>{data?.extraDetails?.[course?._id]?.courseProgress || '0'}%</span>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                {data?.extraDetails?.[course._id]?.isCompleted ? (
+                  <>
+                    <CheckCircle className="h-4 w-4 text-emerald-500" />
+                    <span className="font-medium">Status:</span>
+                    <span>Completed</span>
+                  </>
+                ) : (
+                  <>
+                    <Clock className="h-4 w-4 text-yellow-500" />
+                    <span className="font-medium">Status:</span>
+                    <span>Ongoing</span>
+                  </>
+                )}
+              </div>
+            </div>
               </CardContent>
             </Card>
           </motion.div>

@@ -52,6 +52,13 @@ const userCourseLearningApi = apiSlice.injectEndpoints({
                 method : 'GET',
             }),
             providesTags : ['User']
+        }),
+        updateProgressTracker : builder.mutation({
+            query : (id) => ({
+                url : `user/update-progress-tracker/${id}`,
+                method : 'PATCH'
+            }),
+            invalidatesTags : ['User']
         })
     })
 })
@@ -64,6 +71,7 @@ export const {
     useLessonOrModuleStatusChangeMutation,
     useLoadLessonDetailsQuery,
     useResetCourseProgressMutation,
-    useCheckEnrollmentQuery
+    useCheckEnrollmentQuery,
+    useUpdateProgressTrackerMutation
 
 } = userCourseLearningApi

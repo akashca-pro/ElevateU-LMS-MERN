@@ -7,6 +7,7 @@ import Order from "../../model/order.js";
 import User from "../../model/user.js";
 import { saveNotification, sendNotification } from "../../utils/LiveNotification.js";
 import ProgressTracker from "../../model/progressTracker.js";
+import { calculateLevelSize } from "./userLearningOps.js";
 
 // add to cart
 
@@ -141,12 +142,11 @@ export const enrollInCourse = async (req,res) => {
             isCompleted: false      
         }));
 
-        const totalModules = course.modules.length || 0
-        const levelSize = Math.ceil(totalModules / 5);
+      const { currentLevel, cumulativeModules } = calculateLevelSize(course.modules)
 
         const level = {
-            currentLevel: 1, 
-            levelSize: levelSize
+            currentLevel, 
+            cumulativeModules
         };
 
         await ProgressTracker.create({
@@ -210,7 +210,7 @@ export const loadEnrolledCourses = async (req,res) => {
 
         // console.log(enrollments)
 
-        const otherDetails = await EnrolledCourse.find({userId}).select('courseId progress completed -_id').lean()
+        const otherDetails = await EnrolledCourse.find({userId}).select('courseId courseProgress completed -_id').lean()
         
         const extraDetails = otherDetails.reduce((acc, { courseId, ...rest }) => { // progress and completion boolead
             acc[courseId] = rest;

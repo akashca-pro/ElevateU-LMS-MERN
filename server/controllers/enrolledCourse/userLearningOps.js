@@ -21,24 +21,158 @@ const calculateProgress = (modules) => {
     return totalLessons === 0 ? 0 : Math.round((completedLessons / totalLessons) * 100);
 };
 
-// protect Course Learning page 
+export const calculateLevelSize = (modules) => {
+
+    const totalModules = modules.length || 0;
+    const levels = 5;
+    
+    // Step 1: Calculate base size and remainder
+    const base = Math.floor(totalModules / levels);
+    const remainder = totalModules % levels;
+    
+    // Step 2: Determine modules per level
+    const modulesPerLevel = [];
+    for (let i = 0; i < levels; i++) {
+      if (i < remainder) {
+        modulesPerLevel.push(base + 1); // First 'remainder' levels get an extra module
+      } else {
+        modulesPerLevel.push(base); // Remaining levels get the base number
+      }
+    }
+    
+    // Step 3: Calculate cumulative modules to complete each level
+    const cumulativeModules = modulesPerLevel.reduce((acc, curr, index) => {
+      if (index === 0) {
+        acc.push(curr);
+      } else {
+        acc.push(acc[index - 1] + curr);
+      }
+      return acc;
+    }, []);
+    
+
+    const completedModules = modules.filter(m => m.isCompleted).length || 0;
+    const completedLevels = cumulativeModules.filter(cum => completedModules >= cum).length || 0;
+    
+    let currentLevel;
+    if (completedModules >= totalModules) {
+      currentLevel = 5; // All levels completed
+    } else {
+      currentLevel = completedLevels + 1; // Current level being worked on
+    }
+
+    return { cumulativeModules, currentLevel }
+} 
+
+// check course is enrolled
 
 export const isCourseEnrolled = async (req,res) => {
     
     try {
         const userId = req.user.id;
-        const courseId = req.params.id
+        const courseId = req.params.id;
+
+        const isEnrolled = await EnrolledCourse.findOne({ userId, courseId });
+
+        if(isEnrolled) 
+            return ResponseHandler.success(res, STRING_CONSTANTS.COURSE_IS_ENROLLED, HttpStatus.OK);
+
+        return ResponseHandler.error(res, STRING_CONSTANTS.COURSE_NOT_ENROLLED, HttpStatus.BAD_REQUEST)
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.PROGRESS_TRACKER_UPDATED_ERROR,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER,HttpStatus.OK);
+    }
+
+}
+
+export const updateProgressTracker = async (req,res) => {
+    
+    try {
+        const userId = req.user.id;
+        const courseId = req.params.id;
 
         const isEnrolled = await EnrolledCourse.findOne({ userId, courseId })
 
         if(!isEnrolled)
-            return ResponseHandler.error(res, STRING_CONSTANTS.COURSE_NOT_ENROLLED, HttpStatus.NOT_FOUND)
+            return null
 
-        return ResponseHandler.success(res, STRING_CONSTANTS.COURSE_IS_ENROLLED, HttpStatus.OK);
+        const progressTracker = await ProgressTracker.findOne({ userId , courseId });
+
+        if(!progressTracker)
+            return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND,HttpStatus.NO_CONTENT)
+
+        const course = await Course.findById(courseId).select("modules updatedAt");
+
+        if (!course) 
+            return ResponseHandler.error(res, STRING_CONSTANTS.COURSE_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+        let courseProgressUpdated = false;
+
+        // If the course has been updated after last update, check for new modules or lessons
+        if (!progressTracker.lastCourseUpdate || progressTracker.lastCourseUpdate < course.updatedAt) {
+            progressTracker.lastCourseUpdate = course.updatedAt;
+
+            // Convert modules to a map for quick lookup
+            const progressModulesMap = new Map(progressTracker.modules.map(m => [m.moduleId, m]));
+
+            courseProgressUpdated = false;
+
+            // Iterate over course modules
+            for (const courseModule of course.modules) {
+                if (!progressModulesMap.has(courseModule._id)) {
+                    //  New module found → Add to progress tracker
+                    progressTracker.modules.push({
+                        moduleId: courseModule._id,
+                        moduleTitle: courseModule.moduleTitle,
+                        moduleProgress: 0,
+                        lessons: courseModule.lessons.map(lesson => ({
+                            lessonId: lesson._id,
+                            lessonTitle: lesson.lessonTitle,
+                            isCompleted: false
+                        })),
+                        isCompleted: false
+                    });
+
+                    courseProgressUpdated = true;
+                } else {
+                    //  Check for new lessons inside existing modules
+                    let progressModule = progressModulesMap.get(courseModule._id);
+                    const progressLessonsMap = new Map(progressModule.lessons.map(l => [l.lessonId, l]));
+
+                    for (const lesson of courseModule.lessons) {
+                        if (!progressLessonsMap.has(lesson._id)) {
+                            // New lesson found → Add to progress tracker
+                            progressModule.lessons.push({
+                                lessonId: lesson._id,
+                                lessonTitle: lesson.lessonTitle,
+                                isCompleted: false
+                            });
+
+                            progressModule.isCompleted = false; // Mark module as incomplete
+                            courseProgressUpdated = true;
+                        }
+                    }
+                }
+            }
+            if(courseProgressUpdated){
+            
+                const { cumulativeModules, currentLevel } = calculateLevelSize(progressTracker.modules)
+
+                progressTracker.level ={
+                    currentLevel,
+                    cumulativeModules
+                }
+
+                await progressTracker.save()
+            }
+        }
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.PROGRESS_TRACKER_UPDATED_SUCCESS,HttpStatus.OK,courseProgressUpdated);
 
     } catch (error) {
-        console.log(STRING_CONSTANTS.COURSE_NOT_ENROLLED,error);
-        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
+        console.log(STRING_CONSTANTS.PROGRESS_TRACKER_UPDATED_ERROR,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER,HttpStatus.OK);
     }
 
 }
@@ -66,6 +200,9 @@ export const courseDetails = async (req,res) => {
 
         if(!progressTracker)
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+        if(progressTracker.lastCourseUpdate < courseDetails.updatedAt)
+            return ResponseHandler.success(res, STRING_CONSTANTS.COURSE_IS_UPDATED, HttpStatus.OK)
 
         const allAttachments = courseDetails.modules.flatMap((module,moduleIndex)=>{
            return module.lessons.flatMap((lesson,lessonIndex)=>{
@@ -196,6 +333,9 @@ export const progressStatus = async (req,res) => {
 
         const courseProgress = calculateProgress(progressTracker.modules)
 
+        await EnrolledCourse.findOneAndUpdate({ userId, courseId },
+            { $set : { courseProgress, isCompleted : courseProgress === 100  } })
+
         const moduleIndex = progressTracker.modules.findIndex(m=>m.moduleId === currentModule.moduleId)
 
         let upcomingModule = null;
@@ -231,6 +371,8 @@ export const progressStatus = async (req,res) => {
             isCompleted : currentLesson.isCompleted,
             moduleId : currentModule.moduleId
         }
+
+        const totalModules = progressTracker.modules.length || 0
  
         const currentProgress = {
             currentModule,
@@ -242,9 +384,9 @@ export const progressStatus = async (req,res) => {
             moduleProgress,
             courseProgress,
             currentLevel : courseProgress === 100 ? 5 : progressTracker.level.currentLevel,
-            levelSize : progressTracker.level.levelSize,
             totalLessons,
             completedModules,
+            totalModules,
             completedLessons
         }
 
@@ -265,8 +407,6 @@ export const changeLessonOrModuleStatus = async (req,res) => {
         const userId = req.user.id;
 
         const { lessonId, moduleId, courseId } = req.body
-
-        console.log(req.body)
         
         const progressTracker = await ProgressTracker.findOne({ userId, courseId });
 
@@ -314,19 +454,26 @@ export const changeLessonOrModuleStatus = async (req,res) => {
             }
         }
 
-        const completedModules = progressTracker.modules.filter(m=>m.isCompleted).length
-        const totalModules = progressTracker.modules.length
+        const { cumulativeModules, currentLevel } = calculateLevelSize(progressTracker.modules)
 
-        const getCurrentLevel = (completedModules, totalModules) => {
-            if (totalModules === 0) return 1; // Prevent division by zero
+        // const completedModules = progressTracker.modules.filter(m=>m.isCompleted).length
+        // const totalModules = progressTracker.modules.length
+
+        // const getCurrentLevel = (completedModules, totalModules) => {
+        //     if (totalModules === 0) return 1; // Prevent division by zero
         
-            const modulesPerLevel = Math.ceil(totalModules / 5); // Split modules into 5 levels
-            let level = Math.floor(completedModules / modulesPerLevel) + 1; // Ensure next level only if completed full modules
+        //     const modulesPerLevel = Math.ceil(totalModules / 5); // Split modules into 5 levels
+        //     let level = Math.floor(completedModules / modulesPerLevel) + 1; // Ensure next level only if completed full modules
         
-            return Math.min(level, 5); // Cap at level 5
-        };
+        //     return Math.min(level, 5); // Cap at level 5
+        // };
         
-        updatedProgress.level.currentLevel = getCurrentLevel(completedModules, totalModules)
+        // updatedProgress.level.currentLevel = getCurrentLevel(completedModules, totalModules)
+
+        updatedProgress.level={
+            currentLevel,
+            cumulativeModules
+        }
 
         await updatedProgress.save()
 

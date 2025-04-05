@@ -5,10 +5,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ChevronLeft } from "lucide-react"
+import {ChevronLeft} from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useUserCourseDetailsQuery,useUserCourseCurrentStatusQuery, useLoadLessonDetailsQuery
   ,useLessonOrModuleStatusChangeMutation, useResetCourseProgressMutation, useCheckEnrollmentQuery
+  ,useUpdateProgressTrackerMutation
  } from '@/services/userApi/userLearningCourseApi.js'
 import VideoPlayer from "./components/VideoPlayer"
 import ModuleAccordion from "./components/ModuleAccordion"
@@ -17,8 +18,8 @@ import TutorView from "./components/TutorView"
 import AttachmentsPage from "./components/AttachmentsPage"
 import AchievementNotification from "./components/AchievementNotification"
 import NotEnrolledCard from "@/components/FallbackUI/NotEnrolledCard"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "sonner";
+import CourseCompletionDialog from "./components/CourseCompletionDialog";
 
 const CourseLearningPage = () => {
   
@@ -27,17 +28,17 @@ const CourseLearningPage = () => {
 
   const [updateLessonProgress] = useLessonOrModuleStatusChangeMutation()
   const [resetCourseProgress] = useResetCourseProgressMutation()
+  const [updateProgressTracker] = useUpdateProgressTrackerMutation()
 
-  const { data } = useUserCourseDetailsQuery(courseId)
-  const { data : progress } = useUserCourseCurrentStatusQuery(courseId)
-  const { data : isEnrolled  } = useCheckEnrollmentQuery(courseId)
+  const { data : course, refetch : refetchCourseDetails, isLoading : courseLoading}
+  = useUserCourseDetailsQuery(courseId)
+
+  const { data : progress, refetch : refetchProgressDetails, isLoading : progressLoading } 
+  = useUserCourseCurrentStatusQuery(courseId)
 
   const [courseDetails,setCourseDetails] = useState(null)
   const [moduleDetails,setModuleDetails] = useState(null)
   const [progressDetails, setProgressDetails] = useState(null)
-
-  const [loading, setLoading] = useState(false)
-
   const [selectedModule, setSelectedModule] = useState(null)
   const [currentLesson, setCurrentLesson] = useState(null)
 
@@ -57,9 +58,9 @@ const CourseLearningPage = () => {
 
   useEffect(()=>{
 
-    if(data){
-      setCourseDetails(data?.data?.courseDetails)
-      setModuleDetails(data?.data?.moduleDetails)
+    if(course){
+      setCourseDetails(course?.data?.courseDetails)
+      setModuleDetails(course?.data?.moduleDetails)
     }
 
     if(progress){
@@ -71,19 +72,47 @@ const CourseLearningPage = () => {
       setCurrentLesson(lessonDetails?.data)
     }
     
-  },[data, progress, lessonDetails, courseId])
+  },[course, progress, lessonDetails, courseId])
 
+  useEffect(()=>{
+    handleUpdateProgress()
+  },[courseId])
+  
+  // check and update progress tracker if any changes to module or lesson
+  const handleUpdateProgress = async () => {
+  
+    try {
+      const res = await updateProgressTracker(courseId).unwrap()
+      refetchCourseDetails()
+      refetchProgressDetails()
+      if(res.data){
+        toast.success('Progress tracker updated',{ description : 'New modules or lessons added' })
+      }
+    } catch (error) {
+      toast.error("Failed to update progress tracker");
+      console.log(error)
+    }
+    
+  }
+  
   useEffect(() => {
     if (progressDetails?.courseProgress === 100) {
       setShowConfetti(true);
-      setTimeout(() => setIsModalOpen(true), 4000); // Stop after 5 seconds
+      setTimeout(() => setIsModalOpen(true), 4000); 
     }
   }, [progressDetails?.courseProgress]);
+
+  const handleOpenChange = () =>{
+      setIsModalOpen((prev)=>!prev);
+      setShowConfetti(false)
+  }
 
   // Handle reset progress
   const handleResetProgress = async()=>{
     try {
       await resetCourseProgress(courseDetails?._id).unwrap()
+      refetchCourseDetails()
+      refetchProgressDetails()
       toast.success('Course Progress Resetted',{
         description : 'Now you can start over again !'
       })
@@ -140,11 +169,7 @@ const CourseLearningPage = () => {
     }, 5000)
   }
 
-  if(!isEnrolled){
-    return <NotEnrolledCard courseId={courseId} />
-  }
-
-  if (loading) {
+  if (courseLoading || progressLoading) {
     return (
       <div className="container mx-auto px-4 py-8 animate-pulse">
         <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
@@ -169,28 +194,8 @@ const CourseLearningPage = () => {
       </AnimatePresence>
 
         {/* Progress reset */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Course Completed</DialogTitle>
-            <DialogDescription>
-              Congrats for yours completion of course
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex gap-2">
-          <Button className='flex-1' 
-          onClick={()=>navigate('/user/profile/my-courses')}
-          >
-            Back to Courses
-          </Button>
-          <Button className='flex-1'
-          onClick={handleResetProgress} >
-            Start Over
-          </Button>
-          </div>
-
-        </DialogContent>
-      </Dialog>
+        <CourseCompletionDialog isOpen={isModalOpen} onOpenChange={setIsModalOpen}
+         handleResetProgress={handleResetProgress} title={courseDetails?.title}/>
 
       {/* Course Header */}
       <div className="mb-6">

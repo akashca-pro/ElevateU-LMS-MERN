@@ -24,7 +24,11 @@ const enrollmentSchema = new mongoose.Schema({
     courseName : {
         type : String
     },
-    completed: {
+    courseProgress : {
+        type : Number,
+        default : 0
+    },
+    isCompleted: {
         type: Boolean,
         default: false,
     },

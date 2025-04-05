@@ -40,6 +40,7 @@ import ProtectedRoute from '@/protectors/ProtectedRoute';
 
 import NotFound from '@/components/FallbackUI/NotFound';
 import BlockedUI from '@/components/FallbackUI/BlockedUI';
+import ProtectLearningPage from '@/protectors/ProtectLearningPage';
 
 const UserIndex = () => {
   return (
@@ -113,7 +114,13 @@ const UserRoutes = () => {
           <Route index element={<Profile />}/>
           <Route path='my-courses' element={<CourseLayout/>}>
             <Route index element={<CourseDashboard/>}/>
-            <Route path=':courseId' element={<CourseLearningPage/>}/>
+            <Route path=':courseId' element={
+              <ProtectLearningPage>
+
+              <CourseLearningPage/>
+              
+              </ProtectLearningPage>
+              }/>
           </Route>
           <Route path='messages' element={<Messages/>}/>
           <Route path='community' element={<Community/>}/>
