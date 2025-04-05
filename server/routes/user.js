@@ -19,6 +19,7 @@ import passport from 'passport'
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js'
 import { applyCoupon, bookmarkCourse, fetchCurrentAppliedCoupon, getPricing, isBookMarked, loadBookmarkCourses, removeAppliedCoupon, removeBookmarkCourse } from '../controllers/course/userOps.js'
 import { createOrder, failedPayment, verifyPayment } from '../controllers/order/userOrderOps.js'
+import { changeLessonOrModuleStatus, courseDetails, isCourseEnrolled, loadSelectedLesson, progressStatus, resetCourseProgress, updateProgressTracker } from '../controllers/enrolledCourse/userLearningOps.js'
 
 
 const router =  express.Router();
@@ -87,5 +88,17 @@ router.delete('/remove-applied-coupon/:id',verifyAccessToken('user'),removeAppli
 router.post('/create-order',verifyAccessToken('user'),createOrder)
 router.post('/verify-payment',verifyAccessToken('user'),verifyPayment)
 router.patch('/failed-payment/:id',verifyAccessToken('user'),failedPayment)
+
+// learning progress
+
+router.get('/check-enrollment/:id',verifyAccessToken('user'),isCourseEnrolled)
+router.patch('/update-progress-tracker/:id',verifyAccessToken('user'),updateProgressTracker)
+router.get('/enrolled-course/course-details/:id',verifyAccessToken('user'),courseDetails)
+router.get('/enrolled-course/current-status/:id',verifyAccessToken('user'),progressStatus)
+router.put('/enrolled-course/lesson-status',verifyAccessToken('user'),changeLessonOrModuleStatus)
+router.get('/lesson',verifyAccessToken('user'),loadSelectedLesson)
+router.put('/reset-progress/:id',verifyAccessToken('user'),resetCourseProgress)
+
+
 
 export default router

@@ -169,7 +169,13 @@ function ModuleLessons({ form, moduleIndex }) {
                 <FormItem>
                   <FormLabel>Attachments</FormLabel>
                   <FormControl>
-                    <FileUpload value={field.value || []} onChange={(urls) => field.onChange(urls)} multiple />
+                  <FileUpload 
+                    value={field.value || []} 
+                    onChange={(attachments) => {
+                      field.onChange(attachments);
+                    }}
+                    multiple 
+                  />
                   </FormControl>
                   <FormDescription>Add supplementary materials for this lesson</FormDescription>
                   <FormMessage />
@@ -205,7 +211,12 @@ function ModuleLessons({ form, moduleIndex }) {
         type="button"
         variant="outline"
         size="sm"
-        onClick={() => appendLesson({ title: "", videoUrl: "", attachments: [] })}
+        onClick={() => appendLesson({ 
+          title: "", 
+          videoUrl: "", 
+          attachments: [], 
+          duration: 0 
+        })}
         className="w-full"
       >
         <Plus className="mr-2 h-3 w-3" />

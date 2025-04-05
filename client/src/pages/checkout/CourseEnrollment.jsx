@@ -23,7 +23,7 @@ import ErrorComponent from "@/components/FallbackUI/ErrorComponent"
 import EmptyCartComponent from "@/components/FallbackUI/EmptyCartComponent"
 
 const CourseEnrollment = () => {
-  const courseId = useParams();
+  const {courseId} = useParams();
   const navigate = useNavigate()
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [couponCode, setCouponCode] = useState("")
@@ -150,7 +150,7 @@ const { data: couponDetails } = useUserFetchAppliedCouponQuery(courseId, {
             orderId : response.paymentDetails?.orderId,
             transactionId : response.paymentDetails?.transactionId,
             amountPaid : response.paymentDetails?.amountPaid,
-            courseTitle : course?.title
+            courseId
           }})
         }else{
           navigate(`/explore/courses/${decodedCourseName}/checkout/payment-failed`,{state : decodedCourseName})

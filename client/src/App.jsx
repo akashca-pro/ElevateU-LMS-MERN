@@ -39,7 +39,7 @@ const App = () => {
         <Route path='courses/:courseId' element={<CourseDetails/>} />
         </Route>
 
-        <Route path='/explore/courses/:courseName/checkout' element={
+        <Route path='/explore/courses/:courseId/checkout' element={
           <ProtectedRoute role={'user'}>
           <BlockedUI >
             <Navbar/>

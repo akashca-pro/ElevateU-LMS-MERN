@@ -169,7 +169,6 @@ export const approveOrRejectCourse = async (req,res) => {
                 isPublished : true
             })
 
-             
              const newNotification = await saveNotification(tutorId, 'Tutor', 'publish_course',
                 `Congrats your ${course.title} course has been verified and published,${reason}`
              )

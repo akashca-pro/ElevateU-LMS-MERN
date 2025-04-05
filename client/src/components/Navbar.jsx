@@ -25,9 +25,9 @@ const Navbar = () => {
   
   const { data : cartDetails } = useUserLoadCartQuery(undefined,
     { refetchOnMountOrArgChange : true ,
-      skip : !tutor.isAuthenticated || !admin.isAuthenticated })
+      skip : tutor.isAuthenticated || admin.isAuthenticated })
 
-    const courseName = formatUrl(cartDetails?.data?.course?.title || 'courseName')
+    const courseName = cartDetails?.data?.course?._id || 'courseId'
 
   const { logout: userLogout } = useUserAuthActions();
   const { logout: tutorLogout } = useTutorAuthActions();

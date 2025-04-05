@@ -32,14 +32,15 @@ import Setting from './settings/Index';
 
 // My course 
 import CourseLayout from '@/pages/user/myCourse/Index.jsx'
-import CourseDashboard from './myCourse/CourseDashboard';
-import CourseDetails from './myCourse/CourseDetails';
+import CourseDashboard from './myCourse/CourseDashboard/CourseDashboard';
+import CourseLearningPage from './myCourse/CourseLearningPage/Index';
 
 import ProtectAuthPage from '@/protectors/ProtectAuthPage';
 import ProtectedRoute from '@/protectors/ProtectedRoute';
 
 import NotFound from '@/components/FallbackUI/NotFound';
 import BlockedUI from '@/components/FallbackUI/BlockedUI';
+import ProtectLearningPage from '@/protectors/ProtectLearningPage';
 
 const UserIndex = () => {
   return (
@@ -113,7 +114,13 @@ const UserRoutes = () => {
           <Route index element={<Profile />}/>
           <Route path='my-courses' element={<CourseLayout/>}>
             <Route index element={<CourseDashboard/>}/>
-            <Route path=':courseName' element={<CourseDetails/>}/>
+            <Route path=':courseId' element={
+              <ProtectLearningPage>
+
+              <CourseLearningPage/>
+              
+              </ProtectLearningPage>
+              }/>
           </Route>
           <Route path='messages' element={<Messages/>}/>
           <Route path='community' element={<Community/>}/>
