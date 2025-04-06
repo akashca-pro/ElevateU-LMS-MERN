@@ -141,7 +141,7 @@ const { data: couponDetails } = useUserFetchAppliedCouponQuery(courseId, {
     try {
         const responseOrderCreation = await createOrder({courseId, userData})
         const orderData = responseOrderCreation?.data?.data
-        console.log(orderData)
+        // console.log(orderData)
 
         const response = await handlePayment(orderData);
         if(response.success){

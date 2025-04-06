@@ -73,6 +73,27 @@ const userSchema  = new mongoose.Schema({
     
 },{timestamps : true});
 
+userSchema.post('save', async function (doc) {
+    
+    try {
+        const Wallet = (await import('./wallet.js')).default;
+
+        const existingWallet = await Wallet.findOne({ userId : doc._id, userModel : 'User' })
+        if(!existingWallet){
+            await Wallet.create({
+                userId : doc._id,
+                userModel : 'User',
+                balance : 0,
+                isActive : true
+            });
+        }
+
+    } catch (error) {
+        console.error('Error creating user wallet:', error);
+    }
+
+})
+
 const User = mongoose.model("User",userSchema);
 
 export default User

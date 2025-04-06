@@ -103,6 +103,8 @@ export const enrollInCourse = async (req,res) => {
         if(!orderDetails.paymentStatus === 'success')
             return ResponseHandler.error(res, 'Payment is not done', HttpStatus.BAD_REQUEST);
 
+        // here comes the transaction
+
         // save enrollment
 
         await EnrolledCourse.create({
@@ -118,7 +120,6 @@ export const enrollInCourse = async (req,res) => {
         course.totalEnrollment += 1;
 
         await course.save() 
-
 
         // add enrolled course to user schema
         const user = await User.findByIdAndUpdate(userId,{ $addToSet : { enrolledCourses : courseId } ,
