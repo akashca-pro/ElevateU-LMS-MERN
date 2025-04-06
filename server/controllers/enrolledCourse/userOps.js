@@ -8,6 +8,105 @@ import User from "../../model/user.js";
 import { saveNotification, sendNotification } from "../../utils/LiveNotification.js";
 import ProgressTracker from "../../model/progressTracker.js";
 import { calculateLevelSize } from "./userLearningOps.js";
+import mongoose from "mongoose";
+import Wallet from "../../model/wallet.js";
+import Transaction from "../../model/transaction.js";
+import 'dotenv/config'
+
+// handle transaction and wallet update
+
+const handleTransactionAndWalletUpdate = async ({
+    orderDetails,
+    course,
+    userId,
+    tutorId,
+    adminId
+}) => {
+    try {
+
+        const finalPrice = orderDetails.price.finalPrice;
+        const transactionId = orderDetails.paymentDetails.transactionId;
+    
+        const tutorPayout = finalPrice * 0.8;
+        const adminPayout = finalPrice * 0.2;
+    
+        // create transaction
+        const userTransaction = {
+            _id : transactionId,
+            type: 'debit',
+            amount: finalPrice,
+            purpose: 'course_purchase',
+            status: 'completed',
+            courseId: course._id,
+            description: `You purchased course ${course.title}`
+        }
+
+        // update user wallet
+        await Wallet.updateOne(
+            { userId, userModel : 'User' },
+            {
+                $push : { transactions : userTransaction }
+            }
+        );
+
+        const tutorTransaction = {
+            _id : transactionId,
+            type: 'credit',
+            amount: tutorPayout,
+            purpose: 'course_purchase',
+            status: 'completed',
+            courseId: course._id,
+            description: `Earning from course: ${course.title}`
+          };
+
+        //update tutor wallet
+        await Wallet.updateOne(
+            { userId : tutorId, userModel : 'Tutor' },
+            {
+                $push : { transactions : tutorTransaction },
+                $inc : { balance : tutorPayout, totalEarnings : tutorPayout }
+            }
+        )
+
+        const adminTransaction = {
+            _id : transactionId,
+            type: 'credit',
+            amount: adminPayout,
+            purpose: 'commission',
+            status: 'completed',
+            courseId: course._id,
+            description: `Commission from course: ${course.title}`
+          };
+
+          // update admin wallet
+          await Wallet.updateOne(
+            { userId: adminId, userModel: 'Admin' },
+            {
+              $push: { transactions: adminTransaction },
+              $inc: { balance: adminPayout, totalEarnings: adminPayout }
+            }
+          );
+
+          await Transaction.create({
+            type : 'course_purchase',
+            source : {
+                userId,
+                courseId : course._id,
+                tutorId,
+                adminId
+            },
+            amount : {
+                courseAmount : finalPrice,
+                tutorPayout,
+                adminPayout
+            },
+            orderId : orderDetails._id,
+          })
+          
+    } catch (error) {
+        throw error;
+    }
+}
 
 // add to cart
 
@@ -103,7 +202,13 @@ export const enrollInCourse = async (req,res) => {
         if(!orderDetails.paymentStatus === 'success')
             return ResponseHandler.error(res, 'Payment is not done', HttpStatus.BAD_REQUEST);
 
-        // here comes the transaction
+        await handleTransactionAndWalletUpdate({
+            orderDetails,
+            adminId : process.env.ADMIN_ID,
+            course,
+            userId,
+            tutorId,
+        })
 
         // save enrollment
 

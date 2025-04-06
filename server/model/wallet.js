@@ -3,7 +3,7 @@ import { nanoid } from "nanoid";
 
 const transactionSchema = new mongoose.Schema(
     {
-      _id : { type : String, default : ()=>nanoid(12) },  
+      _id : { type : String, required : true },  
       type: {
         type: String,
         enum: ['debit', 'credit'],

@@ -28,14 +28,12 @@ const transactionSchema = new mongoose.Schema({
     amount : {
         courseAmount : { type : Number, required : function() { return this.type === 'course_purchase' } },
 
-        tutorPayOut : { type : Number, required : function() { return ['course_purchase','tutor_withdrawal'].includes(this.type) } },
+        tutorPayout : { type : Number, required : function() { return ['course_purchase','tutor_withdrawal'].includes(this.type) } },
 
-        adminPayOut : { type : Number, required : function() { return ['course_purchase','admin_withdrawal'].includes(this.type) } }
+        adminPayout : { type : Number, required : function() { return ['course_purchase','admin_withdrawal'].includes(this.type) } }
     },
 
     orderId : { type : String, ref : 'Order' , required : function() { return this.type === 'course_purchase' } },
-
-    description : { type : String },
 
 }, { timestamps : true })
 
