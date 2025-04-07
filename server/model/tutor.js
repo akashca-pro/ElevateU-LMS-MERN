@@ -66,7 +66,7 @@ const tutorSchema = mongoose.Schema({
         default: 0,
     },
     bankDetails : {
-        acntNo : { type : String},
+        accountNumber : { type : String},
         ifsc : { type : String },
         bankName : { type : String},
         holderName : { type : String}

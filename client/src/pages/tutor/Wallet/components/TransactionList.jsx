@@ -11,10 +11,10 @@ const TransactionList = ({ transactions, loadMore }) => {
   const transactionsPerPage = 5
 
   // Get transactions for current page
-  const paginatedTransactions = transactions.slice((page - 1) * transactionsPerPage, page * transactionsPerPage)
+  const paginatedTransactions = transactions?.slice((page - 1) * transactionsPerPage, page * transactionsPerPage)
 
   // Calculate total pages
-  const totalPages = Math.ceil(transactions.length / transactionsPerPage)
+  const totalPages = Math.ceil(transactions?.length / transactionsPerPage)
 
   // Handle pagination
   const nextPage = () => {
@@ -50,7 +50,7 @@ const TransactionList = ({ transactions, loadMore }) => {
 
   return (
     <div className="space-y-4">
-      {transactions.length === 0 ? (
+      {transactions?.length === 0 ? (
         <Card className="border-0 shadow-md">
           <CardContent className="p-6 flex flex-col items-center justify-center text-center py-12">
             <div className="bg-primary/10 p-4 rounded-full mb-4">
@@ -82,7 +82,7 @@ const TransactionList = ({ transactions, loadMore }) => {
             <div className="flex items-center justify-between pt-4">
               <div className="text-sm text-muted-foreground">
                 Showing {(page - 1) * transactionsPerPage + 1} to{" "}
-                {Math.min(page * transactionsPerPage, transactions.length)} of {transactions.length} transactions
+                {Math.min(page * transactionsPerPage, transactions?.length)} of {transactions?.length} transactions
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={prevPage} disabled={page === 1}>

@@ -175,8 +175,8 @@ const WalletPage = () => {
         isOpen={isWithdrawModalOpen}
         onClose={() => setIsWithdrawModalOpen(false)}
         onWithdraw={handleWithdrawal}
-        maxAmount={walletData.balance}
-        paymentMethods={walletData.paymentMethods}
+        maxAmount={walletData?.balance}
+        paymentMethods={walletData?.paymentMethods}
       />
     </div>
   )

@@ -19,6 +19,7 @@ courseTitleExist,
 import passport from 'passport';
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js';
 import { loadWalletDetails } from '../controllers/wallet/common.js';
+import { addBankAccountDetails, loadExistingBankDetails } from '../controllers/wallet/tutorWallet.js';
 
 
 const router = express.Router()
@@ -80,5 +81,9 @@ router.post('/read-notifications',verifyAccessToken('tutor'),readNotifications)
 
 router.get('/wallet',verifyAccessToken('tutor'),loadWalletDetails('Tutor'))
 
+// bank account
+
+router.get('/bank-details',verifyAccessToken('tutor'),loadExistingBankDetails)
+router.post('/bank-details',verifyAccessToken('tutor'),addBankAccountDetails)
 
 export default router

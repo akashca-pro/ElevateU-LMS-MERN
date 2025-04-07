@@ -14,12 +14,29 @@ const tutorWalletApi = apiSlice.injectEndpoints({
                 }
             }),
             providesTags : ['User']
+        }),
+        addBankAccount : builder.mutation({
+            query : (credentials) => ({
+                url : `tutor/bank-details`,
+                method : 'POST',
+                body : credentials
+            }),
+            invalidatesTags : ['Tutor']
+        }),
+        loadBankDetails : builder.query({
+            query : ()=>({
+                url : `tutor/bank-details`,
+                method : 'GET',
+            }),
+            providesTags : ['Tutor']
         })
     })
 })
 
 export const {
 
-    useLoadWalletQuery
+    useLoadWalletQuery,
+    useAddBankAccountMutation,
+    useLoadBankDetailsQuery
 
 } = tutorWalletApi

@@ -37,8 +37,6 @@ import ProfileDetails from './tutorProfile/Index'
 import Messages from './Messages/Messages.jsx'
 import Analytics from './analytics/Analytics.jsx'
 import Notification from './Notification/Index.jsx'
-import Setting from './settings/Settings.jsx'
-
 
 import CourseLayout from '@/pages/tutor/courseManagement/Index.jsx'
 import CourseDashboard from './courseManagement/CourseDashboard.jsx'
@@ -46,6 +44,7 @@ import CourseDetails from './courseManagement/CourseDetails';
 
 import Revenue from './Wallet/WalletPage.jsx'
 
+import Setting from './settings/Index.jsx'
 
 const TutorIndex = () => {
   return (

@@ -158,7 +158,7 @@ const WithdrawFunds = ({ isOpen, onClose, onWithdraw, maxAmount, paymentMethods 
               <div className="space-y-2">
                 <Label>Payment Method</Label>
                 <RadioGroup value={selectedMethod} onValueChange={setSelectedMethod} className="space-y-2">
-                  {paymentMethods.map((method) => (
+                  {paymentMethods?.map((method) => (
                     <div
                       key={method.id}
                       className={`flex items-center space-x-2 border rounded-md p-3 transition-colors ${

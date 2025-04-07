@@ -71,7 +71,8 @@ export const STRING_CONSTANTS = {
     LOADING_WALLET_ERROR : 'Loading wallet details failed',
     ADDING_BANK_DETAILS_SUCCESS : 'Adding bank details success',
     ADDING_BANK_DETAILS_ERROR : 'Adding bank details Failed',
-
+    LOADING_BANK_DETAILS_SUCCESS : 'Loadin Bank details Success',
+    LOADING_BANK_DETAILS_ERROR : 'Loading Bank details Error'
 }
 
 export const DATABASE_FIELDS = {

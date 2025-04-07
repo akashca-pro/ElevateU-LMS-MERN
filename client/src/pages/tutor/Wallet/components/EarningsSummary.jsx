@@ -6,12 +6,12 @@ const EarningsSummary = ({ walletData }) => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: walletData.currency,
+      currency: walletData?.currency || 'INR',
     }).format(amount)
   }
 
   // Calculate net earnings
-  const netEarnings = walletData.totalEarnings - walletData.totalWithdrawals
+  const netEarnings = walletData?.totalEarnings - walletData?.totalWithdrawals
 
   // Animation variants
   const containerVariants = {
@@ -47,7 +47,7 @@ const EarningsSummary = ({ walletData }) => {
               <div>
                 <p className="text-sm text-muted-foreground">Total Earnings</p>
                 <p className="text-2xl font-bold mt-1 text-green-600 dark:text-green-400">
-                  {formatCurrency(walletData.totalEarnings)}
+                  {formatCurrency(walletData?.totalEarnings)}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">Lifetime earnings from all sources</p>
               </div>
@@ -66,7 +66,7 @@ const EarningsSummary = ({ walletData }) => {
               <div>
                 <p className="text-sm text-muted-foreground">Total Withdrawals</p>
                 <p className="text-2xl font-bold mt-1 text-amber-600 dark:text-amber-400">
-                  {formatCurrency(walletData.totalWithdrawals)}
+                  {formatCurrency(walletData?.totalWithdrawals)}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">Total amount withdrawn to date</p>
               </div>

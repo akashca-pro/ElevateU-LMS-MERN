@@ -12,7 +12,7 @@ const WalletSummary = ({ walletData, onWithdraw }) => {
   const [copied, setCopied] = useState(false)
 
   const copyWalletId = () => {
-    navigator.clipboard.writeText(walletData.walletId)
+    navigator.clipboard.writeText(walletData?.walletId)
     setCopied(true)
     toast.info("Wallet ID copied",{
       description: "Wallet ID has been copied to clipboard",
@@ -44,7 +44,7 @@ const WalletSummary = ({ walletData, onWithdraw }) => {
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 300, delay: 0.1 }}
               >
-                {formatCurrency(walletData.balance)}
+                {formatCurrency(walletData?.balance)}
               </motion.h2>
             </div>
 
@@ -52,7 +52,7 @@ const WalletSummary = ({ walletData, onWithdraw }) => {
               onClick={onWithdraw}
               variant="secondary"
               className="gap-2 font-medium"
-              disabled={walletData.balance <= 0}
+              disabled={walletData?.balance <= 0}
             >
               <ArrowUpRight className="h-4 w-4" />
               Withdraw Funds
@@ -69,7 +69,7 @@ const WalletSummary = ({ walletData, onWithdraw }) => {
               <div>
                 <p className="text-sm text-muted-foreground">Wallet ID</p>
                 <div className="flex items-center gap-2">
-                  <p className="font-medium">{walletData.walletId}</p>
+                  <p className="font-medium">{walletData?.walletId}</p>
                   <button onClick={copyWalletId} className="text-gray-400 hover:text-primary transition-colors">
                     {copied ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                   </button>
@@ -88,7 +88,7 @@ const WalletSummary = ({ walletData, onWithdraw }) => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Status</p>
-                <p className="font-medium capitalize">{walletData.status ? 'Active' : 'Not-Active'}</p>
+                <p className="font-medium capitalize">{walletData?.status ? 'Active' : 'Not-Active'}</p>
               </div>
             </div>
 
@@ -98,7 +98,7 @@ const WalletSummary = ({ walletData, onWithdraw }) => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Currency</p>
-                <p className="font-medium">{walletData.currency}</p>
+                <p className="font-medium">{walletData?.currency}</p>
               </div>
             </div>
 
@@ -108,9 +108,9 @@ const WalletSummary = ({ walletData, onWithdraw }) => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Last Updated</p>
-                <p className="font-medium">
-                  {formatDistanceToNow(new Date(walletData.lastUpdated), { addSuffix: true })}
-                </p>
+                {walletData?.lastUpdated && <p className="font-medium">
+                  {formatDistanceToNow(new Date(walletData?.lastUpdated), { addSuffix: true })}
+                </p>}
               </div>
             </div>
           </div>

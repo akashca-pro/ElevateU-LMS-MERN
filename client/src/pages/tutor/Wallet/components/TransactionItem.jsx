@@ -23,7 +23,7 @@ const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
 
     const copyWalletId = (e) => {
         e.stopPropagation();
-        navigator.clipboard.writeText(transaction.reference)
+        navigator.clipboard.writeText(transaction?.reference)
         setCopied(true)
         toast.info("Reference ID copied")
         setTimeout(() => setCopied(false), 2000)
@@ -45,7 +45,7 @@ const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
 
   // Get transaction type icon
   const getTransactionIcon = () => {
-    if (transaction.type === "credit") {
+    if (transaction?.type === "credit") {
       return <ArrowDownLeft className="h-5 w-5 text-green-500" />
     } else {
       return <ArrowUpRight className="h-5 w-5 text-amber-500" />
@@ -54,7 +54,7 @@ const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
 
   // Get status badge
   const getStatusBadge = () => {
-    switch (transaction.status) {
+    switch (transaction?.status) {
       case "completed":
         return (
           <Badge
@@ -105,7 +105,7 @@ const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
       refund: "Refund",
     }
 
-    return purposeMap[transaction.purpose] || transaction.purpose
+    return purposeMap[transaction?.purpose] || transaction?.purpose
   }
 
   return (
@@ -121,7 +121,7 @@ const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
             <div className="flex items-center gap-3">
               <div
                 className={`p-2 rounded-full ${
-                  transaction.type === "credit"
+                  transaction?.type === "credit"
                     ? "bg-green-100 dark:bg-green-900/20"
                     : "bg-amber-100 dark:bg-amber-900/20"
                 }`}
@@ -131,7 +131,7 @@ const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
 
               <div>
                 <p className="font-medium">{getPurposeLabel()}</p>
-                <p className="text-xs text-muted-foreground">{formatDate(transaction.date)}</p>
+                <p className="text-xs text-muted-foreground">{formatDate(transaction?.date)}</p>
               </div>
             </div>
 
@@ -139,13 +139,13 @@ const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
               <div className="text-right">
                 <p
                   className={`font-bold ${
-                    transaction.type === "credit"
+                    transaction?.type === "credit"
                       ? "text-green-600 dark:text-green-400"
                       : "text-amber-600 dark:text-amber-400"
                   }`}
                 >
-                  {transaction.type === "credit" ? "+" : "-"}
-                  {formatCurrency(transaction.amount)}
+                  {transaction?.type === "credit" ? "+" : "-"}
+                  {formatCurrency(transaction?.amount)}
                 </p>
                 <div className="mt-1">{getStatusBadge()}</div>
               </div>
@@ -168,22 +168,22 @@ const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground mb-1">Description</p>
-                    <p>{transaction.description}</p>
+                    <p>{transaction?.description}</p>
                   </div>
 
                   <div>
                     <p className="text-muted-foreground mb-1">Reference ID</p>
                     <div className="flex items-center gap-2">
-                    <p className="font-mono">{transaction.reference}</p>
+                    <p className="font-mono">{transaction?.reference}</p>
                     <button onClick={copyWalletId} className="text-gray-400 hover:text-primary transition-colors">
                     {copied ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                   </button>
                   </div>
                   </div>
 
-                 { transaction.purpose === 'course_purchase' && <div>
+                 { transaction?.purpose === 'course_purchase' && <div>
                     <p className="text-muted-foreground mb-1">Platform Fee</p>
-                    <p className="font-mono">{transaction.platformFee}</p>
+                    <p className="font-mono">{transaction?.platformFee}</p>
                   </div>}
 
                 </div>
