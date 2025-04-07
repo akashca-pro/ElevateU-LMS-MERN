@@ -7,7 +7,6 @@ import { CreditCard, Clock, ArrowUpRight, Copy, CheckCircle2, RefreshCw } from "
 import { useState } from "react"
 import { toast } from "sonner"
 
-
 const WalletSummary = ({ walletData, onWithdraw }) => {
 
   const [copied, setCopied] = useState(false)
@@ -89,7 +88,7 @@ const WalletSummary = ({ walletData, onWithdraw }) => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Status</p>
-                <p className="font-medium capitalize">{walletData.status}</p>
+                <p className="font-medium capitalize">{walletData.status ? 'Active' : 'Not-Active'}</p>
               </div>
             </div>
 

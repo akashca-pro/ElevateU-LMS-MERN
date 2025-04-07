@@ -66,7 +66,12 @@ export const STRING_CONSTANTS = {
     PROGRESS_TRACKER_UPDATED_SUCCESS : 'Progress tracker updation success',
     PROGRESS_TRACKER_UPDATED_ERROR : 'Progress tracker is updation failed',
     PROGRESS_TRACKER_ALREADY_UPDATED : 'Progress tracker is already updated',
-    COURSE_IS_UPDATED : 'Course is updated'
+    COURSE_IS_UPDATED : 'Course is updated',
+    LOADING_WALLET_SUCCESS : 'Loading wallet details success',
+    LOADING_WALLET_ERROR : 'Loading wallet details failed',
+    ADDING_BANK_DETAILS_SUCCESS : 'Adding bank details success',
+    ADDING_BANK_DETAILS_ERROR : 'Adding bank details Failed',
+
 }
 
 export const DATABASE_FIELDS = {

@@ -18,6 +18,7 @@ courseTitleExist,
 } from '../controllers/course/tutorOps.js'
 import passport from 'passport';
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js';
+import { loadWalletDetails } from '../controllers/wallet/common.js';
 
 
 const router = express.Router()
@@ -74,6 +75,10 @@ router.get('/check-title/:title',verifyAccessToken('tutor'),courseTitleExist)
 
 router.get('/load-notifications',verifyAccessToken('tutor'),loadNotifications('tutor'))
 router.post('/read-notifications',verifyAccessToken('tutor'),readNotifications)
+
+// wallet 
+
+router.get('/wallet',verifyAccessToken('tutor'),loadWalletDetails('Tutor'))
 
 
 export default router

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { ArrowUpRight, DollarSign, CreditCard, AlertCircle, CheckCircle, Loader2 } from "lucide-react"
+import { ArrowUpRight, DollarSign, CreditCard, AlertCircle, CheckCircle, Loader2, IndianRupee } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 const WithdrawFunds = ({ isOpen, onClose, onWithdraw, maxAmount, paymentMethods }) => {
@@ -97,9 +97,9 @@ const WithdrawFunds = ({ isOpen, onClose, onWithdraw, maxAmount, paymentMethods 
 
   const formatCurrency = (value) => {
     if (!value) return ""
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: "USD",
+      currency: "INR",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(value)
@@ -141,7 +141,7 @@ const WithdrawFunds = ({ isOpen, onClose, onWithdraw, maxAmount, paymentMethods 
               <div className="space-y-2">
                 <Label htmlFor="amount">Withdrawal Amount</Label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <IndianRupee className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                   <Input
                     id="amount"
                     type="number"

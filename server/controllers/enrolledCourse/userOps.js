@@ -8,7 +8,6 @@ import User from "../../model/user.js";
 import { saveNotification, sendNotification } from "../../utils/LiveNotification.js";
 import ProgressTracker from "../../model/progressTracker.js";
 import { calculateLevelSize } from "./userLearningOps.js";
-import mongoose from "mongoose";
 import Wallet from "../../model/wallet.js";
 import Transaction from "../../model/transaction.js";
 import 'dotenv/config'
@@ -25,14 +24,30 @@ const handleTransactionAndWalletUpdate = async ({
     try {
 
         const finalPrice = orderDetails.price.finalPrice;
-        const transactionId = orderDetails.paymentDetails.transactionId;
     
         const tutorPayout = finalPrice * 0.8;
         const adminPayout = finalPrice * 0.2;
+
+        // Transaction
+        const transaction = await Transaction.create({
+            type : 'course_purchase',
+            source : {
+                userId,
+                courseId : course._id,
+                tutorId,
+                adminId
+            },
+            amount : {
+                courseAmount : finalPrice,
+                tutorPayout,
+                adminPayout
+            },
+            orderId : orderDetails._id,
+          })
     
-        // create transaction
+        // create user transaction history
         const userTransaction = {
-            _id : transactionId,
+            _id : transaction._id,
             type: 'debit',
             amount: finalPrice,
             purpose: 'course_purchase',
@@ -49,10 +64,12 @@ const handleTransactionAndWalletUpdate = async ({
             }
         );
 
+        // create tutor transaction history
         const tutorTransaction = {
-            _id : transactionId,
+            _id : transaction._id,
             type: 'credit',
             amount: tutorPayout,
+            platformFee : adminPayout,
             purpose: 'course_purchase',
             status: 'completed',
             courseId: course._id,
@@ -68,8 +85,9 @@ const handleTransactionAndWalletUpdate = async ({
             }
         )
 
+        // create admin transaction history
         const adminTransaction = {
-            _id : transactionId,
+            _id : transaction._id,
             type: 'credit',
             amount: adminPayout,
             purpose: 'commission',
@@ -87,22 +105,7 @@ const handleTransactionAndWalletUpdate = async ({
             }
           );
 
-          await Transaction.create({
-            type : 'course_purchase',
-            source : {
-                userId,
-                courseId : course._id,
-                tutorId,
-                adminId
-            },
-            amount : {
-                courseAmount : finalPrice,
-                tutorPayout,
-                adminPayout
-            },
-            orderId : orderDetails._id,
-          })
-          
+
     } catch (error) {
         throw error;
     }

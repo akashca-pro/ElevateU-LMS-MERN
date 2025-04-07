@@ -11,14 +11,30 @@ import {
   CheckCircle,
   AlertCircle,
   ExternalLink,
+  CheckCircle2,
+  Copy,
 } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
 
 const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
+
+    const [copied, setCopied] = useState(false)
+
+    const copyWalletId = (e) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(transaction.reference)
+        setCopied(true)
+        toast.info("Reference ID copied")
+        setTimeout(() => setCopied(false), 2000)
+    }
+
+
   // Format currency
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: "USD",
+      currency: "INR",
     }).format(Math.abs(amount))
   }
 
@@ -82,12 +98,11 @@ const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
   // Get purpose label
   const getPurposeLabel = () => {
     const purposeMap = {
-      course_sale: "Course Sale",
+      course_purchase: "Course Sale",
       affiliate_commission: "Affiliate Commission",
       refund_reversal: "Refund Reversal",
       withdrawal: "Withdrawal",
       refund: "Refund",
-      platform_fee: "Platform Fee",
     }
 
     return purposeMap[transaction.purpose] || transaction.purpose
@@ -150,7 +165,7 @@ const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
                 transition={{ duration: 0.2 }}
                 className="mt-4 pt-4 border-t"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground mb-1">Description</p>
                     <p>{transaction.description}</p>
@@ -158,8 +173,19 @@ const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
 
                   <div>
                     <p className="text-muted-foreground mb-1">Reference ID</p>
+                    <div className="flex items-center gap-2">
                     <p className="font-mono">{transaction.reference}</p>
+                    <button onClick={copyWalletId} className="text-gray-400 hover:text-primary transition-colors">
+                    {copied ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                  </button>
                   </div>
+                  </div>
+
+                 { transaction.purpose === 'course_purchase' && <div>
+                    <p className="text-muted-foreground mb-1">Platform Fee</p>
+                    <p className="font-mono">{transaction.platformFee}</p>
+                  </div>}
+
                 </div>
 
                 <div className="mt-4 flex justify-end">

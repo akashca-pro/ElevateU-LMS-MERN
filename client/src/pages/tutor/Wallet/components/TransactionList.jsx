@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowUpRight } from "lucide-react"
 import TransactionItem from "./TransactionItem"
 
-const TransactionList = ({ transactions }) => {
+const TransactionList = ({ transactions, loadMore }) => {
   const [expandedTransaction, setExpandedTransaction] = useState(null)
   const [page, setPage] = useState(1)
   const transactionsPerPage = 5
@@ -30,6 +30,7 @@ const TransactionList = ({ transactions }) => {
       setExpandedTransaction(null) // Close any expanded transaction
     }
   }
+ 
 
   // Toggle transaction details
   const toggleTransaction = (id) => {
@@ -87,9 +88,13 @@ const TransactionList = ({ transactions }) => {
                 <Button variant="outline" size="sm" onClick={prevPage} disabled={page === 1}>
                   Previous
                 </Button>
-                <Button variant="outline" size="sm" onClick={nextPage} disabled={page === totalPages}>
+               {page === totalPages 
+               ? <Button variant="outline" size="sm" onClick={()=>loadMore((prev)=>prev+=10)} >
+                    Load more
+               </Button>
+               : <Button variant="outline" size="sm" onClick={nextPage} disabled={page === totalPages}>
                   Next
-                </Button>
+                </Button>}
               </div>
             </div>
           )}

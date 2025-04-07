@@ -10,78 +10,58 @@ import WithdrawFunds from "./components/WithdrawFunds"
 import TransactionList from "./components/TransactionList"
 import EarningsSummary from "./components/EarningsSummary"
 
+import { useLoadWalletQuery } from '@/services/TutorApi/tutorWalletApi.js'
+
 const WalletPage = () => {
-  const [loading, setLoading] = useState(true)
   const [walletData, setWalletData] = useState(null)
   const [transactions, setTransactions] = useState([])
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false)
+  const [transactionCount,setTransactionCount] = useState(20)
   const [activeTab, setActiveTab] = useState("all")
 
-  // Fetch wallet data
-  useEffect(() => {
-    const fetchWalletData = async () => {
-      try {
-        // Simulate API call
-        setTimeout(() => {
-          // Mock wallet data
-          const mockWalletData = {
-            balance: 1250.75,
-            walletId: "W-" + Math.random().toString(36).substring(2, 10).toUpperCase(),
-            totalEarnings: 3450.25,
-            totalWithdrawals: 2199.5,
-            lastUpdated: new Date().toISOString(),
-            currency: "USD",
-            status: "active",
-            paymentMethods: [
-              { id: "pm1", type: "paypal", email: "user@example.com", isDefault: true },
-              { id: "pm2", type: "bank", accountNumber: "****6789", isDefault: false },
-            ],
-          }
+  const { data, isLoading } = useLoadWalletQuery(transactionCount)
 
-          // Mock transactions
-          const mockTransactions = Array.from({ length: 20 }, (_, i) => {
-            const isCredit = Math.random() > 0.3
-            const types = isCredit
-              ? ["course_sale", "affiliate_commission", "refund_reversal"]
-              : ["withdrawal", "refund", "platform_fee"]
+  useEffect(()=>{
 
-            const amount = isCredit ? (Math.random() * 500 + 50).toFixed(2) : (Math.random() * 300 + 20).toFixed(2)
-
-            const date = new Date()
-            date.setDate(date.getDate() - Math.floor(Math.random() * 30))
-
-            const statuses = ["completed", "pending", "processing"]
-            const status = statuses[Math.floor(Math.random() * statuses.length)]
-
-            return {
-              id: `trx-${i + 1}`,
-              date: date.toISOString(),
-              amount: Number.parseFloat(amount),
-              type: isCredit ? "credit" : "debit",
-              purpose: types[Math.floor(Math.random() * types.length)],
-              status: status,
-              description: isCredit
-                ? `Payment received for ${["Web Development", "UX Design", "Data Science", "Mobile App Development"][Math.floor(Math.random() * 4)]} course`
-                : `Withdrawal to ${Math.random() > 0.5 ? "PayPal" : "Bank Account"}`,
-              reference: `REF-${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
-            }
-          })
-
-          // Sort transactions by date (newest first)
-          mockTransactions.sort((a, b) => new Date(b.date) - new Date(a.date))
-
-          setWalletData(mockWalletData)
-          setTransactions(mockTransactions)
-          setLoading(false)
-        }, 1500)
-      } catch (error) {
-        console.error("Error fetching wallet data:", error)
-        setLoading(false)
-      }
+    const defaultWalletData = {
+      balance: 0,
+      walletId: '',
+      totalEarnings: 0,
+      totalWithdrawals: 0,
+      lastUpdated: new Date().toISOString(),
+      currency: "INR",
+      status: false,
+      paymentMethods: [
+        { id: "pm1", type: "paypal", email: "user@example.com", isDefault: true },
+        { id: "pm2", type: "bank", accountNumber: "****6789", isDefault: false },
+      ],
     }
 
-    fetchWalletData()
-  }, [])
+    const defaultTransactionData = [{
+      id: ``,
+      date: new Date().toISOString(),
+      amount: 0,
+      type: '',
+      purpose: '',
+      status: 'pending',
+      description: '',
+      reference: '',
+    }]
+
+    if(data?.data?.walletDetails){
+      setWalletData(data?.data?.walletDetails)
+    }else{
+      setWalletData(defaultWalletData)
+    }
+
+    if(data?.data?.transactions && data?.data?.transactions.length > 0 ){
+      setTransactions(data?.data?.transactions)
+    }else{
+      setTransactions(defaultTransactionData)
+    }
+
+  },[data])
+
 
   // Filter transactions based on active tab
   const getFilteredTransactions = () => {
@@ -141,7 +121,7 @@ const WalletPage = () => {
     },
   }
 
-  if (loading) {
+  if (isLoading) {
     return <WalletPageSkeleton />
   }
 
@@ -186,7 +166,7 @@ const WalletPage = () => {
             </Tabs>
           </div>
 
-          <TransactionList transactions={getFilteredTransactions()} />
+          <TransactionList transactions={getFilteredTransactions()} loadMore={setTransactionCount} />
         </motion.div>
       </motion.div>
 

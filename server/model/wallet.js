@@ -17,6 +17,9 @@ const transactionSchema = new mongoose.Schema(
           return this.type != null;
         },
       },
+      platformFee : { 
+        type : Number,
+       },
       purpose: {
         type: String,
         enum: ['course_purchase', 'withdrawal', 'commission'],

@@ -65,6 +65,12 @@ const tutorSchema = mongoose.Schema({
         type: Number,
         default: 0,
     },
+    bankDetails : {
+        acntNo : { type : String},
+        ifsc : { type : String },
+        bankName : { type : String},
+        holderName : { type : String}
+    },
     isVerified : {
         type : Boolean,
         default : false
