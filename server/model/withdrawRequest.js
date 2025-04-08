@@ -7,15 +7,32 @@ const withdrawalRequestSchema = new mongoose.Schema({
     userId : { type : String, refPath : 'userRole', required : true },
     userModel : { type : String, enum : ['User','Tutor'], required : true },
     amount : { type : Number, required : true },
+    paymentMethod : { type : String, required : true, enum : ['gpay','bank'] },
+    email : { type : String, required : true },
     bankDetails : {
-        acntNo : { type : String, required : true },
-        ifsc : { type : String, required : true },
-        bankName : { type : String, required : true },
-        holderName : { type : String, required : true }
+        accountNumber : { type : String },
+        ifsc : { type : String },
+        bankName : { type : String },
+        holderName : { type : String}
     },
     status : { type : String, enum : ['pending','processing','completed','rejected'], default : 'pending' },
     adminNote : { type : String }
 },{timestamps : true})
+
+withdrawalRequestSchema.pre("validate", function (next) {
+    if (this.paymentMethod === "bank") {
+      if (
+        !this.bankDetails ||
+        !this.bankDetails.accountNumber ||
+        !this.bankDetails.ifsc ||
+        !this.bankDetails.bankName ||
+        !this.bankDetails.holderName
+      ) {
+        return next(new Error("All bank details are required when payment method is bank."))
+      }
+    }
+    next()
+})
 
 const WithdrawalRequest = mongoose.model('WithdrawalRequest',withdrawalRequestSchema)
 

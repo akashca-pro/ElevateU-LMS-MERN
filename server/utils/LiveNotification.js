@@ -20,8 +20,6 @@ export const saveNotification = async (recipientId, recipientType, type, message
 
 }
 
-
-
 export const sendNotification = (req,newNotification) =>{
 
     if(connectedUsers[newNotification.recipientId]){

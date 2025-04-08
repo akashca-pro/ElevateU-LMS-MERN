@@ -108,6 +108,7 @@ let readNotificationQuery;
       publish_course: "bg-blue-500",
       suspend_course:"bg-yellow-500",
       suspension_removed : "bg-green-500",
+      withdraw_request : "bg-yellow-500",
       default: "bg-gray-500",
     };
     return colors[type] || colors.default;
@@ -123,6 +124,7 @@ let readNotificationQuery;
       publish_course: { label: "Course approved", variant: "blue" },
       suspend_course : { label : "Course suspended", variant : "yellow" },
       suspension_removed : { label : "Suspention removed", variant : "green" },
+      withdraw_request : { label : "withdraw_request", variant : "yellow" },
       default: { label: "Notification", variant: "default" },
     };
 

@@ -10,22 +10,19 @@ import WithdrawFunds from "@/components/wallet/WithdrawFunds"
 import TransactionList from "@/components/wallet/TransactionList"
 import EarningsSummary from "@/components/wallet/EarningsSummary"
 
-import { useLoadWalletQuery, useWithdrawRequestMutation, useLoadWithdrawRequestQuery } 
-from '@/services/TutorApi/tutorWalletApi.js'
-import { toast } from "sonner"
+import { useLoadWalletDetailsQuery, useWithdrawAmountMutation } 
+from '@/services/adminApi/adminWalletApi.js'
 
 const WalletPage = () => {
   const withdrawRef = useRef()
   const [walletData, setWalletData] = useState(null)
   const [transactions, setTransactions] = useState([])
-  const [withdrawRequest, setWithdrawRequest] = useState('')
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false)
   const [transactionCount,setTransactionCount] = useState(20)
   const [activeTab, setActiveTab] = useState("all")
 
-  const { data, isLoading } = useLoadWalletQuery(transactionCount)
-  const { data : fetchWithdrawRequest, refetch } = useLoadWithdrawRequestQuery()
-  const [requestWithdraw] = useWithdrawRequestMutation()
+  const { data, isLoading, refetch} = useLoadWalletDetailsQuery(transactionCount)
+  const [withdrawAmount] = useWithdrawAmountMutation()
 
   useEffect(()=>{
 
@@ -66,11 +63,7 @@ const WalletPage = () => {
       setTransactions(defaultTransactionData)
     }
 
-    if(fetchWithdrawRequest){
-      setWithdrawRequest(fetchWithdrawRequest?.data)
-    }
-
-  },[data, fetchWithdrawRequest])
+  },[data])
 
   // Filter transactions based on active tab
   const getFilteredTransactions = () => {
@@ -83,9 +76,8 @@ const WalletPage = () => {
 
   // Handle withdrawal request
   const handleWithdrawal = async(data) => {
-    console.log("Withdrawal requested:", data)
     try {
-      await requestWithdraw({formData : data}).unwrap()
+      await withdrawAmount({formData : data}).unwrap()
       withdrawRef.current?.triggerSuccess();
       refetch();
     } catch (error) {
@@ -96,16 +88,6 @@ const WalletPage = () => {
         setIsWithdrawModalOpen(false) 
       }, 2000)
     }
-  }
-
-  const handleShowWithdrawRequest = () => {
-     if(withdrawRequest){
-      toast.info('Request Pending',{
-        description : withdrawRequest
-      })
-     }else{
-      setIsWithdrawModalOpen(true)
-     }
   }
 
   // Animation variants
@@ -142,7 +124,7 @@ const WalletPage = () => {
 
         {/* Wallet Summary */}
         <motion.div variants={itemVariants}>
-          <WalletSummary walletData={walletData} onWithdraw={handleShowWithdrawRequest} />
+          <WalletSummary walletData={walletData} onWithdraw={()=>setIsWithdrawModalOpen(true)} />
         </motion.div>
 
         {/* Earnings Summary Cards */}

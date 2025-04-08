@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react"
+import {  useEffect } from "react"
 import { motion } from "framer-motion"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2 } from "lucide-react"
 import bankSchema from "@/Validations/bankSchema"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,15 +9,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { toast } from "sonner"
 import { useAddBankAccountMutation,useLoadBankDetailsQuery } from '@/services/TutorApi/tutorWalletApi.js'
 
-// Mock data to simulate fetching existing bank details
-const mockBankDetails = {
-  accountNumber: "XXXX1234",
-  ifsc: "SBIN0123456",
-  bankName: "State Bank of India",
-  holderName: "John Doe",
-}
 
-export default function BankDetailsForm() {
+export default function BankDetailsForm({ isEdit, setIsEdit }) {
   const { data, refetch } = useLoadBankDetailsQuery();
   const [addBankDetails,{isLoading}] = useAddBankAccountMutation() 
 
@@ -53,6 +45,7 @@ export default function BankDetailsForm() {
       try {
         await addBankDetails({ formData : values }).unwrap();
         refetch()
+        setIsEdit(true);
         toast.success('Data updated Successfully',{id : toastId , 
           description : 'Bank Details updated ' });
       } catch (error) {
@@ -61,6 +54,10 @@ export default function BankDetailsForm() {
           description : 'Update Bank details failed'
         })
       }
+  }
+
+  const handleCancel = () => {
+    setIsEdit(true)
   }
 
   return (
@@ -76,6 +73,7 @@ export default function BankDetailsForm() {
                   <FormLabel>Account Number</FormLabel>
                   <FormControl>
                   <Input
+                    disabled={isEdit}
                     type="text"
                     inputMode="numeric"
                     placeholder="Enter account number"
@@ -98,7 +96,7 @@ export default function BankDetailsForm() {
                 <FormItem>
                   <FormLabel>IFSC Code</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter IFSC code" {...field} />
+                    <Input disabled={isEdit} placeholder="Enter IFSC code" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -114,7 +112,7 @@ export default function BankDetailsForm() {
                 <FormItem>
                   <FormLabel>Bank Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter bank name" {...field} />
+                    <Input disabled={isEdit} placeholder="Enter bank name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -128,7 +126,7 @@ export default function BankDetailsForm() {
                 <FormItem>
                   <FormLabel>Account Holder Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter account holder name" {...field} />
+                    <Input disabled={isEdit} placeholder="Enter account holder name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -140,9 +138,14 @@ export default function BankDetailsForm() {
             <p>Note: Your bank details are securely stored and used only for payment processing.</p>
           </div>
 
-          <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+          <div className="flex gap-2">
+          <Button type="submit" disabled={isLoading || isEdit} className="w-full sm:w-auto">
             Save Bank Details
           </Button>
+          { !isEdit && <Button disabled={isLoading} onClick={handleCancel} className="w-full sm:w-auto" >
+            Cancel
+          </Button>}
+          </div>
         </form>
       </Form>
     </motion.div>

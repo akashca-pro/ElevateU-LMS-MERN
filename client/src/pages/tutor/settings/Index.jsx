@@ -3,12 +3,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { User, Wallet, SettingsIcon, Edit } from "lucide-react"
 
-import UpdateEmailForm from "./components/UpdateEmailForm"
-import UpdatePasswordForm from "./components/UpdatePasswordForm"
-import DeleteAccount from "./components/DeleteAccount"
-import BankDetailsForm from "./components/BankDetailsForm"
-import ThemeToggle from "./components/ThemeToggle"
+import UpdateEmailForm from '@/components/settings/UpdateEmailForm'
+import UpdatePasswordForm from "@/components/settings/UpdatePasswordForm"
+import DeleteAccount from "@/components/settings/DeleteAccount"
+import BankDetailsForm from "@/components/settings/BankDetailsForm"
+import ThemeToggle from "@/components/settings/ThemeToggle"
+
 import { Button } from "@/components/ui/button"
+import { useState } from "react"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -34,6 +36,7 @@ const itemVariants = {
 }
 
 export default function Index() {
+  const [enableEdit,setEnableEdit] = useState(true);
   return (
     <div className="container max-w-4xl py-10 mx-auto">
       <motion.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-6">
@@ -98,13 +101,13 @@ export default function Index() {
                   <CardTitle>Bank Details</CardTitle>
                   <CardDescription>Update your bank account information for payments and withdrawals.</CardDescription>
                 </div>
-                <Button size="icon">
+                <Button size="icon" onClick={()=>setEnableEdit(false)} disabled={!enableEdit} variant={'outline'}  >
                   <Edit className="h-4 w-4" />
                 </Button>
               </CardHeader>
               
               <CardContent>
-                <BankDetailsForm />
+                <BankDetailsForm isEdit = {enableEdit} setIsEdit={setEnableEdit} />
               </CardContent>
             </Card>
           </TabsContent>

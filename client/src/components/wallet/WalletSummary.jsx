@@ -49,9 +49,8 @@ const WalletSummary = ({ walletData, onWithdraw }) => {
             </div>
 
             <Button
-              onClick={onWithdraw}
-              variant="secondary"
-              className="gap-2 font-medium"
+              onClick={onWithdraw}  
+              className="gap-2 font-medium bg-secondary hover:bg-secondary-500"
               disabled={walletData?.balance <= 0}
             >
               <ArrowUpRight className="h-4 w-4" />

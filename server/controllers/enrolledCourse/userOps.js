@@ -47,7 +47,7 @@ const handleTransactionAndWalletUpdate = async ({
     
         // create user transaction history
         const userTransaction = {
-            _id : transaction._id,
+            transactionId : transaction._id,
             type: 'debit',
             amount: finalPrice,
             purpose: 'course_purchase',
@@ -66,7 +66,7 @@ const handleTransactionAndWalletUpdate = async ({
 
         // create tutor transaction history
         const tutorTransaction = {
-            _id : transaction._id,
+            transactionId : transaction._id,
             type: 'credit',
             amount: tutorPayout,
             platformFee : adminPayout,
@@ -87,7 +87,7 @@ const handleTransactionAndWalletUpdate = async ({
 
         // create admin transaction history
         const adminTransaction = {
-            _id : transaction._id,
+            transactionId : transaction._id,
             type: 'credit',
             amount: adminPayout,
             purpose: 'commission',

@@ -12,7 +12,6 @@ const TransactionList = ({ transactions, loadMore }) => {
 
   // Get transactions for current page
   const paginatedTransactions = transactions?.slice((page - 1) * transactionsPerPage, page * transactionsPerPage)
-
   // Calculate total pages
   const totalPages = Math.ceil(transactions?.length / transactionsPerPage)
 

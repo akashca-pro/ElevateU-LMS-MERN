@@ -72,7 +72,16 @@ export const STRING_CONSTANTS = {
     ADDING_BANK_DETAILS_SUCCESS : 'Adding bank details success',
     ADDING_BANK_DETAILS_ERROR : 'Adding bank details Failed',
     LOADING_BANK_DETAILS_SUCCESS : 'Loadin Bank details Success',
-    LOADING_BANK_DETAILS_ERROR : 'Loading Bank details Error'
+    LOADING_BANK_DETAILS_ERROR : 'Loading Bank details Error',
+    REQUEST_WITHDRAWAL_SUCCESS : 'Request withdrawal success',
+    REQUEST_WITHDRAWAL_ERROR : 'Request withdrawal failed',
+    INSUFFICIENT_FUNDS : 'Insufficient funds',
+    LOAD_WITHDRAWAL_REQUEST_SUCCESS : 'Loading withdrawal request success',
+    LOAD_WITHDRAWAL_REQUEST_FAILED : 'Loading withdrawal request failed',
+    WITHDRAW_SUCCESS : 'Withdraw amount successfull',
+    WITHDRAW_REQUEST_REJECTED : 'withdraw request rejected successfully', 
+    WITHDRAW_REQUEST_APPROVED : 'withdraw request approved successfully', 
+    INVALID_ACTION_TYPE : 'Invalid action type',
 }
 
 export const DATABASE_FIELDS = {

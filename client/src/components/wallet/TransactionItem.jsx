@@ -20,6 +20,7 @@ import { toast } from "sonner"
 const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
 
     const [copied, setCopied] = useState(false)
+    console.log(transaction)
 
     const copyWalletId = (e) => {
         e.stopPropagation();
@@ -103,6 +104,7 @@ const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
       refund_reversal: "Refund Reversal",
       withdrawal: "Withdrawal",
       refund: "Refund",
+      withdrawRequest: "Withdraw Request"
     }
 
     return purposeMap[transaction?.purpose] || transaction?.purpose

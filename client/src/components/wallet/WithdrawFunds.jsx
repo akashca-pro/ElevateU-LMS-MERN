@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, forwardRef, useImperativeHandle } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Dialog,
@@ -12,16 +12,17 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { ArrowUpRight, DollarSign, CreditCard, AlertCircle, CheckCircle, Loader2, IndianRupee } from "lucide-react"
+import { ArrowUpRight, DollarSign, CreditCard, AlertCircle, CheckCircle, Loader2, IndianRupee, XCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
-const WithdrawFunds = ({ isOpen, onClose, onWithdraw, maxAmount, paymentMethods }) => {
+const WithdrawFunds = forwardRef(({ isOpen, onClose, onWithdraw, maxAmount, paymentMethods }, ref) => {
   const [amount, setAmount] = useState("")
   const [selectedMethod, setSelectedMethod] = useState("")
   const [errors, setErrors] = useState({})
   const [step, setStep] = useState(1)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [isFailure, setIsFailure] = useState(false)
 
   // Reset form when modal opens
   useEffect(() => {
@@ -31,6 +32,7 @@ const WithdrawFunds = ({ isOpen, onClose, onWithdraw, maxAmount, paymentMethods 
       setStep(1)
       setIsProcessing(false)
       setIsSuccess(false)
+      setIsFailure(false)
 
       // Set default payment method
       if (paymentMethods && paymentMethods.length > 0) {
@@ -69,31 +71,32 @@ const WithdrawFunds = ({ isOpen, onClose, onWithdraw, maxAmount, paymentMethods 
     }
   }
 
+
+  const handleSuccess = () => {
+        setIsProcessing(false)
+        setIsSuccess(true)
+  }
+
+  const handleFailure = () =>{
+        setIsProcessing(false)
+        setIsSuccess(false)
+        setIsFailure(true)
+  }
+
   const handleConfirm = () => {
     setIsProcessing(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsProcessing(false)
-      setIsSuccess(true)
-
-      // After showing success message, submit the data
-      setTimeout(() => {
-        const selectedPaymentMethod = paymentMethods.find((m) => m.id === selectedMethod)
-        const methodName =
-          selectedPaymentMethod.type === "paypal"
-            ? `PayPal (${selectedPaymentMethod.email})`
-            : `Bank Account (${selectedPaymentMethod.accountNumber})`
-
-        onWithdraw({
-          amount: Number.parseFloat(amount),
-          method: methodName,
-          methodId: selectedMethod,
-          timestamp: new Date().toISOString(),
-        })
-      }, 1500)
-    }, 2000)
+    const selectedPaymentMethod = paymentMethods.find((m) => m.id === selectedMethod)
+    onWithdraw({
+      amount: Number.parseFloat(amount),
+      method: selectedPaymentMethod.type,
+      timestamp: new Date().toISOString(),
+    })
   }
+
+  useImperativeHandle(ref,()=>({
+    triggerSuccess: handleSuccess,
+    triggerFailure : handleFailure 
+  }))
 
   const formatCurrency = (value) => {
     if (!value) return ""
@@ -198,7 +201,7 @@ const WithdrawFunds = ({ isOpen, onClose, onWithdraw, maxAmount, paymentMethods 
             </motion.form>
           )}
 
-          {step === 2 && !isProcessing && !isSuccess && (
+          {step === 2 && !isProcessing && !isSuccess && !isFailure &&(
             <motion.div
               key="step2"
               initial={{ opacity: 0, x: 20 }}
@@ -274,11 +277,28 @@ const WithdrawFunds = ({ isOpen, onClose, onWithdraw, maxAmount, paymentMethods 
               </p>
             </motion.div>
           )}
+          {isFailure && (
+        <motion.div
+            key="failure"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="py-8 flex flex-col items-center justify-center"
+        >
+            <div className="bg-red-100 dark:bg-red-900/20 p-4 rounded-full mb-4">
+            <XCircle className="h-12 w-12 text-red-600 dark:text-red-400" />
+            </div>
+            <h3 className="text-lg font-medium text-red-700 dark:text-red-400">Withdrawal Failed</h3>
+            <p className="text-muted-foreground text-center mt-2 max-w-xs">
+            There was a problem processing your withdrawal request. Please try again.
+            </p>
+        </motion.div>
+        )}
         </AnimatePresence>
       </DialogContent>
     </Dialog>
   )
-}
+})
 
 export default WithdrawFunds
 

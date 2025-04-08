@@ -3,7 +3,8 @@ import { Outlet, Route,Routes } from 'react-router-dom'
 
 import {LayoutDashboard, SquareUser, Settings, ListCollapse, ClockArrowUp, 
 GraduationCap, Contact, BellRing,
-Sticker,BookOpen} from 'lucide-react'
+Sticker,BookOpen,
+IndianRupee} from 'lucide-react'
 
 import {useAdminSignupMutation, useAdminLoginMutation} from '@/services/adminApi/adminAuthApi'
 import {useAdminAuthActions} from '@/hooks/useDispatch'
@@ -38,6 +39,7 @@ import CategoryList from './Category/List'
 import CouponList from './Coupon/Index'
 
 import CourseList from './Courses/Index'
+import WalletPage from './Wallet/WalletPage'
 
 const AdminIndex = () => {
   return (
@@ -49,15 +51,16 @@ const AdminIndex = () => {
 
 const menuItems = [
   { id: 1, title: "Dashboard", icon: LayoutDashboard, path: "/admin/profile/dashboard" },
-  { id: 2, title: "Profile", icon: SquareUser, path: "/admin/profile" },
-  { id: 3, title: "Category Management", icon: ListCollapse, path: "/admin/profile/category" },
-  { id: 4, title: "Course Management", icon: BookOpen, path: "/admin/profile/courses" },
-  { id: 5, title: "Coupon Management", icon: Sticker, path: "/admin/profile/coupon" },
-  { id: 6, title: "Order List", icon: ClockArrowUp, path: "/admin/profile/orders" },
-  { id: 7, title: "Notifications", icon: BellRing, path: "/admin/profile/notification" },
-  { id: 8, title: "Students", icon: GraduationCap, path: "/admin/profile/students" },
-  { id: 9, title: "Tutors", icon: Contact, path: "/admin/profile/tutors" },
-  { id: 10, title: "Settings", icon: Settings, path: "/admin/profile/settings" },
+  { id: 2, title: "Revenue", icon: IndianRupee, path: "/admin/profile/revenue" },
+  { id: 3, title: "Profile", icon: SquareUser, path: "/admin/profile" },
+  { id: 4, title: "Category Management", icon: ListCollapse, path: "/admin/profile/category" },
+  { id: 5, title: "Course Management", icon: BookOpen, path: "/admin/profile/courses" },
+  { id: 6, title: "Coupon Management", icon: Sticker, path: "/admin/profile/coupon" },
+  { id: 7, title: "Order List", icon: ClockArrowUp, path: "/admin/profile/orders" },
+  { id: 8, title: "Notifications", icon: BellRing, path: "/admin/profile/notification" },
+  { id: 9, title: "Students", icon: GraduationCap, path: "/admin/profile/students" },
+  { id: 10, title: "Tutors", icon: Contact, path: "/admin/profile/tutors" },
+  { id: 11, title: "Settings", icon: Settings, path: "/admin/profile/settings" },
 ]
 
 const ProtectedLayout = () =>{
@@ -92,6 +95,7 @@ const AdminRoutes = ()=>{
         <Route path='profile' element={<ProtectedLayout/>}>
           <Route index element={<Profile/>}/>
           <Route path='dashboard' element={<Dashboard/>}/>
+          <Route path='revenue' element={<WalletPage/>}/>
           <Route path='category' element={<CategoryList/>}/>
           <Route path='courses' element={<CourseList/>}/>
           <Route path='coupon' element={<CouponList/>}/>

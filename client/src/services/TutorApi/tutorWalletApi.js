@@ -29,6 +29,20 @@ const tutorWalletApi = apiSlice.injectEndpoints({
                 method : 'GET',
             }),
             providesTags : ['Tutor']
+        }),
+        withdrawRequest : builder.mutation({
+            query : (credentials)=>({
+                url : `tutor/withdrawal-request`,
+                method : 'POST',
+                body : credentials
+            }),
+            invalidatesTags : ['Tutor']
+        }),
+        loadWithdrawRequest : builder.query({
+            query : () =>({
+                url : `tutor/withdrawal-request`,
+                method : 'GET'
+            })
         })
     })
 })
@@ -37,6 +51,8 @@ export const {
 
     useLoadWalletQuery,
     useAddBankAccountMutation,
-    useLoadBankDetailsQuery
+    useLoadBankDetailsQuery,
+    useWithdrawRequestMutation,
+    useLoadWithdrawRequestQuery
 
 } = tutorWalletApi
