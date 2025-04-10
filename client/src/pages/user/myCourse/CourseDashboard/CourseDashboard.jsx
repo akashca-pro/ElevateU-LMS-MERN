@@ -23,7 +23,7 @@ const CourseDashboard = () => {
     <div>
 
       <Tabs defaultValue={defaultTab} className="" >
-        <TabsList>
+        <TabsList className='grid  grid-cols-2'>
           <TabsTrigger value='enrolled' >Enrolled</TabsTrigger>
           <TabsTrigger value='bookmark' >Bookmark</TabsTrigger>
         </TabsList>

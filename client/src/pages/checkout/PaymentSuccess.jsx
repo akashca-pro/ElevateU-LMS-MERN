@@ -1,7 +1,6 @@
 
 import { Button } from "@/components/ui/button"
-import { formatUrl } from "@/utils/formatUrls"
-import { CheckCircle2, ArrowRight, BookOpen, LibraryBig } from "lucide-react"
+import { CheckCircle2, BookOpen, LibraryBig } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
 
 const PaymentSuccess = () => {

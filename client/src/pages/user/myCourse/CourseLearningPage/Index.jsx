@@ -17,7 +17,6 @@ import ProgressTracker from "./components/ProgressTracker"
 import TutorView from "./components/TutorView"
 import AttachmentsPage from "./components/AttachmentsPage"
 import AchievementNotification from "./components/AchievementNotification"
-import NotEnrolledCard from "@/components/FallbackUI/NotEnrolledCard"
 import { toast } from "sonner";
 import CourseCompletionDialog from "./components/CourseCompletionDialog";
 
@@ -200,7 +199,7 @@ const CourseLearningPage = () => {
       {/* Course Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">
-          <Button variant="ghost" size="sm" className="gap-1" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="sm" className="gap-1" onClick={() => navigate('/user/profile/my-courses?tab=enrolled')}>
             <ChevronLeft className="h-4 w-4" />
             <span>Back to Course</span>
           </Button>
