@@ -10,8 +10,8 @@ import WithdrawFunds from "@/components/wallet/WithdrawFunds"
 import TransactionList from "@/components/wallet/TransactionList"
 import EarningsSummary from "@/components/wallet/EarningsSummary"
 
-import { useAdminLoadWalletDetailsQuery, useWithdrawAmountMutation } 
-from '@/services/adminApi/adminWalletApi.js'
+import { useUserLoadWalletDetailsQuery } from '@/services/userApi/userWalletApi.js'
+import WorkInProgress from "@/components/FallbackUI/WorkInProgress"
 
 const WalletPage = () => {
   const withdrawRef = useRef()
@@ -21,8 +21,7 @@ const WalletPage = () => {
   const [transactionCount,setTransactionCount] = useState(20)
   const [activeTab, setActiveTab] = useState("all")
 
-  const { data, isLoading, refetch} = useAdminLoadWalletDetailsQuery(transactionCount)
-  const [withdrawAmount] = useWithdrawAmountMutation()
+  const { data, isLoading } = useUserLoadWalletDetailsQuery(transactionCount)
 
   useEffect(()=>{
 
@@ -63,6 +62,7 @@ const WalletPage = () => {
       setTransactions(defaultTransactionData)
     }
 
+
   },[data])
 
   // Filter transactions based on active tab
@@ -76,18 +76,11 @@ const WalletPage = () => {
 
   // Handle withdrawal request
   const handleWithdrawal = async(data) => {
-    try {
-      await withdrawAmount({formData : data}).unwrap()
-      withdrawRef.current?.triggerSuccess();
-      refetch();
-    } catch (error) {
-      console.log(error)
-      withdrawRef.current?.triggerFailure()
-    }finally{
-      setTimeout(() => {
-        setIsWithdrawModalOpen(false) 
-      }, 2000)
-    }
+      // withdrawal feature
+  }
+
+  const handleShowWithdrawRequest = () => {
+    // withdrawal feature
   }
 
   // Animation variants
@@ -118,19 +111,24 @@ const WalletPage = () => {
     <div className="container mx-auto px-4 py-8">
       <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8">
         {/* Wallet Header */}
+        <WorkInProgress title={'Your Earnings Wallet is Coming Soon'} 
+        description={'Track your referral rewards, earnings, and withdrawals in one place! Our upcoming Wallet feature will let you manage your balance, view referral bonuses, and easily request withdrawals. Whether you’re earning through referrals or course engagements, your money is just a few clicks away.'}>
+        <>
         <motion.div variants={itemVariants}>
           <WalletHeader title="My Wallet" subtitle="Manage your earnings and withdrawals" />
         </motion.div>
 
         {/* Wallet Summary */}
         <motion.div variants={itemVariants}>
-          <WalletSummary walletData={walletData} onWithdraw={()=>setIsWithdrawModalOpen(true)} />
+          <WalletSummary walletData={walletData} onWithdraw={handleShowWithdrawRequest} />
         </motion.div>
 
         {/* Earnings Summary Cards */}
         <motion.div variants={itemVariants}>
           <EarningsSummary walletData={walletData} />
         </motion.div>
+        </>
+        </WorkInProgress>
 
         {/* Transactions Section */}
         <motion.div variants={itemVariants} className="space-y-4">

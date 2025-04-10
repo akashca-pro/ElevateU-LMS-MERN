@@ -10,7 +10,7 @@ import WithdrawFunds from "@/components/wallet/WithdrawFunds"
 import TransactionList from "@/components/wallet/TransactionList"
 import EarningsSummary from "@/components/wallet/EarningsSummary"
 
-import { useLoadWalletQuery, useWithdrawRequestMutation, useLoadWithdrawRequestQuery } 
+import { useTutorLoadWalletDetailsQuery, useWithdrawRequestMutation, useLoadWithdrawRequestQuery } 
 from '@/services/TutorApi/tutorWalletApi.js'
 import { toast } from "sonner"
 
@@ -23,7 +23,7 @@ const WalletPage = () => {
   const [transactionCount,setTransactionCount] = useState(20)
   const [activeTab, setActiveTab] = useState("all")
 
-  const { data, isLoading } = useLoadWalletQuery(transactionCount)
+  const { data, isLoading } = useTutorLoadWalletDetailsQuery(transactionCount)
   const { data : fetchWithdrawRequest, refetch } = useLoadWithdrawRequestQuery()
   const [requestWithdraw] = useWithdrawRequestMutation()
 

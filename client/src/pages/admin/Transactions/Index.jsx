@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Filter, RefreshCw, Download } from "lucide-react"
 import TransactionTable from "./components/TransactionTable"
 import TransactionModal from "./components/TransactionModal"
-import { mockTransactions } from "./mockData.js"
 import { useLoadTransactionsQuery } from '@/services/adminApi/adminOrderApi.js'
 
 const containerVariants = {

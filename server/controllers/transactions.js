@@ -1,6 +1,7 @@
 import Admin from "../model/admin.js";
 import Transaction from "../model/transaction.js";
 import Tutor from "../model/tutor.js";
+import User from "../model/user.js";
 import Wallet from "../model/wallet.js";
 import WithdrawalRequest from "../model/withdrawRequest.js";
 import { saveNotification, sendNotification } from "../utils/LiveNotification.js";
@@ -9,6 +10,7 @@ import HttpStatus from "../utils/statusCodes.js";
 import { STRING_CONSTANTS } from "../utils/stringConstants.js";
 
 const roleModels = {
+    User : User,
     Tutor : Tutor,
     Admin : Admin
 }
@@ -62,7 +64,7 @@ const handleWithdrawalTransaction = async ({ role ,id, amount}) => {
 
 }
 
-// load wallets of tutor and admin
+// load wallets of tutor , admin and user
 
 export const loadWalletDetails = (role) => async (req,res) => {
     
@@ -78,14 +80,14 @@ export const loadWalletDetails = (role) => async (req,res) => {
 
         const user = await db.findById(userId);
 
-        let acctno = '4567'
+        let acctno = '4567';
 
-        if(role === 'Tutot'){
+        if(role === 'Tutor'){
             
             acctno = user?.bankDetails.accountNumber.slice(-4)
         }
 
-        const walletDetails = {
+        const walletDetails = role !== 'User' ? {
             balance : wallet.balance,
             walletId : wallet._id,
             totalEarnings : wallet?.totalEarnings || 0,
@@ -97,7 +99,7 @@ export const loadWalletDetails = (role) => async (req,res) => {
                 { id: "pm1", type: "gpay", email: `${user.email}` , isDefault: false },
                 { id: "pm2", type: "bank", accountNumber: `xxxx-xxxx-xxxx-${acctno}`, isDefault: true },
               ],
-        }
+        } : null
 
         const transactions = wallet.transactions
         .sort((a,b)=>new Date(b.createdAt) - new Date(a.createdAt) )
@@ -110,7 +112,7 @@ export const loadWalletDetails = (role) => async (req,res) => {
                 amount : transaction.amount,
                 type : transaction.type,
                 purpose : transaction.purpose,
-                platformFee : transaction.purpose === 'course_purchase' ? transaction.platformFee : undefined,
+                platformFee : role === 'Tutor' ? transaction.platformFee : undefined,
                 status : transaction.status,
                 description : transaction.description,
                 reference : transaction.transactionId

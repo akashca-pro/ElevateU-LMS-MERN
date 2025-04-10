@@ -5,7 +5,7 @@ import apiSlice from "../apiSlice.js";
 const tutorWalletApi = apiSlice.injectEndpoints({
     endpoints : (builder) => ({
 
-        loadWallet : builder.query({
+        tutorLoadWalletDetails : builder.query({
             query : (credentials)=>({
                 url : `tutor/wallet`,
                 method : 'GET',
@@ -49,10 +49,10 @@ const tutorWalletApi = apiSlice.injectEndpoints({
 
 export const {
 
-    useLoadWalletQuery,
     useAddBankAccountMutation,
     useLoadBankDetailsQuery,
     useWithdrawRequestMutation,
-    useLoadWithdrawRequestQuery
+    useLoadWithdrawRequestQuery,
+    useTutorLoadWalletDetailsQuery
 
 } = tutorWalletApi

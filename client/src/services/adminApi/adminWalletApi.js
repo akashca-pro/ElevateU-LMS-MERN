@@ -5,7 +5,7 @@ import apiSlice from "../apiSlice";
 const adminWalletApi = apiSlice.injectEndpoints({
     endpoints : (builder)=>({
 
-        loadWalletDetails : builder.query({
+        adminLoadWalletDetails : builder.query({
             query : ()=>({
                 url : `admin/wallet`,
                 method : 'GET'
@@ -25,7 +25,7 @@ const adminWalletApi = apiSlice.injectEndpoints({
 
 export const {
 
-    useLoadWalletDetailsQuery,
-    useWithdrawAmountMutation
+    useWithdrawAmountMutation,
+    useAdminLoadWalletDetailsQuery
 
 } = adminWalletApi
