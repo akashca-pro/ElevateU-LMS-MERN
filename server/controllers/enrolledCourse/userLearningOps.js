@@ -456,20 +456,6 @@ export const changeLessonOrModuleStatus = async (req,res) => {
 
         const { cumulativeModules, currentLevel } = calculateLevelSize(progressTracker.modules)
 
-        // const completedModules = progressTracker.modules.filter(m=>m.isCompleted).length
-        // const totalModules = progressTracker.modules.length
-
-        // const getCurrentLevel = (completedModules, totalModules) => {
-        //     if (totalModules === 0) return 1; // Prevent division by zero
-        
-        //     const modulesPerLevel = Math.ceil(totalModules / 5); // Split modules into 5 levels
-        //     let level = Math.floor(completedModules / modulesPerLevel) + 1; // Ensure next level only if completed full modules
-        
-        //     return Math.min(level, 5); // Cap at level 5
-        // };
-        
-        // updatedProgress.level.currentLevel = getCurrentLevel(completedModules, totalModules)
-
         updatedProgress.level={
             currentLevel,
             cumulativeModules

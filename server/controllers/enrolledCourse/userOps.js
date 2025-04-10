@@ -319,7 +319,7 @@ export const loadEnrolledCourses = async (req,res) => {
 
         // console.log(enrollments)
 
-        const otherDetails = await EnrolledCourse.find({userId}).select('courseId courseProgress completed -_id').lean()
+        const otherDetails = await EnrolledCourse.find({userId}).select('courseId courseProgress isCompleted -_id').lean()
         
         const extraDetails = otherDetails.reduce((acc, { courseId, ...rest }) => { // progress and completion boolead
             acc[courseId] = rest;

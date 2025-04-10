@@ -194,7 +194,7 @@ const CourseLearningPage = () => {
       </AnimatePresence>
 
         {/* Progress reset */}
-        <CourseCompletionDialog isOpen={isModalOpen} onOpenChange={setIsModalOpen}
+        <CourseCompletionDialog isOpen={isModalOpen} onOpenChange={handleOpenChange}
          handleResetProgress={handleResetProgress} title={courseDetails?.title}/>
 
       {/* Course Header */}

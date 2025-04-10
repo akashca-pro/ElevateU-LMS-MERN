@@ -25,6 +25,7 @@ const Enrolled = () => {
   
   const data = details?.data
   const courses = details?.data?.courses
+  console.log(data)
   const { data : categoryDetails } = useLoadCategoriesQuery()
   const categoryData = categoryDetails?.data;
 
