@@ -16,8 +16,6 @@ const Index = () => {
     const [searchQuery, setSearchQuery] = useState("")
     const [currentPage, setCurrentPage] = useState(1)
     const [filteredQuery,setFilteredQuery] = useState('latest')
-    const [createCoupon] = useAdminCreateCouponMutation()
-    const [updateCoupon] = useAdminUpdateCouponMutation()
     const limit = 7;
     const navigate = useNavigate()
     const {data : coupon, isLoading , error ,refetch} = useAdminLoadCouponsQuery({
@@ -48,7 +46,13 @@ const Index = () => {
         </div >
         <div className="flex flex-wrap justify-end gap-2 w-full md:w-auto">
             <FormModal useAction={useAdminCreateCouponMutation} refetch={refetch}/> 
-          <FilterBox onSelect={setFilteredQuery} selectValue={'Not-Active'}/>
+          <FilterBox onSelect={setFilteredQuery} 
+          options={[
+            { value: "latest", label: "Latest" },
+            { value: "oldest", label: "Oldest" },
+            { value: "Not-Active", label: "Not-Active" },
+        ]}          
+          />
         </div>
     </div>
 

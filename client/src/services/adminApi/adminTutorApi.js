@@ -61,6 +61,26 @@ const adminTutorApi = apiSlice.injectEndpoints({
             url : `admin/toggle-tutor-block/${id}`,
             method :'PATCH'
         })
+       }),
+       loadWithdrawRequests : builder.query({
+        query : ({ page, limit, filter }) =>({
+           url : `admin/withdraw-request`,
+           method : 'GET',
+           params: {
+            page,
+            limit,
+            filter: JSON.stringify(filter)
+          }
+        }),
+        providesTags : ['Admin']
+       }),
+       approveOrRejectWithdrawRequest : builder.mutation({
+        query : (credentials) => ({
+            url : `admin/withdraw-request/approve-or-reject`,
+            method : 'PATCH',
+            body : credentials
+        }),
+        invalidatesTags : ['Admin']
        })
     })
 })
@@ -79,6 +99,11 @@ export const {
     // notification from tutor verification request
 
     useAdminVerificationRequestQuery,
-    useAdminApproveOrRequestMutation
+    useAdminApproveOrRequestMutation,
+
+    // withdraw request 
+
+    useLoadWithdrawRequestsQuery,
+    useApproveOrRejectWithdrawRequestMutation
 
 } = adminTutorApi

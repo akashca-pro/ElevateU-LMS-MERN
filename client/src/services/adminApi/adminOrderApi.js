@@ -11,12 +11,19 @@ const adminOrderApi = apiSlice.injectEndpoints({
                 params : queryParams
             }),
             providesTags : ['Admin']
+        }),
+        loadTransactions : builder.query({
+            query : (page) =>({
+                url : `admin/transactions?page=${page}`,
+                method : 'GET'
+            })
         })
     })
 })
 
 export const {
 
-    useAdminLoadOrdersQuery
+    useAdminLoadOrdersQuery,
+    useLoadTransactionsQuery
 
 } = adminOrderApi

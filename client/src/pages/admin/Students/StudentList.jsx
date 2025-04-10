@@ -46,7 +46,14 @@ const StudentList = () => {
           <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
         </div >
         <div className="flex flex-wrap justify-end gap-2 w-full md:w-auto">
-          <FilterBox onSelect={setFilteredQuery}/>
+          <FilterBox onSelect={setFilteredQuery}
+          options={[
+            { value: "latest", label: "Latest" },
+            { value: "oldest", label: "Oldest" },
+            { value: "Not-Active", label: "Not-Active" },
+
+        ]}          
+          />
         </div>
       </div>
     

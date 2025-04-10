@@ -1,7 +1,8 @@
 import React from 'react';
-import { Routes, Route, Outlet } from 'react-router-dom';
+import { Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import {SquareUser, BookOpen, LibraryBig, MessagesSquare, BellRing, Handshake, Paperclip, ClipboardCheck, 
-  Trophy, Settings
+  Trophy, Settings,
+  Wallet2
 } from 'lucide-react'
 import {useUserForgotPasswordMutation,useUserResetPasswordMutation,useUserGoogleCallbackQuery,
   useUserSignupMutation,useUserLoginMutation
@@ -22,7 +23,6 @@ import Layout from '@/components/Drawer/Layout';
 
 import Profile from '@/pages/user/ProfileDetails/Index'
 
-import Notification from './notification/Index';
 import Assignments from './assignments/Index';
 import Messages from './messages/Index';
 import Community from './community/Index';
@@ -41,6 +41,7 @@ import ProtectedRoute from '@/protectors/ProtectedRoute';
 import NotFound from '@/components/FallbackUI/NotFound';
 import BlockedUI from '@/components/FallbackUI/BlockedUI';
 import ProtectLearningPage from '@/protectors/ProtectLearningPage';
+import WalletPage from './wallet/WalletPage';
 
 const UserIndex = () => {
   return (
@@ -58,7 +59,8 @@ const menuItems = [
   { id: 6, title: "Assignments", icon: Paperclip, path: "/user/profile/assignments" },
   { id: 7, title: "Quiz", icon: ClipboardCheck, path: "/user/profile/quiz" },
   { id: 8, title: "Certificates", icon: Trophy, path: "/user/profile/certificates" },
-  { id: 9, title: "Settings", icon: Settings, path: "/user/profile/settings" },
+  { id: 9, title: "Wallet", icon: Wallet2, path: "/user/profile/wallet" },
+  { id: 10, title: "Settings", icon: Settings, path: "/user/profile/settings" },
 ];
 
 
@@ -79,6 +81,7 @@ const UserRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<UserIndex />}>
+      <Route index element={<Navigate to='/user/login' />} />
         <Route path="sign-up" element={
           <ProtectAuthPage>
           <SignUp role={'user'}  />
@@ -127,6 +130,7 @@ const UserRoutes = () => {
           <Route path='assignments' element={<Assignments/>}/>
           <Route path='quiz' element={<Quiz/>}/>
           <Route path='certificates' element={<Certificates/>}/>
+          <Route path='wallet' element={<WalletPage/>}/>
           <Route path='settings' element={<Setting/>}/>
         </Route>
         <Route path='*' element={<NotFound/>}/>

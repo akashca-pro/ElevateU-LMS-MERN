@@ -1,6 +1,6 @@
 // tutor Auth Api endpoints
 
-import apiSlice from "../apiSlice";
+import apiSlice from "../apiSlice.js";
 
 const tutorAuthApi = apiSlice.injectEndpoints({
     endpoints : (builder) =>({

@@ -66,7 +66,24 @@ export const STRING_CONSTANTS = {
     PROGRESS_TRACKER_UPDATED_SUCCESS : 'Progress tracker updation success',
     PROGRESS_TRACKER_UPDATED_ERROR : 'Progress tracker is updation failed',
     PROGRESS_TRACKER_ALREADY_UPDATED : 'Progress tracker is already updated',
-    COURSE_IS_UPDATED : 'Course is updated'
+    COURSE_IS_UPDATED : 'Course is updated',
+    LOADING_WALLET_SUCCESS : 'Loading wallet details success',
+    LOADING_WALLET_ERROR : 'Loading wallet details failed',
+    ADDING_BANK_DETAILS_SUCCESS : 'Adding bank details success',
+    ADDING_BANK_DETAILS_ERROR : 'Adding bank details Failed',
+    LOADING_BANK_DETAILS_SUCCESS : 'Loadin Bank details Success',
+    LOADING_BANK_DETAILS_ERROR : 'Loading Bank details Error',
+    REQUEST_WITHDRAWAL_SUCCESS : 'Request withdrawal success',
+    REQUEST_WITHDRAWAL_ERROR : 'Request withdrawal failed',
+    INSUFFICIENT_FUNDS : 'Insufficient funds',
+    LOAD_WITHDRAWAL_REQUEST_SUCCESS : 'Loading withdrawal request success',
+    LOAD_WITHDRAWAL_REQUEST_FAILED : 'Loading withdrawal request failed',
+    WITHDRAW_SUCCESS : 'Withdraw amount successfull',
+    WITHDRAW_REQUEST_REJECTED : 'withdraw request rejected successfully', 
+    WITHDRAW_REQUEST_APPROVED : 'withdraw request approved successfully', 
+    INVALID_ACTION_TYPE : 'Invalid action type',
+    LOAD_TRANSACTION_SUCCESS : 'Load transaction success',
+    LOAD_TRANSACTION_FAILED : 'Load transaction failed',
 }
 
 export const DATABASE_FIELDS = {

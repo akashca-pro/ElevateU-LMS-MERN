@@ -18,6 +18,8 @@ courseTitleExist,
 } from '../controllers/course/tutorOps.js'
 import passport from 'passport';
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js';
+import { loadWalletDetails } from '../controllers/transactions.js';
+import { addBankAccountDetails, intiateWithdrawalRequest, loadExistingBankDetails, loadWithdrawalRequest } from '../controllers/wallet/tutorWallet.js';
 
 
 const router = express.Router()
@@ -75,5 +77,15 @@ router.get('/check-title/:title',verifyAccessToken('tutor'),courseTitleExist)
 router.get('/load-notifications',verifyAccessToken('tutor'),loadNotifications('tutor'))
 router.post('/read-notifications',verifyAccessToken('tutor'),readNotifications)
 
+// wallet 
+
+router.get('/wallet',verifyAccessToken('tutor'),loadWalletDetails('Tutor'))
+
+// bank account
+
+router.get('/bank-details',verifyAccessToken('tutor'),loadExistingBankDetails)
+router.post('/bank-details',verifyAccessToken('tutor'),addBankAccountDetails)
+router.post('/withdrawal-request',verifyAccessToken('tutor'),intiateWithdrawalRequest)
+router.get('/withdrawal-request',verifyAccessToken('tutor'),loadWithdrawalRequest)
 
 export default router

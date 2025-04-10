@@ -21,6 +21,8 @@ import { loadNotifications, readNotifications } from '../controllers/notificatio
 import { validateForm } from '../middleware/validation.js'
 import { createCoupon, deleteCoupon, loadCoupons, updateCoupons } from '../controllers/admin/adminCouponOps.js'
 import { loadOrderDetails } from '../controllers/order/adminOrderOps.js'
+import { adminWithdrawAmount, approveOrRejectWithdrawRequest, loadWalletDetails, loadWithdrawRequests } from '../controllers/transactions.js'
+import { loadTransactionList } from '../controllers/admin/transactions.js'
 
 const router = express.Router()
 
@@ -96,6 +98,18 @@ router.post('/read-notifications',verifyAccessToken('admin'),readNotifications)
 
 router.get('/orders',verifyAccessToken('admin'),loadOrderDetails);
 
+// wallet
 
+router.get('/wallet',verifyAccessToken('admin'),loadWalletDetails('Admin'))
+router.post('/wallet/withdraw',verifyAccessToken('admin'),adminWithdrawAmount)
+
+// withdraw request
+
+router.get('/withdraw-request',verifyAccessToken('admin'),loadWithdrawRequests)
+router.patch('/withdraw-request/approve-or-reject',verifyAccessToken('admin'),approveOrRejectWithdrawRequest)
+
+// transactions
+
+router.get('/transactions',verifyAccessToken('admin'),loadTransactionList)
 
 export default router

@@ -37,7 +37,7 @@ const PaymentSuccess = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Amount Paid</p>
-              <p className="font-medium">₹{orderDetails.amountPaid}</p>
+              <p className="font-medium">₹{orderDetails?.amountPaid}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Payment Method</p>

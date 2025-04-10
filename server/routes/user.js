@@ -20,6 +20,7 @@ import { loadNotifications, readNotifications } from '../controllers/notificatio
 import { applyCoupon, bookmarkCourse, fetchCurrentAppliedCoupon, getPricing, isBookMarked, loadBookmarkCourses, removeAppliedCoupon, removeBookmarkCourse } from '../controllers/course/userOps.js'
 import { createOrder, failedPayment, verifyPayment } from '../controllers/order/userOrderOps.js'
 import { changeLessonOrModuleStatus, courseDetails, isCourseEnrolled, loadSelectedLesson, progressStatus, resetCourseProgress, updateProgressTracker } from '../controllers/enrolledCourse/userLearningOps.js'
+import { loadWalletDetails } from '../controllers/transactions.js'
 
 
 const router =  express.Router();
@@ -98,6 +99,10 @@ router.get('/enrolled-course/current-status/:id',verifyAccessToken('user'),progr
 router.put('/enrolled-course/lesson-status',verifyAccessToken('user'),changeLessonOrModuleStatus)
 router.get('/lesson',verifyAccessToken('user'),loadSelectedLesson)
 router.put('/reset-progress/:id',verifyAccessToken('user'),resetCourseProgress)
+
+// wallet
+
+router.get('/wallet',verifyAccessToken('user'),loadWalletDetails('User'))
 
 
 

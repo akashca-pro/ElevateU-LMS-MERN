@@ -8,6 +8,108 @@ import User from "../../model/user.js";
 import { saveNotification, sendNotification } from "../../utils/LiveNotification.js";
 import ProgressTracker from "../../model/progressTracker.js";
 import { calculateLevelSize } from "./userLearningOps.js";
+import Wallet from "../../model/wallet.js";
+import Transaction from "../../model/transaction.js";
+import 'dotenv/config'
+
+// handle transaction and wallet update
+
+const handleTransactionAndWalletUpdate = async ({
+    orderDetails,
+    course,
+    userId,
+    tutorId,
+    adminId
+}) => {
+    try {
+
+        const finalPrice = orderDetails.price.finalPrice;
+    
+        const tutorPayout = finalPrice * 0.8;
+        const adminPayout = finalPrice * 0.2;
+
+        // Transaction
+        const transaction = await Transaction.create({
+            type : 'course_purchase',
+            source : {
+                userId,
+                courseId : course._id,
+                tutorId,
+                adminId
+            },
+            amount : {
+                courseAmount : finalPrice,
+                tutorPayout,
+                adminPayout
+            },
+            orderId : orderDetails._id,
+          })
+    
+        // create user transaction history
+        const userTransaction = {
+            transactionId : transaction._id,
+            type: 'debit',
+            amount: finalPrice,
+            purpose: 'course_purchase',
+            status: 'completed',
+            courseId: course._id,
+            description: `You purchased course ${course.title}`
+        }
+
+        // update user wallet
+        await Wallet.updateOne(
+            { userId, userModel : 'User' },
+            {
+                $push : { transactions : userTransaction }
+            }
+        );
+
+        // create tutor transaction history
+        const tutorTransaction = {
+            transactionId : transaction._id,
+            type: 'credit',
+            amount: tutorPayout,
+            platformFee : adminPayout,
+            purpose: 'course_purchase',
+            status: 'completed',
+            courseId: course._id,
+            description: `Earning from course: ${course.title}`
+          };
+
+        //update tutor wallet
+        await Wallet.updateOne(
+            { userId : tutorId, userModel : 'Tutor' },
+            {
+                $push : { transactions : tutorTransaction },
+                $inc : { balance : tutorPayout, totalEarnings : tutorPayout }
+            }
+        )
+
+        // create admin transaction history
+        const adminTransaction = {
+            transactionId : transaction._id,
+            type: 'credit',
+            amount: adminPayout,
+            purpose: 'commission',
+            status: 'completed',
+            courseId: course._id,
+            description: `Commission from course: ${course.title}`
+          };
+
+          // update admin wallet
+          await Wallet.updateOne(
+            { userId: adminId, userModel: 'Admin' },
+            {
+              $push: { transactions: adminTransaction },
+              $inc: { balance: adminPayout, totalEarnings: adminPayout }
+            }
+          );
+
+
+    } catch (error) {
+        throw error;
+    }
+}
 
 // add to cart
 
@@ -100,8 +202,16 @@ export const enrollInCourse = async (req,res) => {
 
         const orderDetails = await Order.findOne({ userId, courseId })
 
-        if(!orderDetails.paymentStatus === 'success')
+        if(!orderDetails || orderDetails.paymentStatus !== 'success')
             return ResponseHandler.error(res, 'Payment is not done', HttpStatus.BAD_REQUEST);
+
+        await handleTransactionAndWalletUpdate({
+            orderDetails,
+            adminId : process.env.ADMIN_ID,
+            course,
+            userId,
+            tutorId,
+        })
 
         // save enrollment
 
@@ -118,7 +228,6 @@ export const enrollInCourse = async (req,res) => {
         course.totalEnrollment += 1;
 
         await course.save() 
-
 
         // add enrolled course to user schema
         const user = await User.findByIdAndUpdate(userId,{ $addToSet : { enrolledCourses : courseId } ,

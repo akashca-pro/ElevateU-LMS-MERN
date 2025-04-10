@@ -3,7 +3,7 @@ import {
 BellRing, SquareUser, BookOpen, MessagesSquare, IndianRupee, ChartNoAxesCombined, Settings
 } from "lucide-react";
 
-import {Routes , Route, Outlet} from 'react-router-dom'
+import {Routes , Route, Outlet, Navigate} from 'react-router-dom'
 
 import {useTutorSignupMutation, useTutorLoginMutation,useTutorIsVerifiedQuery,
    useTutorForgotPasswordMutation, useTutorResetPasswordMutation ,useTutorGoogleCallbackQuery
@@ -35,17 +35,16 @@ import ProtectedRoute from '@/protectors/ProtectedRoute.jsx';
 import ProfileDetails from './tutorProfile/Index'
 
 import Messages from './Messages/Messages.jsx'
-import Revenue from './revenue/Revenue.jsx'
 import Analytics from './analytics/Analytics.jsx'
 import Notification from './Notification/Index.jsx'
-import Setting from './settings/Settings.jsx'
-
 
 import CourseLayout from '@/pages/tutor/courseManagement/Index.jsx'
 import CourseDashboard from './courseManagement/CourseDashboard.jsx'
 import CourseDetails from './courseManagement/CourseDetails';
 
+import Revenue from './Wallet/WalletPage.jsx'
 
+import Setting from './settings/Index.jsx'
 
 const TutorIndex = () => {
   return (
@@ -85,7 +84,7 @@ const TutorRoutes = ()=>{
 return (
   <Routes>
     <Route path='/' element={<TutorIndex/>}>
-  
+    <Route index element={<Navigate to='/tutor/login' />} />
         <Route path="sign-up" element={
           <ProtectAuthPage>
           <SignUp role={'tutor'} />

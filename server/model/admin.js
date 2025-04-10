@@ -34,6 +34,27 @@ const adminSchema = mongoose.Schema({
 
 },{timestamps : true});
 
+adminSchema.post('save', async function (doc) {
+    
+    try {
+        const Wallet = (await import('./wallet.js')).default;
+
+        const existingWallet = await Wallet.findOne({ userId : doc._id, userModel : 'Admin' })
+        if(!existingWallet){
+            await Wallet.create({
+                userId : doc._id,
+                userModel : 'Admin',
+                balance : 0,
+                isActive : true
+            });
+        }
+
+    } catch (error) {
+        console.error('Error creating admin wallet:', error);
+    }
+
+})
+
 const Admin = mongoose.model('Admin',adminSchema)
 
 export default Admin

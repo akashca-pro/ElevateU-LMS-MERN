@@ -109,7 +109,6 @@ const roleValidations = {
         .trim()
         .notEmpty()
         .withMessage('Video is required of each lesson')
-
         ]
     },
     admin : {
