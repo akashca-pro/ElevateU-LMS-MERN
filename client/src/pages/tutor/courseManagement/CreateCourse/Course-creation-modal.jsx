@@ -96,7 +96,7 @@ export function CourseCreationModal({ isOpen, onClose }) {
     const toastId = toast.loading('Please wait . . . ');
     try {
       console.log("Form submitted:", data)
-      // await createCourse({formData : data , draft : false}).unwrap()
+      await createCourse({formData : data , draft : false}).unwrap()
       reset(defaultValues);
       toast.success("Course created successfully! Awaiting approval.",{id : toastId})
       onClose()

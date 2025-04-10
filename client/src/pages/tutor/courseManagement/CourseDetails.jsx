@@ -38,7 +38,8 @@ const CourseDetails = () => {
   const [categories,setCategories] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
   const [isDataChanged,setIsDataChanged] = useState(false)
-  const [prevData,setPrevData] = useState(null)
+  const [lockedModules, setLockedModules] = useState(new Set());
+  const [lockedLessons, setLockedLessons] = useState(new Set());
   const [formErrors,setFormErrors] = useState(null)
   const editSectionRef = useRef(null)
 
@@ -50,11 +51,27 @@ const CourseDetails = () => {
   useEffect(() => {
     if (courseDetails?.data) {
       setCourse(JSON.parse(JSON.stringify(courseDetails.data)));
-      setPrevData(course)
     }
     setCategories(categoryDetails?.data)
 
+    if(courseDetails?.data && courseDetails?.data?.modules?.length > 0 ){
+      const modSet = new Set();
+      const lessonSet = new Set();
+
+      courseDetails?.data?.modules?.forEach((mod,modIndex)=>{
+        modSet.add(modIndex);
+        mod?.lessons.forEach((_,lessonIndex)=>{
+          lessonSet.add(`${modIndex}-${lessonIndex}`)
+        })
+      })
+
+      setLockedModules(modSet);
+      setLockedLessons(lessonSet);
+
+    }
+
   }, [courseDetails, isEditing, categoryDetails]);
+
 
   const handleEdit = () => {
     setIsEditing(true)
@@ -138,6 +155,9 @@ const CourseDetails = () => {
   }
 
   const handleModuleChange = (index, field, value) => {
+
+  if(field === 'title' && lockedModules.has(index)) return 
+
    const courseCopy = JSON.parse(JSON.stringify(course))
    courseCopy.modules[index][field] = value;
    setCourse(courseCopy);
@@ -146,6 +166,9 @@ const CourseDetails = () => {
   }
 
   const handleLessonChange = (moduleIndex, lessonIndex, field, value) => {
+    
+    if(field === 'title' && lockedLessons.has(`${moduleIndex}-${lessonIndex}`)) return 
+
     const courseCopy = JSON.parse(JSON.stringify(course))
     courseCopy.modules[moduleIndex].lessons[lessonIndex][field] = value;
     setCourse(courseCopy);
@@ -577,7 +600,6 @@ const CourseDetails = () => {
                           placeholder = 'Enter Module Title'
                           onChange={(e) => {
                             e.stopPropagation();
-                            // console.log(e.target.value)
                             handleModuleChange(moduleIndex, "title", e.target.value);
                           }}
                           onClick={(e) => e.stopPropagation()}

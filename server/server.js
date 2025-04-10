@@ -16,7 +16,6 @@ import { initializeSocket } from './services/socketServer.js'
 
 connectDB();
 
-
 const app= express()
 const server = http.createServer(app);
 

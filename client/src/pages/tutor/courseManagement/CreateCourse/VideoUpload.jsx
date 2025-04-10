@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import VideoPlayer from "@/services/Cloudinary/VideoPlayer";
 import { videoUpload } from "@/services/Cloudinary/videoUpload";
 import { X, FileVideo, Upload } from "lucide-react";
 import { useRef, useState } from "react";
@@ -7,6 +6,7 @@ import { toast } from "sonner";
 
 export const VideoUpload = ({ value, onChange, onRemove ,disabled = false}) => {
   const [preview, setPreview] = useState("");
+  const [isUploading,setIsUploading] = useState(false)
   const [isUploaded,setIsUploaded] = useState(false)
   const [videoFile,setVideoFile] = useState(null)
   const fileInputRef = useRef(null); // Reference to the hidden file input
@@ -36,12 +36,13 @@ export const VideoUpload = ({ value, onChange, onRemove ,disabled = false}) => {
     const toastId = toast.loading('uploading . . .') 
 
     try {
+      setIsUploading(true)
       const { uploadedVideoeUrl } = await videoUpload(videoFile)
       toast.success('Video uploaded',{id : toastId});
       setPreview(uploadedVideoeUrl)
       onChange(uploadedVideoeUrl)
       setIsUploaded(true)
-
+      setIsUploading(false)
     } catch (error) {
       console.error("Upload failed", error);
       setPreview(preview)
@@ -75,6 +76,7 @@ export const VideoUpload = ({ value, onChange, onRemove ,disabled = false}) => {
       <div className="flex gap-2">
         {/* Hidden file input */}
         <input
+          disabled={isUploading}
           type="file"
           accept="video/*"
           onChange={handleAdd}
@@ -100,7 +102,7 @@ export const VideoUpload = ({ value, onChange, onRemove ,disabled = false}) => {
           variant="outline"
           className="shrink-0"
           onClick={handleUpload}
-          disabled={!preview || isUploaded} 
+          disabled={!preview || isUploaded || isUploading} 
         >
           <Upload className="h-4 w-4 mr-2" />
           Upload

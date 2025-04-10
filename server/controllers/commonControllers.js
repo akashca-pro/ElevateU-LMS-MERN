@@ -10,8 +10,6 @@ import { DATABASE_FIELDS, STRING_CONSTANTS } from "../utils/stringConstants.js"
 import Category from "../model/category.js"
 import EnrolledCourse from "../model/enrolledCourses.js"
 import Course from "../model/course.js"
-import RefreshToken from "../model/refreshToken.js"
-import { generateRefreshToken } from "../utils/generateToken.js"
 
 const roleModals = {
     user : User,
@@ -179,54 +177,6 @@ export const loadCategories = async (req,res) => {
     } catch (error) {
         console.log(STRING_CONSTANTS.LOADING_ERROR, error);
         return ResponseHandler.error(res, STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-
-}
-
-// Load course
-
-export const getCourses = (sort) => async (req,res) => {
-    
-    try {
-        let sortQuery;
-
-        if(sort === 'top-rated'){
-            sortQuery = {rating : -1}
-        }else if(sort === 'best-selling'){
-            sortQuery = {totalEnrollment : -1}
-        }else if(sort === 'new-releases'){
-            sortQuery = {createdAt : -1}
-        }else if (sort === 'trending'){
-            const oneWeekAgo = new Date()
-            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
-            const trendingEnrollments = await EnrolledCourse.aggregate( 
-                [ {$match : { createdAt : {$gte : oneWeekAgo} } },
-                  { $group : { _id : '$course' , count : { $sum : 1 } } },
-                  { $sort : { count : -1 } },
-                  { $limit : 10 }
-                ]);
-        
-            const trendingCoursesIds = trendingEnrollments.map((e)=>e._id)
-            const trendingCourses = await Course.find({ _id : { $in : trendingCoursesIds } , isPublished : true })
-            .select('_id title tutor totalEnrollment category duration thumbnail rating')
-            .populate('tutor','name profileImage')
-            .exec()
-
-            return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.ok,trendingCourses)
-        };
-
-        const courses = await Course.find({ isPublished :true })
-        .select('_id title tutor totalEnrollment category duration thumbnail rating')
-        .sort(sortQuery)
-        .limit(10)
-        .populate('tutor','firstName profileImage')
-        .exec();
-
-        return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.ok,courses)
-
-    } catch (error) {
-        console.log(STRING_CONSTANTS.LOADING_ERROR,error)
-        return ResponseHandler.success(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -434,6 +384,54 @@ export const loadCourseTitles = async (req,res) => {
     } catch (error) {
         console.log(STRING_CONSTANTS.LOADING_ERROR,error);
         return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// Load course
+
+export const getCourses = (sort) => async (req,res) => {
+    
+    try {
+        let sortQuery;
+
+        if(sort === 'top-rated'){
+            sortQuery = {rating : -1}
+        }else if(sort === 'best-selling'){
+            sortQuery = {totalEnrollment : -1}
+        }else if(sort === 'new-releases'){
+            sortQuery = {createdAt : -1}
+        }else if (sort === 'trending'){
+            const oneWeekAgo = new Date()
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+            const trendingEnrollments = await EnrolledCourse.aggregate( 
+                [ {$match : { createdAt : {$gte : oneWeekAgo} } },
+                  { $group : { _id : '$course' , count : { $sum : 1 } } },
+                  { $sort : { count : -1 } },
+                  { $limit : 10 }
+                ]);
+        
+            const trendingCoursesIds = trendingEnrollments.map((e)=>e._id)
+            const trendingCourses = await Course.find({ _id : { $in : trendingCoursesIds } , isPublished : true })
+            .select('_id title tutor totalEnrollment category duration thumbnail rating')
+            .populate('tutor','name profileImage')
+            .exec()
+
+            return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.ok,trendingCourses)
+        };
+
+        const courses = await Course.find({ isPublished :true })
+        .select('_id title tutor totalEnrollment category duration thumbnail rating')
+        .sort(sortQuery)
+        .limit(10)
+        .populate('tutor','firstName profileImage')
+        .exec();
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.ok,courses)
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.LOADING_ERROR,error)
+        return ResponseHandler.success(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }

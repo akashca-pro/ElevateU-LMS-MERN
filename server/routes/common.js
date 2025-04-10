@@ -3,9 +3,6 @@ const router = express.Router()
 import {sendOtp, verifyOtp, loadCategories, getCourses ,
     loadCourseDetails, loadCourses, loadCourseTitles} from '../controllers/commonControllers.js'
 
-
-
-
 router.post('/generate-otp',sendOtp)
 router.post('/verify-otp',verifyOtp)
 
