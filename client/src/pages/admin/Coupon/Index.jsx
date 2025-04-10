@@ -46,7 +46,13 @@ const Index = () => {
         </div >
         <div className="flex flex-wrap justify-end gap-2 w-full md:w-auto">
             <FormModal useAction={useAdminCreateCouponMutation} refetch={refetch}/> 
-          <FilterBox onSelect={setFilteredQuery} selectValue={'Not-Active'}/>
+          <FilterBox onSelect={setFilteredQuery} 
+          options={[
+            { value: "latest", label: "Latest" },
+            { value: "oldest", label: "Oldest" },
+            { value: "Not-Active", label: "Not-Active" },
+        ]}          
+          />
         </div>
     </div>
 

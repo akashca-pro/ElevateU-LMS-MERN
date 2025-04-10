@@ -82,6 +82,8 @@ export const STRING_CONSTANTS = {
     WITHDRAW_REQUEST_REJECTED : 'withdraw request rejected successfully', 
     WITHDRAW_REQUEST_APPROVED : 'withdraw request approved successfully', 
     INVALID_ACTION_TYPE : 'Invalid action type',
+    LOAD_TRANSACTION_SUCCESS : 'Load transaction success',
+    LOAD_TRANSACTION_FAILED : 'Load transaction failed',
 }
 
 export const DATABASE_FIELDS = {

@@ -46,7 +46,13 @@ const List = () => {
         <div className="flex flex-wrap justify-end gap-2 w-full md:w-auto">
           <FormModal title={'Add Category'} useCategory={useAdminAddCategoryMutation} 
           style={"bg-blue-600 hover:bg-blue-700 rounded-lg border border-gray-300 px-4 py-2"} type={'add'}/>
-          <FilterBox onSelect={setFilteredQuery} selectValue={'Not-Active'}/>
+          <FilterBox onSelect={setFilteredQuery} 
+          options={[
+            { value: "latest", label: "Latest" },
+            { value: "oldest", label: "Oldest" },
+            { value: "Not-Active", label: "Not-Active" },
+        ]}
+          />
         </div>
       </div>
 

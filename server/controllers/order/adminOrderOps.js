@@ -63,4 +63,3 @@ export const loadOrderDetails = async (req,res) => {
     }
 
 }
-

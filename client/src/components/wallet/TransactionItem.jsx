@@ -20,7 +20,6 @@ import { toast } from "sonner"
 const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
 
     const [copied, setCopied] = useState(false)
-    console.log(transaction)
 
     const copyWalletId = (e) => {
         e.stopPropagation();

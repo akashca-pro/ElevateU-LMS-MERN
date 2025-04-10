@@ -3,7 +3,7 @@ import {
 BellRing, SquareUser, BookOpen, MessagesSquare, IndianRupee, ChartNoAxesCombined, Settings
 } from "lucide-react";
 
-import {Routes , Route, Outlet} from 'react-router-dom'
+import {Routes , Route, Outlet, Navigate} from 'react-router-dom'
 
 import {useTutorSignupMutation, useTutorLoginMutation,useTutorIsVerifiedQuery,
    useTutorForgotPasswordMutation, useTutorResetPasswordMutation ,useTutorGoogleCallbackQuery
@@ -84,7 +84,7 @@ const TutorRoutes = ()=>{
 return (
   <Routes>
     <Route path='/' element={<TutorIndex/>}>
-  
+    <Route index element={<Navigate to='/tutor/login' />} />
         <Route path="sign-up" element={
           <ProtectAuthPage>
           <SignUp role={'tutor'} />

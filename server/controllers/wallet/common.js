@@ -27,10 +27,9 @@ const source = {
 }
 
 const handleWithdrawalTransaction = async ({ role ,id, amount}) => {
-    
     try {
         const transaction = await Transaction.create({
-            type : [source[role].transactionType],
+            type : source[role].transactionType,
             source : {
                 [source[role].nameLabel] : id
             },
@@ -101,6 +100,7 @@ export const loadWalletDetails = (role) => async (req,res) => {
         }
 
         const transactions = wallet.transactions
+        .sort((a,b)=>new Date(b.createdAt) - new Date(a.createdAt) )
         .slice(0,limit)
         .map((transaction,index)=>{
        
@@ -116,7 +116,6 @@ export const loadWalletDetails = (role) => async (req,res) => {
                 reference : transaction.transactionId
             }
         });
-
 
         return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_WALLET_SUCCESS, HttpStatus.OK,{
             walletDetails, 
@@ -139,19 +138,17 @@ export const loadWithdrawRequests = async (req,res) => {
         const page = parseInt(req.query.page) || 1
         const limit = parseInt(req.query.limit) || 5
         const skip = (page-1) * limit
-
-        let filter = {};
+        
+        let filter = {status : 'pending'};
         let sort
         if (req.query.filter) {
             try {
               const parsedFilter = JSON.parse(req.query.filter);
-
                 sort = sortingConditions[parsedFilter.sort] || { createdAt: -1 };
           
               if (parsedFilter.search) {
                 filter.email = { $regex: parsedFilter.search, $options: "i" };
               }
-
               
             } catch (error) {
               return ResponseHandler.error(
@@ -165,7 +162,7 @@ export const loadWithdrawRequests = async (req,res) => {
         const totalRequest = await WithdrawalRequest.countDocuments(filter)
 
         const requests = await WithdrawalRequest.find(filter)
-        .populate('userId','-_id firstName')
+        .select('-bankDetails')
         .skip(skip)
         .limit(limit)
         .sort(sort)
@@ -186,7 +183,7 @@ export const loadWithdrawRequests = async (req,res) => {
         })
 
     } catch (error) {
-        console.log(STRING_CONSTANTS.SERVER);
+        console.log(STRING_CONSTANTS.SERVER,error);
         return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -197,35 +194,43 @@ export const loadWithdrawRequests = async (req,res) => {
 export const approveOrRejectWithdrawRequest = async (req,res) => {
     
     try {
-        const { formData } = req.body;
-        const request = await WithdrawalRequest.findById(formData.requestId)
+        const { input, id, reason } = req.body;
+        const request = await WithdrawalRequest.findById(id)
         
         if (['completed', 'rejected'].includes(request.status)) {
             return ResponseHandler.success(res, STRING_CONSTANTS.EXIST, HttpStatus.ALREADY_REPORTED);
         }
 
-        if(formData.input === 'approve'){
+        if(input === 'approve'){
             await handleWithdrawalTransaction({
                  role : request.userModel,
                  id : request.userId,
                 amount : request.amount, });
             
             request.status = 'completed'
+            request.adminNote = reason ? reason : undefined
+
             await request.save()
+
+            const newNotification = await saveNotification(request.userId, 
+                request.userModel, 'withdraw_approved', 
+                `Withdraw request approved for your amount ₹${request.amount} ${reason ? reason : ''}`)
+            
+            sendNotification(req, newNotification)
 
             return ResponseHandler.success(res, STRING_CONSTANTS.WITHDRAW_REQUEST_APPROVED, HttpStatus.OK)
         }
 
-        if(formData.input === 'reject'){
+        if(input === 'reject'){
         
            request.status = 'rejected';
-           request.adminNote = formData.note
+           request.adminNote = reason ? reason : undefined
            await request.save()
 
            const newNotification = 
            await saveNotification(request.userId, 
             request.userModel, 'withdraw_rejected', 
-            `Withdraw request rejected for your amount ${request.amount} ${formData.adminNote}`)
+            `Withdraw request rejected for your amount ₹${request.amount} ${reason ? reason : ''}`)
 
             sendNotification(req, newNotification)
 
@@ -235,7 +240,7 @@ export const approveOrRejectWithdrawRequest = async (req,res) => {
         return ResponseHandler.error(res, STRING_CONSTANTS.INVALID_ACTION_TYPE, HttpStatus.BAD_REQUEST);
 
     } catch (error) {
-        console.log(STRING_CONSTANTS.SERVER);
+        console.log(STRING_CONSTANTS.SERVER,error);
         return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

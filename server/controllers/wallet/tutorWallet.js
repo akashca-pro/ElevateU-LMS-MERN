@@ -73,7 +73,8 @@ export const intiateWithdrawalRequest = async (req,res) => {
         const tutorId = req.tutor.id;
         const { formData } = req.body;
         const alreadyRequested = await WithdrawalRequest.findOne({ userId : tutorId, userModel : 'Tutor' })
-        if(alreadyRequested)
+        
+        if(alreadyRequested && alreadyRequested.status === 'pending')
             return ResponseHandler.error(res, STRING_CONSTANTS.EXIST,HttpStatus.CONFLICT);
 
         const wallet = await Wallet.findOne({ userId : tutorId, userModel : 'Tutor' });
@@ -82,10 +83,11 @@ export const intiateWithdrawalRequest = async (req,res) => {
             return ResponseHandler.error(res, STRING_CONSTANTS.INSUFFICIENT_FUNDS, HttpStatus.BAD_REQUEST);
         }
 
-        const tutor = await Tutor.findById(tutorId)
+        const tutor = await Tutor.findById(tutorId).select('email firstName bankDetails')
 
         await WithdrawalRequest.create({
             userId : tutorId,
+            userName : tutor.firstName,
             userModel : 'Tutor',
             amount : formData.amount,
             email : tutor.email,
@@ -113,10 +115,10 @@ export const loadWithdrawalRequest = async (req,res) => {
     try {
         const tutorId = req.tutor.id;
 
-        const withdrawRequest = await WithdrawalRequest.findOne({ userId : tutorId, userModel : 'Tutor' })
+        const withdrawRequest = await WithdrawalRequest.findOne({ userId : tutorId, userModel : 'Tutor' , status : 'pending'})
 
         if(!withdrawRequest)
-            return ResponseHandler.success(res, STRING_CONSTANTS.LOAD_WITHDRAWAL_REQUEST_FAILED,HttpStatus.NO_CONTENT);
+            return ResponseHandler.error(res, STRING_CONSTANTS.LOAD_WITHDRAWAL_REQUEST_FAILED,HttpStatus.NO_CONTENT);
 
         const response = `Withdrawal of ₹${withdrawRequest.amount} is ${withdrawRequest.status}`
 

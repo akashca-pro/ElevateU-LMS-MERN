@@ -23,6 +23,7 @@ import { createCoupon, deleteCoupon, loadCoupons, updateCoupons } from '../contr
 import { loadOrderDetails } from '../controllers/order/adminOrderOps.js'
 import { approveOrRejectWithdrawRequest, loadWalletDetails, loadWithdrawRequests } from '../controllers/wallet/common.js'
 import { withdrawAmount } from '../controllers/wallet/adminWallet.js'
+import { loadTransactionList } from '../controllers/admin/transactions.js'
 
 const router = express.Router()
 
@@ -107,5 +108,9 @@ router.post('/wallet/withdraw',verifyAccessToken('admin'),withdrawAmount)
 
 router.get('/withdraw-request',verifyAccessToken('admin'),loadWithdrawRequests)
 router.patch('/withdraw-request/approve-or-reject',verifyAccessToken('admin'),approveOrRejectWithdrawRequest)
+
+// transactions
+
+router.get('/transactions',verifyAccessToken('admin'),loadTransactionList)
 
 export default router

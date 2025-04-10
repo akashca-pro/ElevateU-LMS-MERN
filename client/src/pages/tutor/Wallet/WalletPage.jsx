@@ -66,7 +66,7 @@ const WalletPage = () => {
       setTransactions(defaultTransactionData)
     }
 
-    if(fetchWithdrawRequest){
+    if(fetchWithdrawRequest?.success){
       setWithdrawRequest(fetchWithdrawRequest?.data)
     }
 

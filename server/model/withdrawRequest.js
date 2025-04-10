@@ -5,6 +5,7 @@ const withdrawalRequestSchema = new mongoose.Schema({
 
     _id : { type : String, default : ()=>nanoid(12) },
     userId : { type : String, refPath : 'userRole', required : true },
+    userName : { type : String, required : true },
     userModel : { type : String, enum : ['User','Tutor'], required : true },
     amount : { type : Number, required : true },
     paymentMethod : { type : String, required : true, enum : ['gpay','bank'] },

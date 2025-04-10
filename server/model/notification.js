@@ -11,7 +11,7 @@ const notificationSchema = new mongoose.Schema({
     senderType : { type : String, enum : ['User','Tutor','Admin'],required : function(){ return !!this.senderId }},
 
     type : { type : String, 
-        enum : ['publish_request','verify_profile','new_enrollment','payment_update','publish_course','suspend_course','suspension_removed','withdraw_request','withdraw_rejected'] },
+        enum : ['publish_request','verify_profile','new_enrollment','payment_update','publish_course','suspend_course','suspension_removed','withdraw_request','withdraw_rejected','withdraw_approved'] },
 
     message : {type : String, required : true},
 

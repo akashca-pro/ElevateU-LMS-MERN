@@ -58,7 +58,15 @@ export default function Index() {
 
       <div className="flex justify-end gap-2 w-full md:w-auto">
         <CreateCourseButton />
-        <FilterBox onSelect={setFilteredQuery} selectValue={'Draft'}/>
+        <FilterBox onSelect={setFilteredQuery}
+          options={[
+            { value: "latest", label: "Latest" },
+            { value: "oldest", label: "Oldest" },
+            { value: "Not-Active", label: "Not-Active" },
+            { value: "Draft", label: "Draft" },
+        ]}
+        
+        />
       </div>
     </div>
 

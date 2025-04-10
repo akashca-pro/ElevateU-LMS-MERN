@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Outlet } from 'react-router-dom';
+import { Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import {SquareUser, BookOpen, LibraryBig, MessagesSquare, BellRing, Handshake, Paperclip, ClipboardCheck, 
   Trophy, Settings
 } from 'lucide-react'
@@ -22,7 +22,6 @@ import Layout from '@/components/Drawer/Layout';
 
 import Profile from '@/pages/user/ProfileDetails/Index'
 
-import Notification from './notification/Index';
 import Assignments from './assignments/Index';
 import Messages from './messages/Index';
 import Community from './community/Index';
@@ -79,6 +78,7 @@ const UserRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<UserIndex />}>
+      <Route index element={<Navigate to='/user/login' />} />
         <Route path="sign-up" element={
           <ProtectAuthPage>
           <SignUp role={'user'}  />

@@ -42,7 +42,12 @@ const Enrolled = () => {
         onChange={(e) => setSearchQuery(e.target.value)}
         />
         <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-        <FilterBox onSelect={setFilteredQuery} disable={true}/>
+        <FilterBox onSelect={setFilteredQuery}
+          options={[
+            { value: "latest", label: "Latest" },
+            { value: "oldest", label: "Oldest" },
+        ]}        
+        />
       </div>
         </CardTitle>
       </CardHeader>

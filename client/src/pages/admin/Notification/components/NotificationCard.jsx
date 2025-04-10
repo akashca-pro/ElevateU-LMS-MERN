@@ -2,6 +2,7 @@ import {useAdminVerificationRequestQuery, useAdminApproveOrRequestMutation} from
 import { useAdminLoadPendingRequestQuery, useAdminApproveOrRejectCourseMutation } from '@/services/adminApi/adminCourseApi.js'
 import CoursePublishRequests from "./CoursePublishRequests";
 import TutorVerificationRequest from "./tutorVerificationRequest";
+import WithdrawRequests from './WithdrawRequests';
 
 
 export function NotificationCard() {
@@ -24,6 +25,8 @@ export function NotificationCard() {
       <CoursePublishRequests courseApproveOrReject={courseApproveOrReject} 
       publishRequests={publishRequests}
       refetchPublishRequest={refetchPublishRequest}  />
+
+      <WithdrawRequests/>
 
     </div>
   );

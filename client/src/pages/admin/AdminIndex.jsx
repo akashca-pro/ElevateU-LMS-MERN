@@ -1,10 +1,11 @@
 import React from 'react'
-import { Outlet, Route,Routes } from 'react-router-dom'
+import { Navigate, Outlet, Route,Routes } from 'react-router-dom'
 
 import {LayoutDashboard, SquareUser, Settings, ListCollapse, ClockArrowUp, 
 GraduationCap, Contact, BellRing,
 Sticker,BookOpen,
-IndianRupee} from 'lucide-react'
+IndianRupee,
+Landmark} from 'lucide-react'
 
 import {useAdminSignupMutation, useAdminLoginMutation} from '@/services/adminApi/adminAuthApi'
 import {useAdminAuthActions} from '@/hooks/useDispatch'
@@ -34,12 +35,13 @@ import TutorsLayout from './Tutors/Index'
 import TutorsList from './Tutors/TutorsList'
 import TutorsDetails from './Tutors/TutorsDetails'
 
-
 import CategoryList from './Category/List'
 import CouponList from './Coupon/Index'
 
 import CourseList from './Courses/Index'
 import WalletPage from './Wallet/WalletPage'
+
+import Transaction from './Transactions/Index'
 
 const AdminIndex = () => {
   return (
@@ -56,11 +58,12 @@ const menuItems = [
   { id: 4, title: "Category Management", icon: ListCollapse, path: "/admin/profile/category" },
   { id: 5, title: "Course Management", icon: BookOpen, path: "/admin/profile/courses" },
   { id: 6, title: "Coupon Management", icon: Sticker, path: "/admin/profile/coupon" },
-  { id: 7, title: "Order List", icon: ClockArrowUp, path: "/admin/profile/orders" },
-  { id: 8, title: "Notifications", icon: BellRing, path: "/admin/profile/notification" },
-  { id: 9, title: "Students", icon: GraduationCap, path: "/admin/profile/students" },
-  { id: 10, title: "Tutors", icon: Contact, path: "/admin/profile/tutors" },
-  { id: 11, title: "Settings", icon: Settings, path: "/admin/profile/settings" },
+  { id: 7, title: "Orders List", icon: ClockArrowUp, path: "/admin/profile/orders" },
+  { id: 8, title: "Transactions", icon: Landmark, path: "/admin/profile/transactions" },
+  { id: 9, title: "Notifications", icon: BellRing, path: "/admin/profile/notification" },
+  { id: 10, title: "Students", icon: GraduationCap, path: "/admin/profile/students" },
+  { id: 11, title: "Tutors", icon: Contact, path: "/admin/profile/tutors" },
+  { id: 12, title: "Settings", icon: Settings, path: "/admin/profile/settings" },
 ]
 
 const ProtectedLayout = () =>{
@@ -82,6 +85,7 @@ const AdminRoutes = ()=>{
   return (
     <Routes>
       <Route path='/' element={<AdminIndex/>}>
+        <Route index element={<Navigate to='/admin/login' />} />
         <Route path='sign-up' element={
           <ProtectAuthPage>
           <SignUp role={'admin'} useSignup={useAdminSignupMutation}/>
@@ -100,6 +104,7 @@ const AdminRoutes = ()=>{
           <Route path='courses' element={<CourseList/>}/>
           <Route path='coupon' element={<CouponList/>}/>
           <Route path='orders' element={<Orders/>}/>
+          <Route path='transactions' element={<Transaction/>} />
           <Route path='notification' element={<Notification/>}/>
           <Route path='students' element={<StudentsLayout/>}>
             <Route index element={<StudentList/>}/>
