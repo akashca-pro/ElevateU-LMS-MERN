@@ -202,7 +202,7 @@ export const enrollInCourse = async (req,res) => {
 
         const orderDetails = await Order.findOne({ userId, courseId })
 
-        if(!orderDetails.paymentStatus === 'success')
+        if(!orderDetails || orderDetails.paymentStatus !== 'success')
             return ResponseHandler.error(res, 'Payment is not done', HttpStatus.BAD_REQUEST);
 
         await handleTransactionAndWalletUpdate({

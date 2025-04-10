@@ -99,7 +99,7 @@ export const loadTransactionList = async (req,res) => {
                 date : transaction.createdAt,
                 amount : type === 'course_purchase' ? transaction.amount.courseAmount : transaction.amount.tutorPayout,
                 type : transaction.type,
-                status : transaction.type,
+                status : 'completed',
                 users,
                 course,
                 order

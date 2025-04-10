@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator"
 import { Download, Copy, CheckCircle, Clock } from "lucide-react"
 import { formatCurrency, formatDate } from "../utils"
 import { useState } from "react"
+import { toast } from "sonner"
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -23,9 +24,10 @@ const cardVariants = {
 export default function OrderInfoCard({ order }) {
   const [copied, setCopied] = useState(false)
 
-  const copyToClipboard = (text) => {
+  const copyToClipboard = (text, field) => {
     navigator.clipboard.writeText(text)
     setCopied(true)
+    toast.info('ID copied',{ description : `${field} copied to clipboard` })
     setTimeout(() => setCopied(false), 2000)
   }
 
@@ -56,7 +58,7 @@ export default function OrderInfoCard({ order }) {
                   <div className="flex items-center gap-1">
                     <span className="font-medium">{order.orderId}</span>
                     <button
-                      onClick={() => copyToClipboard(order.orderId)}
+                      onClick={() => copyToClipboard(order.orderId,'Order ID')}
                       className="text-muted-foreground hover:text-primary transition-colors"
                     >
                       {copied ? (
@@ -83,7 +85,7 @@ export default function OrderInfoCard({ order }) {
                   <div className="flex items-center gap-1">
                     <span className="font-medium">{order.razorpayId}</span>
                     <button
-                      onClick={() => copyToClipboard(order.razorpayId)}
+                      onClick={() => copyToClipboard(order.razorpayId,'RazorPay ID')}
                       className="text-muted-foreground hover:text-primary transition-colors"
                     >
                       {copied ? (
@@ -101,14 +103,14 @@ export default function OrderInfoCard({ order }) {
                   <span className="text-muted-foreground">Status:</span>
                   <Badge
                     className={
-                      order.status === "completed"
+                      order.status === "success"
                         ? "bg-green-500"
                         : order.status === "pending"
                           ? "bg-amber-500"
                           : "bg-red-500"
                     }
                   >
-                    {order.status === "completed" ? (
+                    {order.status === "success" ? (
                       <CheckCircle className="h-3.5 w-3.5 mr-1" />
                     ) : (
                       <Clock className="h-3.5 w-3.5 mr-1" />

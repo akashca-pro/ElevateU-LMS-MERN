@@ -19,26 +19,20 @@ export default function TransactionTable({ transactions, onViewDetails, setCurre
   const itemsPerPage = 10
 
   // Calculate pagination
-  const totalPages = Math.ceil(transactions.length / itemsPerPage)
+  const totalPages = Math.ceil(transactions?.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
-  const paginatedTransactions = transactions.slice(startIndex, startIndex + itemsPerPage)
+  const paginatedTransactions = transactions?.slice(startIndex, startIndex + itemsPerPage)
 
   // Get transaction type badge
   const getTransactionBadge = (type) => {
     switch (type.toLowerCase()) {
-      case "purchase":
+      case "course_purchase":
         return (
           <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
             Purchase
           </Badge>
         )
-      case "refund":
-        return (
-          <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">
-            Refund
-          </Badge>
-        )
-      case "payout":
+      case "tutor_withdrawal":
         return (
           <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
             Payout
@@ -55,7 +49,7 @@ export default function TransactionTable({ transactions, onViewDetails, setCurre
   }
 
   // Empty state
-  if (transactions.length === 0) {
+  if (transactions?.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <div className="bg-muted rounded-full p-3 mb-4">
@@ -85,7 +79,7 @@ export default function TransactionTable({ transactions, onViewDetails, setCurre
           </TableHeader>
           <TableBody>
             <AnimatePresence mode="wait">
-              {paginatedTransactions.map((transaction) => (
+              {paginatedTransactions?.map((transaction) => (
                 <motion.tr
                   key={transaction.id}
                   initial={{ opacity: 0, y: 10 }}
@@ -100,10 +94,10 @@ export default function TransactionTable({ transactions, onViewDetails, setCurre
                   <TableCell>{getTransactionBadge(transaction.type)}</TableCell>
                   <TableCell>
                     <div className="flex -space-x-2 overflow-hidden">
-                      {transaction.users.slice(0, 3).map((user, index) => (
+                      {transaction?.users.slice(0, 3).map((user, index) => (
                         <Avatar key={index} className="h-8 w-8 border-2 border-background">
-                          <AvatarImage src={user.profileImage} alt={user.name} />
-                          <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                          <AvatarImage src={user?.profileImage} alt={user.name} />
+                          <AvatarFallback>{user?.firstName.charAt(0)}</AvatarFallback>
                         </Avatar>
                       ))}
                       {transaction.users.length > 3 && (

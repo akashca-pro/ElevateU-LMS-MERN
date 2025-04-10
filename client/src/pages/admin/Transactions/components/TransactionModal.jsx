@@ -90,10 +90,11 @@ export default function TransactionModal({ isOpen, onClose, transaction }) {
 
               <div className="px-6 pb-6">
                 <Tabs defaultValue="users">
-                  <TabsList className="grid w-full grid-cols-3 mb-6">
+                  <TabsList
+                   className={`grid w-full ${transaction?.type === 'course_purchase' ? 'grid-cols-3' : 'grid-cols-1'}  mb-6`}>
                     <TabsTrigger value="users">User Details</TabsTrigger>
-                    <TabsTrigger value="course">Course Details</TabsTrigger>
-                    <TabsTrigger value="order">Order Details</TabsTrigger>
+                    { transaction?.course && <TabsTrigger value="course">Course Details</TabsTrigger>}
+                    { transaction?.order && <TabsTrigger value="order">Order Details</TabsTrigger>}
                   </TabsList>
 
                   <TabsContent value="users" className="mt-0">
@@ -104,13 +105,13 @@ export default function TransactionModal({ isOpen, onClose, transaction }) {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="course" className="mt-0">
+                  { transaction?.course && <TabsContent value="course" className="mt-0">
                     <CourseInfoCard course={transaction.course} />
-                  </TabsContent>
+                  </TabsContent>}
 
-                  <TabsContent value="order" className="mt-0">
+                  { transaction?.order && <TabsContent value="order" className="mt-0">
                     <OrderInfoCard order={transaction.order} />
-                  </TabsContent>
+                  </TabsContent>}
                 </Tabs>
               </div>
             </motion.div>

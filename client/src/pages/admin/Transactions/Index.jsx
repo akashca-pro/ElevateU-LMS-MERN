@@ -38,25 +38,26 @@ export default function TransactionsPage() {
   const [activeTab, setActiveTab] = useState("all")
   const [dateFilter, setDateFilter] = useState("all")
 
-  const { data } = useLoadTransactionsQuery(currentPage)
+  const { data, refetch } = useLoadTransactionsQuery(currentPage)
 
-  console.log(data)
+  const transactions = data?.data?.transactions
+  console.log(data?.data?.transactions)
 
   // Filter transactions based on search query, tab, and date filter
-  const filteredTransactions = mockTransactions.filter((transaction) => {
+  const filteredTransactions = transactions?.filter((transaction) => {
     // Search filter
     const matchesSearch =
-      transaction.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      transaction.users.some(
+      transaction?.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      transaction?.users.some(
         (user) =>
-          user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
           user.email.toLowerCase().includes(searchQuery.toLowerCase()),
       ) ||
-      transaction.course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      transaction.order.orderId.toLowerCase().includes(searchQuery.toLowerCase())
+      transaction?.course?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      transaction?.order?.orderId.toLowerCase().includes(searchQuery.toLowerCase())
 
     // Tab filter
-    const matchesTab = activeTab === "all" || transaction.type.toLowerCase() === activeTab.toLowerCase()
+    const matchesTab = activeTab === "all" || transaction?.type.toLowerCase() === activeTab.toLowerCase()
 
     // Date filter (simplified for demo)
     let matchesDate = true
@@ -79,6 +80,7 @@ export default function TransactionsPage() {
 
   const handleViewDetails = (transaction) => {
     setSelectedTransaction(transaction)
+    console.log(transaction)
     setIsModalOpen(true)
   }
 
@@ -99,7 +101,9 @@ export default function TransactionsPage() {
                   <CardDescription>A complete list of all transactions processed through the platform.</CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="h-8 gap-1">
+                  <Button 
+                  onClick={()=>refetch()}
+                  variant="outline" size="sm" className="h-8 gap-1">
                     <RefreshCw className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">Refresh</span>
                   </Button>
@@ -141,16 +145,16 @@ export default function TransactionsPage() {
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="all">All</TabsTrigger>
-                    <TabsTrigger value="purchase">Purchases</TabsTrigger>
-                    <TabsTrigger value="payout">Payouts</TabsTrigger>
+                    <TabsTrigger value="course_purchase">Purchases</TabsTrigger>
+                    <TabsTrigger value="tutor_withdrawal">Payouts</TabsTrigger>
                   </TabsList>
                   <TabsContent value="all" className="mt-4">
                     <TransactionTable transactions={filteredTransactions} onViewDetails={handleViewDetails} setCurrentPage={setCurrentPage} currentPage={currentPage}/>
                   </TabsContent>
-                  <TabsContent value="purchase" className="mt-4">
+                  <TabsContent value="course_purchase" className="mt-4">
                     <TransactionTable transactions={filteredTransactions} onViewDetails={handleViewDetails} setCurrentPage={setCurrentPage} currentPage={currentPage}/>
                   </TabsContent>
-                  <TabsContent value="payout" className="mt-4">
+                  <TabsContent value="tutor_withdrawal" className="mt-4">
                     <TransactionTable transactions={filteredTransactions} onViewDetails={handleViewDetails} setCurrentPage={setCurrentPage} currentPage={currentPage}/>
                   </TabsContent>
                 </Tabs>

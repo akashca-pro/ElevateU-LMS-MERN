@@ -83,7 +83,6 @@ const WalletPage = () => {
 
   // Handle withdrawal request
   const handleWithdrawal = async(data) => {
-    console.log("Withdrawal requested:", data)
     try {
       await requestWithdraw({formData : data}).unwrap()
       withdrawRef.current?.triggerSuccess();

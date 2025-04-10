@@ -18,7 +18,7 @@ courseTitleExist,
 } from '../controllers/course/tutorOps.js'
 import passport from 'passport';
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js';
-import { loadWalletDetails } from '../controllers/wallet/common.js';
+import { loadWalletDetails } from '../controllers/transactions.js';
 import { addBankAccountDetails, intiateWithdrawalRequest, loadExistingBankDetails, loadWithdrawalRequest } from '../controllers/wallet/tutorWallet.js';
 
 

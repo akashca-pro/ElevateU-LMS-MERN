@@ -1,12 +1,12 @@
-import Admin from "../../model/admin.js";
-import Transaction from "../../model/transaction.js";
-import Tutor from "../../model/tutor.js";
-import Wallet from "../../model/wallet.js";
-import WithdrawalRequest from "../../model/withdrawRequest.js";
-import { saveNotification, sendNotification } from "../../utils/LiveNotification.js";
-import ResponseHandler from "../../utils/responseHandler.js";
-import HttpStatus from "../../utils/statusCodes.js";
-import { STRING_CONSTANTS } from "../../utils/stringConstants.js";
+import Admin from "../model/admin.js";
+import Transaction from "../model/transaction.js";
+import Tutor from "../model/tutor.js";
+import Wallet from "../model/wallet.js";
+import WithdrawalRequest from "../model/withdrawRequest.js";
+import { saveNotification, sendNotification } from "../utils/LiveNotification.js";
+import ResponseHandler from "../utils/responseHandler.js";
+import HttpStatus from "../utils/statusCodes.js";
+import { STRING_CONSTANTS } from "../utils/stringConstants.js";
 
 const roleModels = {
     Tutor : Tutor,
@@ -189,7 +189,7 @@ export const loadWithdrawRequests = async (req,res) => {
 
 }
 
-// approve or reject withdraw request
+// approve or reject withdraw request , if approve start withraw transction for tutor
 
 export const approveOrRejectWithdrawRequest = async (req,res) => {
     
@@ -245,3 +245,34 @@ export const approveOrRejectWithdrawRequest = async (req,res) => {
     }
 
 }
+
+// withdrawal for admin
+
+export const adminWithdrawAmount = async (req,res) => {
+    
+    try {
+        const adminId = req.admin.id;
+        const { formData } = req.body;
+
+        if(!formData)
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND,HttpStatus.BAD_REQUEST)
+        
+        const wallet = await Wallet.findOne({ userId : adminId, userModel : 'Admin' });
+
+        if(!wallet)
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+        if(wallet.balance < formData.amount)
+            return ResponseHandler.error(res, STRING_CONSTANTS.INSUFFICIENT_FUNDS, HttpStatus.BAD_REQUEST);
+
+        await handleWithdrawalTransaction({ role : 'Admin', id : adminId, amount : formData?.amount })
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.WITHDRAW_SUCCESS,HttpStatus.OK)
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.SERVER,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+}
+

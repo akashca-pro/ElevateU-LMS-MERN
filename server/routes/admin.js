@@ -21,8 +21,7 @@ import { loadNotifications, readNotifications } from '../controllers/notificatio
 import { validateForm } from '../middleware/validation.js'
 import { createCoupon, deleteCoupon, loadCoupons, updateCoupons } from '../controllers/admin/adminCouponOps.js'
 import { loadOrderDetails } from '../controllers/order/adminOrderOps.js'
-import { approveOrRejectWithdrawRequest, loadWalletDetails, loadWithdrawRequests } from '../controllers/wallet/common.js'
-import { withdrawAmount } from '../controllers/wallet/adminWallet.js'
+import { adminWithdrawAmount, approveOrRejectWithdrawRequest, loadWalletDetails, loadWithdrawRequests } from '../controllers/transactions.js'
 import { loadTransactionList } from '../controllers/admin/transactions.js'
 
 const router = express.Router()
@@ -102,7 +101,7 @@ router.get('/orders',verifyAccessToken('admin'),loadOrderDetails);
 // wallet
 
 router.get('/wallet',verifyAccessToken('admin'),loadWalletDetails('Admin'))
-router.post('/wallet/withdraw',verifyAccessToken('admin'),withdrawAmount)
+router.post('/wallet/withdraw',verifyAccessToken('admin'),adminWithdrawAmount)
 
 // withdraw request
 

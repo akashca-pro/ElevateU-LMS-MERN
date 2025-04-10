@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Mail, Phone, MapPin, ExternalLink } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -19,6 +20,7 @@ const cardVariants = {
 }
 
 export default function UserInfoCard({ user, role }) {
+  const navigate = useNavigate()
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible">
       <Card className="overflow-hidden">
@@ -26,8 +28,8 @@ export default function UserInfoCard({ user, role }) {
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-shrink-0">
               <Avatar className="h-20 w-20 border-2 border-muted">
-                <AvatarImage src={user.profileImage} alt={user.name} />
-                <AvatarFallback className="text-2xl">{user.name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={user?.profileImage} alt={user?.firstName} />
+                <AvatarFallback className="text-2xl">{user?.firstName.charAt(0)}</AvatarFallback>
               </Avatar>
             </div>
 
@@ -35,15 +37,17 @@ export default function UserInfoCard({ user, role }) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-lg">{user.name}</h3>
+                    <h3 className="font-semibold text-lg">{user?.firstName}</h3>
                     <Badge variant="outline" className="ml-2">
                       {role}
                     </Badge>
                   </div>
-                  <p className="text-muted-foreground text-sm">{user.email}</p>
+                  <p className="text-muted-foreground text-sm">{user?.email}</p>
                 </div>
 
-                <Button variant="outline" size="sm" className="gap-1 sm:self-start">
+                <Button 
+                onClick={()=>navigate(`/admin/profile/${role === 'Seller' ? 'tutors' : 'students' }/${user._id}`)}
+                 variant="outline" size="sm" className="gap-1 sm:self-start">
                   <ExternalLink className="h-3.5 w-3.5" />
                   View Profile
                 </Button>
@@ -66,7 +70,7 @@ export default function UserInfoCard({ user, role }) {
 
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Mail className="h-3.5 w-3.5" />
-                  <span>{user.email}</span>
+                  <span>{user?.email}</span>
                 </div>
               </div>
 
