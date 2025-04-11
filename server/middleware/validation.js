@@ -56,7 +56,7 @@ const roleValidations = {
         body('courseDetails.title')
         .trim()
         .isLength({ min : 5 })
-        .withMessage('Course title is required'),
+        .withMessage('Course title is required and atleast 5 characters'),
 
         body('courseDetails.description')
         .trim()

@@ -7,19 +7,31 @@ import { ImageUpload } from "../ImageUpload"
 import { useLoadCategoriesQuery } from '@/services/commonApi'
 import { useTutorCheckTitleCourseQuery } from '@/services/TutorApi/tutorCourseApi'
 import { useEffect, useState } from "react"
+import { useFieldArray } from "react-hook-form"
+import { Plus, X } from "lucide-react"
 
-export function StepBasicDetails({ form, nextStep ,setCategoryName}) {
+export function StepBasicDetails({ form, nextStep ,setCategoryName, titleError , setTitleError}) {
+
+  const {  
+    fields : whatYouLearnField,
+    append : appendWhatYouLearn,
+    remove : removeWhatYouLearn
+  } = useFieldArray({
+    control: form.control,
+    name: "whatYouLearn",
+  })
+
   const { data : details } = useLoadCategoriesQuery()
   const categories = details?.data;
 
   const title = form.watch('title');
 
-  const { error : titleCheck } = useTutorCheckTitleCourseQuery(
-    title?.length > 2 ? title : '',
-    {skip : !title || title.length < 3}
-  )
+  const encodedTitle = title ? encodeURIComponent(title) : '';
 
-  const [titleError,setTitleError] = useState('')
+  const { error: titleCheck } = useTutorCheckTitleCourseQuery(
+    encodedTitle,
+    { skip: !title || title.trim().length < 1 } 
+  );
 
   useEffect(()=>{
       if(titleCheck?.status === 409){
@@ -37,7 +49,6 @@ export function StepBasicDetails({ form, nextStep ,setCategoryName}) {
       }
     })
   }
-
 
   return (
     <div className="space-y-6">
@@ -122,6 +133,44 @@ export function StepBasicDetails({ form, nextStep ,setCategoryName}) {
           </FormItem>
         )}
       />
+
+    <div className="space-y-2">
+          <FormLabel>What you'll learn (description)</FormLabel>
+          <FormDescription>List the things can be learned from this course</FormDescription>
+
+          <div className="space-y-2">
+            {whatYouLearnField.map((field, index) => (
+              <div key={field.id} className="flex items-center gap-2">
+                <FormField
+                  control={form.control}
+                  name={`whatYouLearn.${index}`}
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormControl>
+                        <Input placeholder={`Goal ${index + 1}`} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeWhatYouLearn(index)}
+                  className="h-8 w-8 text-destructive"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          <Button type="button" variant="outline" size="sm" onClick={() => appendWhatYouLearn("")} className="mt-2">
+            <Plus className="mr-2 h-3 w-3" />
+            Add Goal
+          </Button>
+        </div>
 
       <div className="flex justify-end">
         <Button type="button" onClick={handleNext}>

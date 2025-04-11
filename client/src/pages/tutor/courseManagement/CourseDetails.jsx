@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AlertCircle, Edit2, Plus, Clock, Users, BookOpen, Award, Copy, Car, X } from "lucide-react"
+import { AlertCircle, Edit2, Plus, Clock, Users, BookOpen, Award, Copy, Car, X, Trash2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { useTutorLoadCourseQuery, useTutorUpdateCourseMutation, useTutorDeleteCourseMutation, 
@@ -84,6 +84,7 @@ const CourseDetails = () => {
        
       const errors = validateUpdatedData(course)
       setFormErrors(errors)
+      console.log(course)
       await updateCourse({formData : course}).unwrap()
       toast.success('Data updated successfully',{id : toastId});
       setIsEditing(false)
@@ -181,7 +182,25 @@ const CourseDetails = () => {
     setCourse(courseCopy);
     setIsDataChanged(true)
   }
+
+  const handleRemoveModule = (moduleIndex) => {
+    // if(lockedModules.has(index)) return 
+
+    const courseCopy = JSON.parse(JSON.stringify(course));
+    courseCopy.modules.splice(moduleIndex,1);
+    setCourse(courseCopy)
+    setIsDataChanged(true)
+  }
   
+  const handleRemoveLesson = (moduleIndex, lessonIndex) => {
+    // if(lockedLessons.has(`${moduleIndex}-${lessonIndex}`)) return 
+
+    const courseCopy = JSON.parse(JSON.stringify(course))
+    courseCopy.modules[moduleIndex].lessons.splice(lessonIndex,1);
+    setCourse(courseCopy)
+    setIsDataChanged(true)
+  }
+
   const handleDeleteCourse = async() =>{
     const toastId = toast.loading('Deleting course . . .');
       try {
@@ -677,13 +696,25 @@ const CourseDetails = () => {
                             </p>
                     </div>
                           </div>
+                          {isEditing && (
+                      <Button onClick={()=>handleRemoveLesson(moduleIndex,lessonIndex)} className="mt-4" variant='destructive'>
+                        <Trash2/> Remove lesson
+                      </Button>
+                    )}
                         </div>
                       ))}
+                      <div className="flex justify-between items-center w-full mt-2" >
                       {isEditing && (
                         <Button onClick={() => handleAddLesson(moduleIndex)} variant="outline" className="mt-2">
                           <Plus className="mr-2 h-4 w-4" /> Add Lesson
                         </Button>
                       )}
+                      {isEditing && (
+                        <Button onClick={() => handleRemoveModule(moduleIndex)} variant="destructive" className="mt-2">
+                          <Trash2 className="mr-2 h-4 w-4" /> Remove module
+                        </Button>
+                      )}
+                      </div>
                     </AccordionContent>
                   </AccordionItem>
                 ))}

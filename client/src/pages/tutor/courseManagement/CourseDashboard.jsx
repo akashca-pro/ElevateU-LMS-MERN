@@ -12,7 +12,6 @@ import { FilterBox } from "@/components/FilterBox";
 import LoadingSpinner from "@/components/FallbackUI/LoadingSpinner";
 import ErrorComponent from "@/components/FallbackUI/ErrorComponent";
 
-
 export default function Index() {
   const { data : details } = useLoadCategoriesQuery()
   const categoryData = details?.data;
@@ -23,7 +22,6 @@ export default function Index() {
   const [currentPage, setCurrentPage] = useState(1)
   const [filteredQuery,setFilteredQuery] = useState('latest')
   const limit = 7
-  const { courseName } = useParams()
 
   const {data : courses, isLoading, error , refetch , status} = useTutorLoadCoursesQuery({
     page : currentPage,
@@ -71,7 +69,7 @@ export default function Index() {
     </div>
 
       {/* Course Grid */}
-      {error ? 
+      { !(data?.courses.length > 0) ? 
       <p
       className="text-xl font-semibold text-gray-600 bg-gray-100 p-4 rounded-lg shadow-md text-center"
     >
@@ -129,14 +127,6 @@ export default function Index() {
                     <BarChart3 size={16} /> View Analytics
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                   {/* <DeleteDialog 
-                   btnClass={"flex gap-2 text-red-500"} 
-                   btnName={'delete'} 
-                   credentials={''}
-                   onSuccess={''}
-                   deleteApi={useTutorDeleteCourseMutation}
-                   
-                   /> */}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -146,7 +136,7 @@ export default function Index() {
       </div> 
        }
 
-      <div className="mt-6 flex items-center justify-center gap-2 flex-wrap">
+      { data?.courses.length > 0 && <div className="mt-6 flex items-center justify-center gap-2 flex-wrap">
         <button
           className="rounded-lg p-2 hover:bg-gray-100 disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -172,7 +162,7 @@ export default function Index() {
         >
           <ChevronRight className="h-5 w-5 text-gray-600" />
         </button>
-      </div>
+      </div>}
 
     </div>
     

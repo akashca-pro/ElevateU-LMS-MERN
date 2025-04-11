@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { UserCircle, ShoppingCart, MessageSquare, LogOut, Menu, X, Search } from "lucide-react"; 
+import { UserCircle, ShoppingCart, MessageSquare, LogOut, Menu, X } from "lucide-react"; 
 import { useSelect } from "@/hooks/useSelect";
 import { useUserAuthActions, useTutorAuthActions, useAdminAuthActions } from "@/hooks/useDispatch";
 import { useTutorLogoutMutation } from '@/services/TutorApi/tutorAuthApi';
@@ -11,7 +11,6 @@ import Notification from "./Notification";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlobalSearch } from "./Search";
-import { formatUrl } from "@/utils/formatUrls";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -23,11 +22,12 @@ const Navbar = () => {
   const role = user.isAuthenticated ? "user" : tutor.isAuthenticated ? "tutor" : admin.isAuthenticated ? 'admin' : null;
   const roleData = user.isAuthenticated ? user.userData : tutor.isAuthenticated ? tutor.tutorData : admin.isAuthenticated ? admin.adminData : null;
   
-  const { data : cartDetails } = useUserLoadCartQuery(undefined,
-    { refetchOnMountOrArgChange : true ,
-      skip : tutor.isAuthenticated || admin.isAuthenticated })
+  const { data : cartDetails } = useUserLoadCartQuery(undefined, {
+    refetchOnMountOrArgChange : true,
+    skip : tutor.isAuthenticated || admin.isAuthenticated
+  });
 
-    const courseName = cartDetails?.data?.course?._id || 'courseId'
+  const courseName = cartDetails?.data?.course?._id || 'courseId';
 
   const { logout: userLogout } = useUserAuthActions();
   const { logout: tutorLogout } = useTutorAuthActions();
@@ -86,7 +86,7 @@ const Navbar = () => {
         {/* Search Bar (Desktop) */}
         <div className="hidden w-full max-w-xl md:flex justify-center px-8">
           <div className="relative w-full">
-            <GlobalSearch onSearch={handleSearch}  />
+            <GlobalSearch onSearch={handleSearch} />
           </div>
         </div>
 
@@ -94,12 +94,16 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
           {user.isAuthenticated || tutor.isAuthenticated || admin.isAuthenticated ? (
             <>
-              { user.isAuthenticated && <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-                <Link to={`/explore/courses/${courseName}/checkout`} className="hidden text-gray-600 hover:text-purple-600 md:block">
-                  <ShoppingCart className="h-6 w-6" />
-                </Link>
-              </motion.div>}
+              {/* Cart */}
+              {user.isAuthenticated && (
+                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                  <Link to={`/explore/courses/${courseName}/checkout`} className="hidden text-gray-600 hover:text-purple-600 md:block">
+                    <ShoppingCart className="h-6 w-6" />
+                  </Link>
+                </motion.div>
+              )}
 
+              {/* Messages */}
               {!admin.isAuthenticated && (
                 <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                   <Link to={user.isAuthenticated ? `/user/profile/messages` : `/tutor/profile/messages`} className="hidden text-gray-600 hover:text-purple-600 md:block">
@@ -108,14 +112,19 @@ const Navbar = () => {
                 </motion.div>
               )}
 
+              {/* Profile */}
               <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                 <Link to={`/${role}/profile`} className="hidden text-gray-600 hover:text-purple-600 md:block">
                   <UserCircle className="h-6 w-6" />
                 </Link>
               </motion.div>
 
-              <Notification role={role} userId={roleData} />
+              {/* Notification (Desktop Only) */}
+              <div className="hidden md:block">
+                <Notification role={role} userId={roleData} />
+              </div>
 
+              {/* Logout */}
               <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                 <button onClick={handleLogout} className="hidden text-gray-600 hover:text-red-600 md:block">
                   <LogOut className="h-6 w-6" />
@@ -132,6 +141,15 @@ const Navbar = () => {
               </Link>
             </div>
           )}
+
+          {/* Notification (Mobile Only) */}
+          {user.isAuthenticated || tutor.isAuthenticated || admin.isAuthenticated ? (
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+              <div className="md:hidden">
+                <Notification role={role} userId={roleData} />
+              </div>
+            </motion.div>
+          ) : null}
 
           {/* Mobile Menu Button */}
           <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>

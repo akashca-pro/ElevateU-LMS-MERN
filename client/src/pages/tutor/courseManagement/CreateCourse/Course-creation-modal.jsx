@@ -19,6 +19,7 @@ const courseFormSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters"),
   category: z.string().min(1, "Please select a category"),
   thumbnail: z.string().min(1, 'Thumbnail is required'),
+  whatYouLearn : z.array(z.string()).default([]),
   modules: z
     .array(
       z.object({
@@ -48,6 +49,7 @@ const courseFormSchema = z.object({
 
 
 export function CourseCreationModal({ isOpen, onClose }) {
+  const [titleError,setTitleError] = useState('')
   const [categoryName,setCategoryName] = useState(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [createCourse] = useTutorCreateCourseMutation()
@@ -59,6 +61,7 @@ export function CourseCreationModal({ isOpen, onClose }) {
     description: "",
     category: "",
     thumbnail: "",
+    whatYouLearn : [""],
     modules: [{ title: "", lessons: [{ title: "", videoUrl: "", attachments: [] }] }],
     price: 0,
     isFree: false,
@@ -95,6 +98,10 @@ export function CourseCreationModal({ isOpen, onClose }) {
   const onSubmit = async (data) => {
     const toastId = toast.loading('Please wait . . . ');
     try {
+      if(titleError){
+        toast.error('Course is already exist with the same title',{id : toastId})
+        return
+      }
       console.log("Form submitted:", data)
       await createCourse({formData : data , draft : false}).unwrap()
       reset(defaultValues);
@@ -125,6 +132,9 @@ export function CourseCreationModal({ isOpen, onClose }) {
       if(!data.title){
         toast.error('Atleast Course Title required to make a draft',{id : toastId})
         return
+      }else if(titleError){
+        toast.error('Course is already exist with the same title',{id : toastId})
+        return
       }
       await createCourse({formData : data, draft : true }).unwrap()
       toast.success('Data saved as draft',{id : toastId})
@@ -148,7 +158,7 @@ export function CourseCreationModal({ isOpen, onClose }) {
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-6">
-              {step === 1 && <StepBasicDetails form={form} nextStep={nextStep} setCategoryName={setCategoryName}/>}
+              {step === 1 && <StepBasicDetails form={form} nextStep={nextStep} setCategoryName={setCategoryName} titleError = {titleError} setTitleError={setTitleError} />}
               {step === 2 && <StepContent form={form} nextStep={nextStep} prevStep={prevStep} />}
               {step === 3 && <StepPricing form={form} nextStep={nextStep} prevStep={prevStep} />}
               {step === 4 && <StepPublish form={form} prevStep={prevStep} onSubmit={form.handleSubmit(onSubmit)} categoryName={categoryName}/>}

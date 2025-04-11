@@ -73,6 +73,7 @@ const courseSchema = new mongoose.Schema(
       hasCertification : { type : Boolean , default : false},
       
       draft : { type : Boolean, default : false },
+
     },
     { timestamps: true }
   );

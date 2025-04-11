@@ -1,12 +1,14 @@
 import Course from '../../model/course.js'
 import Tutor from '../../model/tutor.js'
 import Admin from '../../model/admin.js'
-import Notification from '../../model/notification.js'
 import ResponseHandler from '../../utils/responseHandler.js'
 import HttpStatus from '../../utils/statusCodes.js'
 import { STRING_CONSTANTS } from '../../utils/stringConstants.js'
-import { connectedUsers } from '../../services/socketServer.js'
 import { saveNotification, sendNotification } from '../../utils/LiveNotification.js'
+
+function normalizeTitle(title) {
+    return title.trim().replace(/\s+/g, ' ').toLowerCase();
+}
 
 // create a course
 export const createCourse = async (req,res) => {
@@ -129,6 +131,25 @@ export const updateCourse = async (req, res) => {
       if (!course) 
         return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
 
+
+      const incompleteModule = formData.modules.some(module => {
+        // If module title is missing, it's incomplete
+        if (!module.title.trim()) return true;
+      
+        // If no lessons present, it's incomplete
+        if (!Array.isArray(module.lessons) || module.lessons.length === 0) return true;
+      
+        // If any lesson is missing title or videoUrl, it's incomplete
+        const hasInvalidLesson = module.lessons.some(lesson => 
+          !lesson.title?.trim() || !lesson.videoUrl?.trim()
+        );
+      
+        return hasInvalidLesson;
+      });
+
+      if(incompleteModule)
+        return ResponseHandler.error(res, 'Modules should be completed',HttpStatus.BAD_REQUEST)
+
       await Course.findOneAndUpdate({ _id : courseId},formData);
   
       return ResponseHandler.success(res,STRING_CONSTANTS.UPDATION_SUCCESS, HttpStatus.OK);
@@ -218,10 +239,14 @@ export const courseTitleExist = async (req,res) => {
     
     try {
         const tutorId = req.tutor.id;
-        const title = req.params.title;
+        const {title} = req.query
 
-        const titleExist = await Course.findOne({title : title , tutor : tutorId})
-        if(titleExist)
+        const titleExist = await Course.findOne({
+            tutor: tutorId,
+            title: { $regex: `^${title}$`, $options: 'i' }
+          });
+        
+        if(titleExist && titleExist.title.toLowerCase() === title.toLowerCase())
             return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT)
 
         return ResponseHandler.success(res, undefined, HttpStatus.OK)
