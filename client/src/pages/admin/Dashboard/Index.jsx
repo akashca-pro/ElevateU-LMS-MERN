@@ -1,5 +1,6 @@
 import { ChevronDown } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import TopAnalytics from "./TopAnalytics"
 
 const data = [
   { month: "Jan", income: 65, profit: 40 },
@@ -37,7 +38,7 @@ const metrics = [
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl space-y-8">
         <h1 className="text-2xl font-semibold">Dashboard</h1>
 
@@ -108,7 +109,12 @@ const Index = () => {
               <span className="text-sm text-gray-500">Profit</span>
             </div>
           </div>
+
         </div>
+        {/* Top 10  */}
+
+        <TopAnalytics/>
+
       </div>
     </div>
   )

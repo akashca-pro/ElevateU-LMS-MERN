@@ -84,7 +84,6 @@ const CourseDetails = () => {
        
       const errors = validateUpdatedData(course)
       setFormErrors(errors)
-      console.log(course)
       await updateCourse({formData : course}).unwrap()
       toast.success('Data updated successfully',{id : toastId});
       setIsEditing(false)

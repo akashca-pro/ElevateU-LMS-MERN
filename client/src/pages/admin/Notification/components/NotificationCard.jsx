@@ -16,7 +16,6 @@ export function NotificationCard() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Tutor verification requests */}
 
       <TutorVerificationRequest VerificationRequests={VerificationRequests}
        refetchVerificationRequest={refetchVerificationRequest} 

@@ -84,6 +84,8 @@ export const STRING_CONSTANTS = {
     INVALID_ACTION_TYPE : 'Invalid action type',
     LOAD_TRANSACTION_SUCCESS : 'Load transaction success',
     LOAD_TRANSACTION_FAILED : 'Load transaction failed',
+    LOAD_BEST_SELLING_COURSE_SUCCESS : 'Load best selling course success',
+    LOAD_BEST_SELLING_COURSE_ERROR : 'Load best selling course failed'
 }
 
 export const DATABASE_FIELDS = {
