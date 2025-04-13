@@ -1,6 +1,7 @@
 import AppliedCoupon from "../../model/AppliedCoupons.js";
 import Coupon from "../../model/coupon.js";
 import Course from "../../model/course.js";
+import EnrolledCourse from "../../model/enrolledCourses.js";
 import Order from "../../model/order.js";
 import { generateSignature, razorpayOrder } from "../../utils/razorPay.js";
 import ResponseHandler from "../../utils/responseHandler.js";
@@ -39,6 +40,11 @@ export const createOrder = async (req,res) => {
         
         if(!courseId || !userData )
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.BAD_REQUEST);
+
+        const isAlreadyEnrolled = await EnrolledCourse.findOne({ userId : userData._id , courseId})
+
+        if(isAlreadyEnrolled)
+            return ResponseHandler.error(res, STRING_CONSTANTS.COURSE_ALREADY_ENROLLED, HttpStatus.BAD_REQUEST)
         
         const course = await Course.findById(courseId);
         
@@ -103,6 +109,7 @@ export const createOrder = async (req,res) => {
         const order = await Order.create({
             userId : userData._id,
             courseId,
+            categoryId : course.category,
             userData : {
                 name : userData.name,
                 email : userData.email,

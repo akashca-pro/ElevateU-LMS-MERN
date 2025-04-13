@@ -9,6 +9,7 @@ import { useTutorCheckTitleCourseQuery } from '@/services/TutorApi/tutorCourseAp
 import { useEffect, useState } from "react"
 import { useFieldArray } from "react-hook-form"
 import { Plus, X } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
 
 export function StepBasicDetails({ form, nextStep ,setCategoryName, titleError , setTitleError}) {
 
@@ -118,6 +119,30 @@ export function StepBasicDetails({ form, nextStep ,setCategoryName, titleError ,
           </FormItem>
         )}
       />
+
+        <FormField
+          control={form.control}
+          name="hasCertification"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>
+                  Enable Certificate
+                </FormLabel>
+                <FormDescription>
+                  Not sure yet? No worries — you can toggle this anytime in your course settings.
+                </FormDescription>
+              </div>
+            </FormItem>
+          )}
+        />
+
 
       <FormField
         control={form.control}

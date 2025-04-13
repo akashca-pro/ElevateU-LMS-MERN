@@ -5,8 +5,8 @@ import { Search } from "lucide-react";
 
 const CoursesFilter = ({ onApplyFilter }) => {
   const [dateRange, setDateRange] = useState({
-    fromDate: undefined,
-    toDate: undefined,
+    fromDate: '',
+    toDate: '',
   });
 
   const handleApplyFilter = () => {

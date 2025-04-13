@@ -89,8 +89,8 @@ const userCourseApi = apiSlice.injectEndpoints({
             invalidatesTags : ['User']
         }),
         userLoadCart : builder.query({
-            query : ()=>({
-                url : `user/cart`,
+            query : (courseId)=>({
+                url : `user/cart/${courseId}`,
                 method : 'GET'
             }),
             invalidatesTags : ['User']

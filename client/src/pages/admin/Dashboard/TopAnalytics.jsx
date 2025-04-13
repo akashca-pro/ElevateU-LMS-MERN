@@ -1,51 +1,29 @@
-import { useEffect, useState } from "react"
-import { topProducts, topCategories, topBrands } from "./mockData.js"
+import { useState } from "react"
 import TopSellersCarousel from "./TopSellersCarousel.jsx"
 import { Card } from "@/components/ui/card"
-import { useBestSellingCoursesQuery } from '@/services/adminApi/adminAnalyticsApi.js'
+import { useBestSellingCoursesQuery,useBestSellingCategoriesQuery } from '@/services/adminApi/adminAnalyticsApi.js'
 
 export default function TopAnalytics() {
-  const [bestSellingCourseFilter,setbestSellingCourseFilter] = useState({
+  const [courseFilter,setCourseFilter] = useState({
     fromDate: '', toDate:''
   })
-  const [bestSellingCategoryFilter,setbestSellingCategoryFilter] = useState({
+  const [categoryFilter,setCategoryFilter] = useState({
     fromDate: '', toDate:''
   })
   
-  const { data : courses } = useBestSellingCoursesQuery({...bestSellingCourseFilter})
-
-  const [bestSellingCourse,setBestSellingCourses] = useState([{
-    _id: "",
-    totalSales: 0,
-    title: "",
-    thumbnail: "",
-    description: "",
-    price: 0,
-    isFree: false,
-    level: "",
-    tutorName: "",
-    tutorImage: "",
-    category: "",
-  }])
-
-useEffect(()=>{
-
-  if(courses?.data){
-    setBestSellingCourses(courses?.data)
-  }
-
-},[bestSellingCourseFilter, courses, bestSellingCourse])
+  const { data : courses } = useBestSellingCoursesQuery({...courseFilter})
+  const { data : categories } = useBestSellingCategoriesQuery({...categoryFilter})
 
   return (
     <div className="container mx-auto px-4 py-8">
 
       <div className="space-y-10">
         <Card className="p-6">
-          <TopSellersCarousel title="Top Selling Courses" items={bestSellingCourse} type="product" onApplyFilter={setbestSellingCourseFilter}/>
+          <TopSellersCarousel title="Top Selling Courses" items={courses?.data || []} type="product" onApplyFilter={setCourseFilter}/>
         </Card>
 
         <Card className="p-6">
-          <TopSellersCarousel title="Popular Categories" items={topCategories} type="category" onApplyFilter={bestSellingCategoryFilter}/>
+          <TopSellersCarousel title="Popular Categories" items={categories?.data || []} type="category" onApplyFilter={setCategoryFilter}/>
         </Card>
       </div>
     </div>

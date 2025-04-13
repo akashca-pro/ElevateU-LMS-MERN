@@ -98,7 +98,7 @@ const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
   // Get purpose label
   const getPurposeLabel = () => {
     const purposeMap = {
-      course_purchase: "Course Sale",
+      course_purchase: "Course Purchase",
       affiliate_commission: "Affiliate Commission",
       refund_reversal: "Refund Reversal",
       withdrawal: "Withdrawal",
@@ -182,7 +182,7 @@ const TransactionItem = ({ transaction, isExpanded, onToggle }) => {
                   </div>
                   </div>
 
-                 { transaction?.purpose === 'course_purchase' && <div>
+                 { transaction?.purpose === 'course_purchase' && transaction?.platformFee && <div>
                     <p className="text-muted-foreground mb-1">Platform Fee</p>
                     <p className="font-mono">{transaction?.platformFee}</p>
                   </div>}

@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react"
-import equal from "fast-deep-equal"
 import { useNavigate, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,6 +25,7 @@ import { FileUpload } from "./CreateCourse/FileUpload"
 import { toast } from "sonner"
 import DeleteCourseCard from "./CreateCourse/DeleteCourseCard"
 import validateUpdatedData from "./CreateCourse/validateUpdatedData"
+import { Checkbox } from "@/components/ui/checkbox"
 
 
 const CourseDetails = () => {
@@ -72,7 +72,6 @@ const CourseDetails = () => {
 
   }, [courseDetails, isEditing, categoryDetails]);
 
-
   const handleEdit = () => {
     setIsEditing(true)
     editSectionRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -102,6 +101,12 @@ const CourseDetails = () => {
     const { name, value } = e.target
     setCourse({ ...course, [name]: value })
     setIsDataChanged(true)
+  }
+
+  const handleCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setCourse((prev) => ({ ...prev, [name]: checked }));
+    setIsDataChanged(true);
   }
 
   const handleInputArrayChange = (field, index, value) => {
@@ -517,20 +522,32 @@ const CourseDetails = () => {
                 </Button>
                   </div>
                 ))}
+              <Button type="button" variant="outline" size="sm" 
+              onClick={() => handleInputAddItemsToArray('whatYouLearn')}
+              className="mt-2"
+              disabled={!isEditing}
+              >
+              <Plus className="mr-2 h-3 w-3" />
+              Add Description
+            </Button>
                 <p className={`${formErrors?.whatYouLearn ? 'text-red-500' : 'text-blue-500' } text-sm font-semibold opacity-80`}>
                   {formErrors ? formErrors.whatYouLearn : 'Required Field'} 
                 </p>
-              <br/>
-            <Button type="button" variant="outline" size="sm" 
-            onClick={() => handleInputAddItemsToArray('whatYouLearn')}
-             className="mt-2"
-             disabled={!isEditing}
-             >
-            <Plus className="mr-2 h-3 w-3" />
-            Add Description
-          </Button>
 
               </div>
+
+              <div className="flex items-center space-x-2">
+              <Checkbox
+                disabled={!isEditing}
+                id="hasCertification"
+                name="hasCertification"
+                checked={course.hasCertification}
+                onCheckedChange={(checked) =>
+                  handleCheckboxChange({ target: { name: "hasCertification", checked } })
+                }
+              />
+              <Label htmlFor="hasCertification">Certification Provided</Label>
+            </div>
 
                 <div>
                   <Label htmlFor="category">Category</Label>

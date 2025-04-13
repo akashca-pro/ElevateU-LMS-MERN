@@ -1,42 +1,33 @@
 import { ChevronDown } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import TopAnalytics from "./TopAnalytics"
-
-const data = [
-  { month: "Jan", income: 65, profit: 40 },
-  { month: "Feb", income: 50, profit: 35 },
-  { month: "Mar", income: 45, profit: 30 },
-  { month: "Apr", income: 60, profit: 45 },
-  { month: "May", income: 75, profit: 50 },
-  { month: "Jun", income: 80, profit: 60 },
-  { month: "Jul", income: 77, profit: 65 },
-  { month: "Aug", income: 60, profit: 70 },
-  { month: "Sep", income: 50, profit: 55 },
-  { month: "Oct", income: 70, profit: 45 },
-  { month: "Nov", income: 75, profit: 40 },
-  { month: "Dec", income: 65, profit: 35 },
-]
-
-const metrics = [
-  {
-    value: "$200.00",
-    label: "Total Revenue",
-  },
-  {
-    value: "551",
-    label: "Total Students",
-  },
-  {
-    value: "551",
-    label: "Total Tutors",
-  },
-  {
-    value: "23",
-    label: "Tutors Courses",
-  },
-]
+import { useDashboardMetricsQuery, useRevenueChartQuery } from '@/services/adminApi/adminAnalyticsApi.js'
+import { useState } from "react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const Index = () => {
+  const [year,setYear] = useState(new Date().getFullYear())
+  const { data : revenueData } = useRevenueChartQuery({ year })
+  const { data : details } = useDashboardMetricsQuery()
+  const metrics = [
+    {
+      value: details?.data?.totalEarnings || 0,
+      label: "Total Earnings",
+    },
+    {
+      value: details?.data?.totalStudents || 0,
+      label: "Total Students",
+    },
+    {
+      value: details?.data?.totalTutors || 0,
+      label: "Total Tutors",
+    },
+    {
+      value: details?.data?.totalCourses || 0,
+      label: "Total Courses",
+    },
+  ]
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl space-y-8">
@@ -55,58 +46,46 @@ const Index = () => {
         {/* Chart Section */}
         <div className="rounded-lg border border-gray-100 bg-white p-6">
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Income & Expanse</h2>
-            <button className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-              Yearly
-              <ChevronDown className="h-4 w-4" />
-            </button>
+            <h2 className="text-lg font-semibold">Revenue</h2>
+            <Select onValueChange={(value) => setYear(value)} defaultValue="2025">
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Select Year" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="2025">2025</SelectItem>
+              <SelectItem value="2024">2024</SelectItem>
+              <SelectItem value="2023">2023</SelectItem>
+              <SelectItem value="2022">2022</SelectItem>
+            </SelectContent>
+          </Select>
           </div>
 
           <div className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data} margin={{ top: 20, right: 0, left: 0, bottom: 0 }}>
+              <AreaChart data={revenueData?.data} margin={{ top: 20, right: 0, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="income" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.1} />
                     <stop offset="95%" stopColor="#7C3AED" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="profit" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#FFA500" stopOpacity={0.1} />
-                    <stop offset="95%" stopColor="#FFA500" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.1} />
+                    <stop offset="95%" stopColor="#7C3AED" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="month" axisLine={false} tickLine={false} tickMargin={10} />
                 <YAxis axisLine={false} tickLine={false} tickMargin={10} tickFormatter={(value) => `${value}k`} />
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
-                          <div className="space-y-2">
-                            <div className="text-sm text-gray-500">09 Projects</div>
-                            <div className="font-medium">${payload[0].value},000</div>
-                          </div>
-                        </div>
-                      )
-                    }
-                    return null
-                  }}
-                />
+             
                 <Area type="monotone" dataKey="income" stroke="#7C3AED" strokeWidth={2} fill="url(#income)" />
-                <Area type="monotone" dataKey="profit" stroke="#FFA500" strokeWidth={2} fill="url(#profit)" />
+                <Area type="monotone" dataKey="profit" stroke="#7C3AED" strokeWidth={2} fill="url(#profit)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
-
           <div className="mt-6 flex items-center justify-center gap-8">
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-full bg-[#7C3AED]" />
-              <span className="text-sm text-gray-500">Income</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-[#FFA500]" />
-              <span className="text-sm text-gray-500">Profit</span>
+              <span className="text-sm text-gray-500">Revenue</span>
             </div>
           </div>
 

@@ -64,7 +64,7 @@ router.patch('/bookmark-course/:id',verifyAccessToken('user'),removeBookmarkCour
 //cart managing
 
 router.post('/cart',verifyAccessToken('user'),addToCart)
-router.get('/cart',verifyAccessToken('user'),getCartDetails)
+router.get('/cart/:id',verifyAccessToken('user'),getCartDetails)
 
 // course enrollment 
 

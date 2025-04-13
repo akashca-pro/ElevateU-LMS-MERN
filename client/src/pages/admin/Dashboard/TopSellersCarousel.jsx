@@ -39,8 +39,8 @@ export default function TopSellersCarousel({
   autoScroll = true,
   autoScrollInterval = 5000,
 }) {
+  const [current,setCurrent] = useState(0)
   const [api, setApi] = useState()
-  const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
 
   // Setup auto scroll
@@ -77,9 +77,7 @@ export default function TopSellersCarousel({
       case "product":
         return <ProductCard item={item} index={index} />
       case "category":
-        return <CategoryCard item={item} current={current} />
-      case "brand":
-        return <BrandCard item={item} current={current} />
+        return <CategoryCard item={item} index={index} />
       default:
         return <ProductCard item={item} index={index} />
     }
@@ -121,7 +119,7 @@ export default function TopSellersCarousel({
           </CarouselContent>
           { (items?.length === 0 || !items) && <div className="flex flex-col items-center justify-center p-8 text-center text-gray-500">
           <BookX className="w-12 h-12 mb-4 text-gray-400" />
-          <h2 className="text-lg font-semibold">No courses found</h2>
+          <h2 className="text-lg font-semibold">{type === 'product' ? 'No courses found' : 'No categories found' }</h2>
           <p className="text-sm">Try adjusting your filters or date range.</p>
         </div>}
           <div className="flex justify-end gap-2 mt-4">
@@ -150,7 +148,7 @@ function ProductCard({ item, index }) {
             <span className="text-muted-foreground">No image</span>
           </div>
         )}
-        <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">#{ index + 1}</Badge>
+        <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">#{index + 1}</Badge>
       </div>
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
@@ -193,8 +191,8 @@ function ProductCard({ item, index }) {
         )}
 
         <div className="flex justify-between items-center mt-3 pt-3 border-t text-sm">
-          <span className="text-muted-foreground text-xs">Sales</span>
-          <Badge variant="secondary" className="font-medium">
+          <span className="text-muted-foreground text-xs">Total Sales</span>
+          <Badge variant="outline" className="font-medium">
             {item.totalSales.toLocaleString()}
           </Badge>
         </div>
@@ -203,7 +201,7 @@ function ProductCard({ item, index }) {
   )
 }
 
-function CategoryCard({ item, current }) {
+function CategoryCard({ item, index }) {
   return (
     <Card className="overflow-hidden h-full transition-all duration-300 hover:shadow-md hover:-translate-y-1">
       <div className="aspect-[16/9] w-full relative overflow-hidden">
@@ -220,7 +218,7 @@ function CategoryCard({ item, current }) {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
           <div className="p-4 text-white w-full">
-            <Badge className="mb-2 bg-primary text-primary-foreground">#{current + 1}</Badge>
+          <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">#{index + 1}</Badge>
             <h3 className="font-bold text-lg mb-1">{item.title}</h3>
             <div className="flex justify-between items-center">
               <span className="text-white/80 text-sm">Total Sales</span>

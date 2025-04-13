@@ -19,7 +19,6 @@ import OrderSummary from "./components/OrderSummary"
 import CouponForm from "./components/CouponForm"
 import { formatUrl } from "@/utils/formatUrls"
 import LoadingSpinner from "@/components/FallbackUI/LoadingSpinner"
-import ErrorComponent from "@/components/FallbackUI/ErrorComponent"
 import EmptyCartComponent from "@/components/FallbackUI/EmptyCartComponent"
 
 const CourseEnrollment = () => {
@@ -31,13 +30,15 @@ const CourseEnrollment = () => {
   const [couponDiscount, setCouponDiscount] = useState(null)
   const [user,setUser] = useState(null)
   const [course,setCourse] = useState(null)
-  const { data : cartDetails, isFetching, isLoading } = useUserLoadCartQuery(undefined,{refetchOnMountOrArgChange : true})
+  const { data : cartDetails, error, isLoading } = useUserLoadCartQuery(courseId,{refetchOnMountOrArgChange : true})
 
 
   useEffect(() => {
     if (cartDetails?.data) {
       setUser(cartDetails.data.user);
       setCourse(cartDetails.data.course);
+    }else if(error?.data){
+      toast.error(error?.data)
     }
   }, [cartDetails]);
 

@@ -60,7 +60,7 @@ const courseSchema = new mongoose.Schema(
 
       rating: { type: Number, default: 0 }, // Overall Rating
 
-      duration: { type: Number, default: 0 }, // Total course duration in minutes
+      duration: { type: Number, default: 0 , required: function () { return !this.draft }}, // Total course duration in minutes
 
       level: { type: String, enum: ["Beginner", "Intermediate", "Advanced"], default: "Beginner" },
 
