@@ -18,6 +18,7 @@ const courseFormSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   category: z.string().min(1, "Please select a category"),
+  hasCertification : z.boolean().default(false) ,
   thumbnail: z.string().min(1, 'Thumbnail is required'),
   whatYouLearn : z.array(z.string()).default([]),
   modules: z
@@ -60,6 +61,7 @@ export function CourseCreationModal({ isOpen, onClose }) {
     title: "",
     description: "",
     category: "",
+    hasCertification : false,
     thumbnail: "",
     whatYouLearn : [""],
     modules: [{ title: "", lessons: [{ title: "", videoUrl: "", attachments: [] }] }],

@@ -43,16 +43,6 @@ const WalletPage = () => {
       ],
     }
 
-    const defaultTransactionData = [{
-      id: ``,
-      date: new Date().toISOString(),
-      amount: 0,
-      type: '',
-      purpose: '',
-      status: 'pending',
-      description: '',
-      reference: '',
-    }]
 
     if(data?.data?.walletDetails){
       setWalletData(data?.data?.walletDetails)
@@ -62,10 +52,8 @@ const WalletPage = () => {
 
     if(data?.data?.transactions && data?.data?.transactions.length > 0 ){
       setTransactions(data?.data?.transactions)
-    }else{
-      setTransactions(defaultTransactionData)
     }
-
+    
     if(fetchWithdrawRequest?.success){
       setWithdrawRequest(fetchWithdrawRequest?.data)
     }

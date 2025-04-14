@@ -25,8 +25,8 @@ const handleTransactionAndWalletUpdate = async ({
 
         const finalPrice = orderDetails.price.finalPrice;
     
-        const tutorPayout = finalPrice * 0.8;
-        const adminPayout = finalPrice * 0.2;
+        const tutorPayout = (finalPrice * 0.8).toFixed(2);
+        const adminPayout = (finalPrice * 0.2).toFixed(2);
 
         // Transaction
         const transaction = await Transaction.create({
@@ -133,6 +133,12 @@ export const addToCart = async (req, res) => {
 export const getCartDetails = async (req, res) => {
     try {
         const userId = req.user.id;
+        const courseId = req.params.id
+
+        const isAlreadyEnrolled = await EnrolledCourse.findOne({ userId, courseId })
+
+        if(isAlreadyEnrolled)
+            return ResponseHandler.error(res, STRING_CONSTANTS.COURSE_ALREADY_ENROLLED, HttpStatus.BAD_REQUEST)
 
         const cartDetails = await User.findOne({ _id: userId, cart: { $ne: null } })
             .select("name firstName email phone profileImage _id ") 
@@ -198,7 +204,7 @@ export const enrollInCourse = async (req,res) => {
         const alreadyEnrolled = await EnrolledCourse.findOne({user : userId , course : courseId})
 
         if(alreadyEnrolled) 
-            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
+            return ResponseHandler.error(res, STRING_CONSTANTS.COURSE_ALREADY_ENROLLED, HttpStatus.CONFLICT);
 
         const orderDetails = await Order.findOne({ userId, courseId })
 
@@ -238,7 +244,7 @@ export const enrollInCourse = async (req,res) => {
         const progressTrackerAlreadyExist = await ProgressTracker.findOne({ userId, courseId })
 
         if(progressTrackerAlreadyExist)
-            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST,HttpStatus.CONFLICT);
+            return ResponseHandler.error(res, STRING_CONSTANTS.PROGRESS_TRACKER_ALREADY_EXIST,HttpStatus.CONFLICT);
 
         const modules = course.modules.map((module) => ({
             moduleId: module._id,

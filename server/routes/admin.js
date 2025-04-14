@@ -23,6 +23,7 @@ import { createCoupon, deleteCoupon, loadCoupons, updateCoupons } from '../contr
 import { loadOrderDetails } from '../controllers/order/adminOrderOps.js'
 import { adminWithdrawAmount, approveOrRejectWithdrawRequest, loadWalletDetails, loadWithdrawRequests } from '../controllers/transactions.js'
 import { loadTransactionList } from '../controllers/admin/transactions.js'
+import { bestSellingCategory, bestSellingCourse, revenueChartAnalysis, dashboardDetails } from '../controllers/analytics/admin.js'
 
 const router = express.Router()
 
@@ -111,5 +112,12 @@ router.patch('/withdraw-request/approve-or-reject',verifyAccessToken('admin'),ap
 // transactions
 
 router.get('/transactions',verifyAccessToken('admin'),loadTransactionList)
+
+// analytics
+
+router.get('/dashboard',verifyAccessToken('admin'),dashboardDetails)
+router.get('/dashboard/best-selling-course',verifyAccessToken('admin'),bestSellingCourse)
+router.get('/dashboard/best-selling-category',verifyAccessToken('admin'),bestSellingCategory)
+router.get('/dashboard/revenue-chart-data',revenueChartAnalysis)
 
 export default router

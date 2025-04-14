@@ -163,8 +163,17 @@ export const approveOrRejectCourse = async (req,res) => {
             return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
         
         if(input === 'approve'){
+
+            const totalDuration = course.modules.reduce((moduleAcc, module) => {
+                const moduleDuration = module.lessons.reduce((lessonAcc, lesson) => {
+                    return lessonAcc + lesson.duration;
+                }, 0);
+                return moduleAcc + moduleDuration;
+                }, 0);
+
             await Course.findByIdAndUpdate(courseId,{
                 status : 'approved',
+                duration : totalDuration,
                 reason,
                 isPublished : true
             })

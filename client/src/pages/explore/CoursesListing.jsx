@@ -64,7 +64,7 @@ const CoursesListing = ({ categories }) => {
       rating: 0,
       levels: [],
       priceRange: [0, 10000],
-      duration: [0, 500],
+      duration: [0, 10000],
       hasCertification: false,
     },
   });
@@ -107,7 +107,7 @@ const CoursesListing = ({ categories }) => {
         rating: 0,
         levels: [],
         priceRange: [0, 10000],
-        duration: [0, 500],
+        duration: [0, 10000],
         hasCertification: false,
         sort : 'newest'
       },
@@ -347,20 +347,20 @@ const uniqueTutors = coursesData?.courses
 
               {/* Duration Filter */}
               <div>
-                <label className="text-sm font-medium mb-3 block">Duration (hours)</label>
+                <label className="text-sm font-medium mb-3 block">Duration (Minutes)</label>
                 <div className="px-1">
                   <Slider
                     defaultValue={[0, 50]}
                     min={0}
-                    max={50}
+                    max={10000}
                     step={1}
                     value={queryParams.filter.duration}
                     onValueChange={(value) => handleFilterChange("duration", value)}
                     className="mb-2"
                   />
                   <div className="flex justify-between text-sm text-gray-500">
-                    <span>{queryParams.filter.duration[0]}h</span>
-                    <span>{queryParams.filter.duration[1]}h</span>
+                    <span>{queryParams.filter.duration[0]}m</span>
+                    <span>{queryParams.filter.duration[1]}m</span>
                   </div>
                 </div>
               </div>
@@ -388,29 +388,29 @@ const uniqueTutors = coursesData?.courses
 
               {/* Tutors Filter */}
               <Accordion type="single" collapsible className="w-full">
-  <AccordionItem value="tutors">
-    <AccordionTrigger className="text-sm font-medium py-1">Tutors</AccordionTrigger>
-    <AccordionContent>
-      <div className="space-y-2 mt-1">
-        {uniqueTutors?.map((tutor) => (
-          <div key={tutor._id} className="flex items-center">
-            <Checkbox
-              checked={queryParams.filter.tutors.includes(tutor._id)}
-              id={`${tutor._id}`}
-              onCheckedChange={() => toggleTutor(tutor._id)}
-            />
-            <label
-              htmlFor={`tutor-${tutor._id}`}
-              className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              {tutor.firstName} {tutor.lastName}
-            </label>
-          </div>
-        ))}
-      </div>
-    </AccordionContent>
-  </AccordionItem>
-</Accordion>
+              <AccordionItem value="tutors">
+                <AccordionTrigger className="text-sm font-medium py-1">Tutors</AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-2 mt-1">
+                    {uniqueTutors?.map((tutor) => (
+                      <div key={tutor._id} className="flex items-center">
+                        <Checkbox
+                          checked={queryParams.filter.tutors.includes(tutor._id)}
+                          id={`${tutor._id}`}
+                          onCheckedChange={() => toggleTutor(tutor._id)}
+                        />
+                        <label
+                          htmlFor={`tutor-${tutor._id}`}
+                          className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {tutor.firstName} {tutor.lastName}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
             </div>
           </div>
         </div>
@@ -581,7 +581,7 @@ const CourseCard = ({ course, renderStars }) => {
 
       <div className="flex items-center text-sm text-gray-600">
       <Clock className="h-3.5 w-3.5 mr-1 text-gray-400" />
-      <span>{course.duration} hours</span>
+      <span>{course.duration} minutes</span>
     </div>
     </CardContent>
 

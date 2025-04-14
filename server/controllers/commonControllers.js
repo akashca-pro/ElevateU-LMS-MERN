@@ -313,8 +313,8 @@ export const loadCourses = async (req,res) => {
                 filter.duration = { $gte: parsedFilter.duration[0], $lte: parsedFilter.duration[1] };
               }
           
-              if (parsedFilter.hasCertification !== undefined) {
-                filter.hasCertification = parsedFilter.hasCertification;
+              if (parsedFilter.hasCertification === true) {
+                filter.hasCertification = true;
               }
               
             } catch (error) {
@@ -343,7 +343,6 @@ export const loadCourses = async (req,res) => {
                 currentPage: page,
                 totalPages: 0,
               })
-
 
         return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, {
             courses,
