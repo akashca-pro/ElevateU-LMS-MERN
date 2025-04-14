@@ -84,6 +84,7 @@ export default function TopSellersCarousel({
   }
 
   return (
+    <Card className="p-6">
     <div className="space-y-4 py-6">
       <div className="flex items-center justify-between">
         <motion.h2
@@ -129,6 +130,7 @@ export default function TopSellersCarousel({
         </Carousel>
       </motion.div>
     </div>
+    </Card>
   )
 }
 
@@ -231,35 +233,3 @@ function CategoryCard({ item, index }) {
   )
 }
 
-function BrandCard({ item, current }) {
-  return (
-    <Card className="overflow-hidden h-full transition-all duration-300 hover:shadow-md hover:-translate-y-1 flex flex-col">
-      <div className="aspect-square w-full relative overflow-hidden p-6 flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-        {item.thumbnail ? (
-          <img
-          src={item.thumbnail || "/placeholder.svg"}
-          alt={item.title}
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-        />
-        ) : (
-          <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-primary font-bold text-xl">{item.title.charAt(0)}</span>
-          </div>
-        )}
-        <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">#{current + 1}</Badge>
-      </div>
-      <CardContent className="p-4 flex-grow flex flex-col">
-        <h3 className="font-semibold text-center mb-2">{item.title}</h3>
-        {item.description && (
-          <p className="text-sm text-muted-foreground text-center mb-4 line-clamp-2">{item.description}</p>
-        )}
-        <div className="mt-auto pt-3 border-t flex justify-between items-center">
-          <span className="text-muted-foreground text-xs">Total Sales</span>
-          <Badge variant="secondary" className="font-medium">
-            {item.totalSales.toLocaleString()}
-          </Badge>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}

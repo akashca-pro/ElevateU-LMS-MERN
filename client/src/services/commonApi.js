@@ -85,8 +85,23 @@ const commonApi = apiSlice.injectEndpoints({
                 url : `course-titles`,
                 method : 'GET',
                 params : { search : searchQuery }
-            })
-        }) 
+            }),
+            providesTags : ['Common']
+        }),
+        bestSellingCategories : builder.query({
+            query : () => ({
+                url : `top-categories`,
+                method : 'GET'
+            }),
+            providesTags : ['Common']
+        }),
+        bestSellingCourses : builder.query({
+            query : ()=>({
+                url : `top-courses`,
+                method : 'GET'
+            }),
+            providesTags : ['Common']
+        }),
     })
 })
 
@@ -103,6 +118,8 @@ export const {
     useLoadTrendingCoursesQuery,
     useLoadCourseDetailsQuery,
     useLoadCoursesQuery,
-    useGlobalSearchQuery
+    useGlobalSearchQuery,
+    useBestSellingCategoriesQuery,
+    useBestSellingCoursesQuery
 
 } = commonApi

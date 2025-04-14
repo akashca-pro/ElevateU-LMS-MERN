@@ -54,27 +54,34 @@ const UserIndex = () => {
 const menuItems = [
   { id: 1, title: "Profile", icon: SquareUser, path: "/user/profile" },
   { id: 2, title: "My Courses", icon: BookOpen, path: "/user/profile/my-courses" },
-  { id: 4, title: "Messages", icon: MessagesSquare, path: "/user/profile/messages" },
-  { id: 5, title: "Community", icon: Handshake, path: "/user/profile/community" },
-  { id: 6, title: "Assignments", icon: Paperclip, path: "/user/profile/assignments" },
-  { id: 7, title: "Quiz", icon: ClipboardCheck, path: "/user/profile/quiz" },
-  { id: 8, title: "Certificates", icon: Trophy, path: "/user/profile/certificates" },
-  { id: 9, title: "Wallet", icon: Wallet2, path: "/user/profile/wallet" },
-  { id: 10, title: "Settings", icon: Settings, path: "/user/profile/settings" },
+  { id: 3, title: "Certificates", icon: Trophy, path: "/user/profile/certificates" },
+  { id: 4, title: "Wallet", icon: Wallet2, path: "/user/profile/wallet" },
+  { id: 5, title: "Settings", icon: Settings, path: "/user/profile/settings" },
 ];
 
 
-const ProtectedLayout = () => (
-  <ProtectedRoute role={'user'}>
-    <BlockedUI >
-    <Navbar/>
-    <Layout menuItems = {menuItems}  >
-      <Outlet/>
-    </Layout>
-    <Footer/>
-    </BlockedUI>
+const ProtectedLayout = () => {
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(true);
+
+  return (
+    <ProtectedRoute role={'user'}>
+      <BlockedUI role={'user'} >
+        <Navbar 
+          setSidebarCollapsed={setSidebarCollapsed} 
+          isSidebarCollapsed={sidebarCollapsed}
+        />
+        <Layout 
+          menuItems={menuItems} 
+          sidebarCollapsed={sidebarCollapsed}
+          setSidebarCollapsed={setSidebarCollapsed}
+        >
+          <Outlet/>
+        </Layout>
+        <Footer/>
+      </BlockedUI>
     </ProtectedRoute>
-);
+  );
+};
 
 
 const UserRoutes = () => {
@@ -125,10 +132,6 @@ const UserRoutes = () => {
               </ProtectLearningPage>
               }/>
           </Route>
-          <Route path='messages' element={<Messages/>}/>
-          <Route path='community' element={<Community/>}/>
-          <Route path='assignments' element={<Assignments/>}/>
-          <Route path='quiz' element={<Quiz/>}/>
           <Route path='certificates' element={<Certificates/>}/>
           <Route path='wallet' element={<WalletPage/>}/>
           <Route path='settings' element={<Setting/>}/>

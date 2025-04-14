@@ -178,7 +178,7 @@ export const approveOrRejectCourse = async (req,res) => {
                 isPublished : true
             })
 
-             const newNotification = await saveNotification(tutorId, 'Tutor', 'publish_course',
+             const newNotification = await saveNotification(tutorId, 'Tutor', 'course_approved',
                 `Congrats your ${course.title} course has been verified and published,${reason}`
              )
  
@@ -189,7 +189,7 @@ export const approveOrRejectCourse = async (req,res) => {
         else if(input === 'reject') {
             await Course.findByIdAndUpdate(courseId,{status : 'rejected' , reason})
 
-            const newNotification = await saveNotification(tutorId, 'Tutor', 'publish_course',
+            const newNotification = await saveNotification(tutorId, 'Tutor', 'course_rejected',
                `Sorry ${course.title} course has been rejected,${reason}`
              )
 

@@ -1,6 +1,9 @@
+import { Button } from '@/components/ui/button'
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const TeachBanner = () => {
+  const navigate = useNavigate()
     return (
       <div className="container mx-auto px-4 py-20">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -17,12 +20,11 @@ const TeachBanner = () => {
               Join a global community of educators and share your expertise with eager learners.
             </p>
             <div className="flex flex-wrap gap-4">
-              <button className="px-6 py-3 bg-[#7C3AED] text-white rounded-lg hover:bg-[#6D28D9] transition-colors">
-                Start Teaching Today
-              </button>
-              <button className="px-6 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                Browse Teachers
-              </button>
+              <Button className='p-5' 
+              onClick={()=>navigate('/tutor/sign-up')}
+              >
+               Start Teaching Today 
+              </Button>
             </div>
           </div>
         </div>

@@ -23,6 +23,7 @@ import VideoPlayer from "@/services/Cloudinary/VideoPlayer"
 import { formatUrl } from "@/utils/formatUrls"
 import { toast } from "sonner"
 import { useSelect } from "@/hooks/useSelect"
+import { CourseDetailsSkeleton } from "@/components/Skeletons/CourseDetailsSkeleton";
 
 const CourseDetails = () => {
   const { tutor, admin } = useSelect()
@@ -131,7 +132,7 @@ const CourseDetails = () => {
 
   if (isLoading) {
     return (
-      <LoadingSpinner/>
+      <CourseDetailsSkeleton/>
     )
   }
 
@@ -151,28 +152,6 @@ const CourseDetails = () => {
     );
   }
 
-  // Mock data for demonstration
-  const mockCourse = {
-    ...course,
-    badges: ["Best Seller", "New", "Popular"],
-    whatYouLearn: [
-      "Build responsive real-world websites with HTML and CSS",
-      "Modern JavaScript from the beginning - ES6, ES7, ES8",
-      "Learn React.js and build powerful single-page applications",
-      "Advanced CSS animations and transitions",
-      "Implement authentication and authorization",
-      "Deploy your applications to production",
-    ],
-    tutor: {
-      name: "John Smith",
-      bio: "Web Development Instructor with over 10 years of experience. Passionate about teaching and helping students achieve their goals.",
-      avatar: "/placeholder.svg?height=100&width=100",
-      rating: 4.8,
-      courses: 12,
-      students: 15000,
-    },
-  }
-
   const totalLessons = course.modules.reduce((acc, module) => acc + module.lessons.length, 0)
   const totalDuration = course.modules.reduce(
     (acc, module) => acc + module.lessons.reduce((sum, lesson) => sum + (lesson.duration || 0), 0),
@@ -188,58 +167,43 @@ const CourseDetails = () => {
 
   return (
     <div className="bg-gray-50">
-      {/* Hero Section with Large Thumbnail */}
-      <div className="relative w-full h-[500px] bg-gray-900">
-        <div className="absolute inset-0 opacity-60">
+   {/* Hero Section with Large Thumbnail */}
+   <div className="relative w-full h-[500px] bg-gray-900 overflow-hidden">
+        <div className="absolute inset-0 opacity-60 transform hover:scale-105 transition-transform duration-700">
           <img
             src={course?.thumbnail}
             alt={course?.title}
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/70 to-transparent"></div>
-        <div className="container mx-auto px-4 relative h-full flex flex-col justify-end pb-12">
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
+        <div className="container mx-auto px-4 relative h-full flex flex-col justify-end pb-12 animate-fade-in">
           <div className="flex flex-wrap gap-2 mb-4">
-            
-            {course?.badge && (
-              <Badge 
-              className={`${course?.badge === 'Best Seller' 
-                ? 'bg-blue-500 hover:bg-blue-500' 
-                : course?.badge === 'Trending'
-                ? 'bg-red-500 hover:bg-red-500' 
-                : course?.badge === 'New' 
-                ? 'bg-green-500 hover:bg-green-500'
-                : 'bg-yellow-500 hover:bg-yellow-500' }`}>
-                
-                {course.badge}
-
-              </Badge>
-            )}
-            <Badge variant="outline" className="bg-white/10 text-white border-white/20">
+            <Badge variant="outline" className="bg-white/10 text-white border-white/20 backdrop-blur-sm">
               {course?.level}
             </Badge>
           </div>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">{course.title}</h1>
-          <p className="text-white/80 text-lg max-w-3xl mb-6">{course.description}</p>
-          <div className="flex flex-wrap items-center gap-6 text-white/90">
-            <div className="flex items-center">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-md">{course.title}</h1>
+          <p className="text-white/90 text-lg max-w-3xl mb-6 drop-shadow-sm">{course.description}</p>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-white/90">
+            <div className="flex items-center backdrop-blur-sm bg-black/10 rounded-full px-3 py-1.5">
               <Star className="h-5 w-5 text-yellow-400 mr-1" fill="currentColor" />
               <span className="font-medium mr-1">{course?.rating?.toFixed(1) || "4.5"}</span>
-              <span className="text-white/70">({mockCourse.reviews?.length || 0} reviews)</span>
+              <span className="text-white/70">(327 reviews)</span>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center backdrop-blur-sm bg-black/10 rounded-full px-3 py-1.5">
               <Users className="h-5 w-5 mr-1" />
-              <span>{course.totalEnrollment || 0} students enrolled</span>
+              <span>{course.totalEnrollment?.toLocaleString() || 0} students</span>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center backdrop-blur-sm bg-black/10 rounded-full px-3 py-1.5">
               <Clock className="h-5 w-5 mr-1" />
               <span>{formatDuration(totalDuration)} total</span>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center backdrop-blur-sm bg-black/10 rounded-full px-3 py-1.5">
               <BookOpen className="h-5 w-5 mr-1" />
               <span>{totalLessons} lessons</span>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center backdrop-blur-sm bg-black/10 rounded-full px-3 py-1.5">
               <Calendar className="h-5 w-5 mr-1" />
               <span>
                 Last updated {course?.updatedAt ? format(new Date(course?.updatedAt), "MMM yyyy") : "N/A"}
@@ -415,15 +379,15 @@ const CourseDetails = () => {
                         <Star
                           key={star}
                           className={`h-5 w-5 ${
-                            star <= Math.round(mockCourse.rating || 0)
+                            star <= Math.round(course?.rating || 0)
                               ? "text-yellow-400 fill-yellow-400"
                               : "text-gray-300"
                           }`}
                         />
                       ))}
                     </div>
-                    <span className="ml-2 font-bold">{mockCourse.rating?.toFixed(1) || "4.5"}</span>
-                    <span className="ml-1 text-muted-foreground">({mockCourse.reviews?.length || 0} reviews)</span>
+                    <span className="ml-2 font-bold">{course?.rating?.toFixed(1) || "4.5"}</span>
+                    <span className="ml-1 text-muted-foreground">({course?.reviews?.length || 0} reviews)</span>
                   </div>
                 </div>
 
@@ -446,13 +410,13 @@ const CourseDetails = () => {
                     })}
                   </div>
                   <div className="flex flex-col justify-center items-center text-center">
-                    <div className="text-5xl font-bold mb-2">{mockCourse.rating?.toFixed(1) || "4.5"}</div>
+                    <div className="text-5xl font-bold mb-2">{course?.rating?.toFixed(1) || "4.5"}</div>
                     <div className="flex mb-2">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                           key={star}
                           className={`h-6 w-6 ${
-                            star <= Math.round(mockCourse.rating || 0)
+                            star <= Math.round(course?.rating || 0)
                               ? "text-yellow-400 fill-yellow-400"
                               : "text-gray-300"
                           }`}
@@ -466,9 +430,9 @@ const CourseDetails = () => {
                 <Separator className="my-6" />
 
                 {/* Review List */}
-                {mockCourse.reviews && mockCourse.reviews.length > 0 ? (
+                {course?.reviews && course?.reviews.length > 0 ? (
                   <div className="space-y-6">
-                    {mockCourse.reviews.slice(0, 3).map((review, index) => (
+                    {course?.reviews.slice(0, 3).map((review, index) => (
                       <div key={index} className="border-b border-gray-200 pb-6 last:border-0">
                         <div className="flex justify-between items-start">
                           <div className="flex items-start gap-3">
@@ -497,7 +461,7 @@ const CourseDetails = () => {
                       </div>
                     ))}
 
-                    {mockCourse.reviews.length > 3 && (
+                    {course?.reviews.length > 3 && (
                       <Button variant="outline" className="w-full">
                         Show All Reviews
                       </Button>

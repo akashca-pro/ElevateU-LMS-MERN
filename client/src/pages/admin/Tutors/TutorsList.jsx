@@ -13,6 +13,7 @@ import {useAdminLoadTutorsDetailsQuery, useAdminToggleTutorBlockMutation} from '
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { AlertDialogDelete } from "@/components/AlertDialog";
+import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 
 const TutorsList = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -30,8 +31,10 @@ const TutorsList = () => {
       const data = tutors?.data;
   
     return (
-      <div className="container mx-auto p-6">
-        <h1 className="mb-8 text-2xl font-bold">Tutors List</h1>
+    <Card className="container mx-auto p-6">
+      <CardTitle>
+      <h1 className="mb-8 text-2xl font-bold">Tutors List</h1>
+      </CardTitle>
   
         {/* Search and Filter */}
         <div className="mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -59,7 +62,7 @@ const TutorsList = () => {
         {/* Table */}
      
           { error || isLoading ? <p className="text-center">No users found</p> : 
-          <div className="overflow-x-auto">
+          <CardContent className="overflow-x-auto">
             <Table>
             <TableHeader>
               <TableRow>
@@ -101,12 +104,13 @@ const TutorsList = () => {
               ))}
             </TableBody>
           </Table>
-          </div>}
+          </CardContent>}
           
   
         {/* Pagination */}
-        { error || isLoading ? <p className="text-center"></p> : 
-        (<div className="mt-6 flex items-center justify-center gap-2 flex-wrap">
+
+       { data?.tutors.length > 0 &&
+        <CardFooter className="mt-6 flex items-center justify-center gap-2 flex-wrap">
           <button
             className="rounded-lg p-2 hover:bg-gray-100 disabled:opacity-50"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -132,8 +136,8 @@ const TutorsList = () => {
           >
             <ChevronRight className="h-5 w-5 text-gray-600" />
           </button>
-        </div>)}
-      </div>
+        </CardFooter>}
+      </Card>
     );
   };
 

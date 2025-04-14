@@ -190,20 +190,18 @@ export const courseDetails = async (req,res) => {
         if(!isEnrolled)
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.BAD_REQUEST);
 
+        
         const courseDetails = await Course.findById(courseId)
         .populate('tutor','firstName lastName profileImage bio expertise experience socialLinks')
-
+        
         if(!courseDetails)
             return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NO_CONTENT);
-
+        
         const progressTracker = await ProgressTracker.findOne({ userId, courseId })
-
+        
         if(!progressTracker)
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
-
-        if(progressTracker.lastCourseUpdate < courseDetails.updatedAt)
-            return ResponseHandler.success(res, STRING_CONSTANTS.COURSE_IS_UPDATED, HttpStatus.OK)
-
+        
         const allAttachments = courseDetails.modules.flatMap((module,moduleIndex)=>{
            return module.lessons.flatMap((lesson,lessonIndex)=>{
 

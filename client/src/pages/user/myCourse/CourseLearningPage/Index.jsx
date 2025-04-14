@@ -84,6 +84,7 @@ const CourseLearningPage = () => {
       const res = await updateProgressTracker(courseId).unwrap()
       refetchCourseDetails()
       refetchProgressDetails()
+      console.log(res)
       if(res.data){
         toast.success('Progress tracker updated',{ description : 'New modules or lessons added' })
       }

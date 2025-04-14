@@ -109,7 +109,7 @@ const Index = () => {
                 />
                 <Input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" id="profileImage" />
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-3 mt-3">
                 <Label
                   htmlFor="profileImage"
                   className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-200 cursor-pointer"

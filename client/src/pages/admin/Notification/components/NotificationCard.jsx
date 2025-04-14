@@ -15,7 +15,7 @@ export function NotificationCard() {
   const [courseApproveOrReject] = useAdminApproveOrRejectCourseMutation()
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col container mx-auto p-6 gap-3">
 
       <TutorVerificationRequest VerificationRequests={VerificationRequests}
        refetchVerificationRequest={refetchVerificationRequest} 

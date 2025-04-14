@@ -6,6 +6,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { useAdminLoadOrdersQuery } from '@/services/adminApi/adminOrderApi.js'
 import { format } from 'date-fns'
 import LoadingSpinner from '@/components/FallbackUI/LoadingSpinner'
+import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card'
 
 const Index = () => {
     const [searchQuery, setSearchQuery] = useState("")
@@ -30,8 +31,10 @@ const Index = () => {
   if(isLoading) return(<LoadingSpinner/>)
  
   return (
-    <div className='container mx-auto p-6 max-w-full overflow-x-auto'>
-    <h1 className="mb-8 text-2xl font-bold text-center md:text-left">Order List</h1>
+    <Card className="container mx-auto px-4 py-8">
+      <CardTitle>
+      <h1 className="mb-8 text-2xl font-bold text-center md:text-left">Orders List</h1>
+      </CardTitle>
 
     <div className="mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
     <div className="relative w-full md:w-96">
@@ -50,7 +53,7 @@ const Index = () => {
         </div>
     </div>
 
-    <div className="overflow-x-auto">
+    <CardContent className="overflow-x-auto">
     { error ? <p className="text-center">No Order found</p> :
         <Table>
             <TableCaption>List of available Orders</TableCaption>
@@ -92,10 +95,11 @@ const Index = () => {
                ))}
             </TableBody>
         </Table> }
-    </div>
+    </CardContent>
 
     {/* Pagination */}
-    <div className="mt-6 flex items-center justify-center gap-2 flex-wrap">
+   { data?.orders?.length > 0 &&
+    <CardFooter className="mt-6 flex items-center justify-center gap-2 flex-wrap">
         <button
           className="rounded-lg p-2 hover:bg-gray-100 disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -121,9 +125,9 @@ const Index = () => {
         >
           <ChevronRight className="h-5 w-5 text-gray-600" />
         </button>
-      </div>
+      </CardFooter>}
 
-    </div>
+    </Card>
   )
 }
 

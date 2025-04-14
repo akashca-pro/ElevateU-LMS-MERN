@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { UserCircle, ShoppingCart, MessageSquare, LogOut, Menu, X } from "lucide-react"; 
+import { UserCircle, ShoppingCart, MessageSquare, LogOut, Menu, X, CircleChevronRight } from "lucide-react"; 
 import { useSelect } from "@/hooks/useSelect";
 import { useUserAuthActions, useTutorAuthActions, useAdminAuthActions } from "@/hooks/useDispatch";
 import { useTutorLogoutMutation } from '@/services/TutorApi/tutorAuthApi';
@@ -11,8 +11,9 @@ import Notification from "./Notification";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlobalSearch } from "./Search";
+import { Button } from "./ui/button";
 
-const Navbar = () => {
+const Navbar = ({ setSidebarCollapsed, isSidebarCollapsed }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -22,6 +23,8 @@ const Navbar = () => {
   const role = user.isAuthenticated ? "user" : tutor.isAuthenticated ? "tutor" : admin.isAuthenticated ? 'admin' : null;
   const roleData = user.isAuthenticated ? user.userData : tutor.isAuthenticated ? tutor.tutorData : admin.isAuthenticated ? admin.adminData : null;
   
+  const isProfileRoute = location.pathname.startsWith(`/${role}/profile`);
+
   const { data : cartDetails } = useUserLoadCartQuery(undefined, {
     refetchOnMountOrArgChange : true,
     skip : tutor.isAuthenticated || admin.isAuthenticated
@@ -71,16 +74,27 @@ const Navbar = () => {
   return (
     <nav className="border-b bg-white relative">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+
         
         {/* Left Side */}
-        <div className="flex items-center gap-8">      
+        <div className="flex items-center gap-8">
+
+       { isProfileRoute && <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setSidebarCollapsed(!isSidebarCollapsed)}
+            className="p-2 rounded-lg hover:bg-gray-100"
+          >
+            <CircleChevronRight className="h-6 w-6 text-gray-800" />
+          </motion.button>}
+
           <Link to="/" className="flex items-center gap-2">
             <img src="/logo.svg" alt="ElevateU Logo" className="h-8 w-8" />
             <span className="text-xl font-bold">ElevateU</span>
           </Link>
-          <Link to="/explore" className="hidden text-gray-600 hover:text-purple-600 md:block">
+          { !isProfileRoute && <Link to="/explore" className="hidden text-gray-600 hover:text-purple-600 md:block">
             Explore
-          </Link>
+          </Link>}
         </div>
 
         {/* Search Bar (Desktop) */}
@@ -99,15 +113,6 @@ const Navbar = () => {
                 <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                   <Link to={`/explore/courses/${courseName}/checkout`} className="hidden text-gray-600 hover:text-purple-600 md:block">
                     <ShoppingCart className="h-6 w-6" />
-                  </Link>
-                </motion.div>
-              )}
-
-              {/* Messages */}
-              {!admin.isAuthenticated && (
-                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-                  <Link to={user.isAuthenticated ? `/user/profile/messages` : `/tutor/profile/messages`} className="hidden text-gray-600 hover:text-purple-600 md:block">
-                    <MessageSquare className="h-6 w-6" />
                   </Link>
                 </motion.div>
               )}

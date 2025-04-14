@@ -35,8 +35,6 @@ import ProtectedRoute from '@/protectors/ProtectedRoute.jsx';
 import ProfileDetails from './tutorProfile/Index'
 
 import Messages from './Messages/Messages.jsx'
-import Analytics from './analytics/Analytics.jsx'
-import Notification from './Notification/Index.jsx'
 
 import CourseLayout from '@/pages/tutor/courseManagement/Index.jsx'
 import CourseDashboard from './courseManagement/CourseDashboard.jsx'
@@ -57,27 +55,32 @@ const TutorIndex = () => {
 const menuItems = [
   { id: 1, title: "Profile", icon: SquareUser, path: "/tutor/profile" },
   { id: 2, title: "Course Management", icon: BookOpen, path: "/tutor/profile/course-management" },
-  { id: 3, title: "Messages", icon: MessagesSquare, path: "/tutor/profile/messages" },
-  { id: 4, title: "Revenue", icon: IndianRupee, path: "/tutor/profile/revenue" },
-  { id: 5, title: "Notifications", icon: BellRing, path: "/tutor/profile/notification" },
-  { id: 6, title: "Analytics", icon: ChartNoAxesCombined, path: "/tutor/profile/analytics" },
-  { id: 7, title: "Settings", icon: Settings, path: "/tutor/profile/settings" },
+  { id: 3, title: "Revenue", icon: IndianRupee, path: "/tutor/profile/revenue" },
+  { id: 4, title: "Settings", icon: Settings, path: "/tutor/profile/settings" },
 ];
 
-const ProtectedLayout = ()=>{
+const ProtectedLayout = () => {
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(true);
+
   return (
     <ProtectedRoute role={'tutor'}>
-      <BlockedUI role={'tutor'}>
-      <Navbar/>
-      <Layout menuItems = {menuItems}>
-      <Outlet/>
-      </Layout>
-      <Footer/>
+      <BlockedUI role={'tutor'} >
+        <Navbar 
+          setSidebarCollapsed={setSidebarCollapsed} 
+          isSidebarCollapsed={sidebarCollapsed}
+        />
+        <Layout 
+          menuItems={menuItems} 
+          sidebarCollapsed={sidebarCollapsed}
+          setSidebarCollapsed={setSidebarCollapsed}
+        >
+          <Outlet/>
+        </Layout>
+        <Footer/>
       </BlockedUI>
     </ProtectedRoute>
-  )
-}
-
+  );
+};
 
 const TutorRoutes = ()=>{
 
@@ -129,10 +132,7 @@ return (
             <Route path=':courseId' element={ <CourseDetails/>
               }/>
           </Route>
-          <Route path='messages' element={<Messages/>}/>
           <Route path='revenue' element={<Revenue/>}/>
-          <Route path='analytics' element={<Analytics/>}/>
-          <Route path='notification' element={<Notification/>}/>
           <Route path='settings' element={<Setting/>}/>
         </Route>
         <Route path='*' element={<NotFound/>}/>

@@ -67,12 +67,20 @@ const menuItems = [
 ]
 
 const ProtectedLayout = () =>{
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(true);
   
   return (
     <>
     <ProtectedRoute role={'admin'}>
-    <Navbar/>
-    <Layout menuItems={menuItems}>
+    <Navbar 
+      setSidebarCollapsed={setSidebarCollapsed} 
+      isSidebarCollapsed={sidebarCollapsed}
+        />
+    <Layout 
+      menuItems={menuItems} 
+      sidebarCollapsed={sidebarCollapsed}
+      setSidebarCollapsed={setSidebarCollapsed}
+    >
     <Outlet/>
     </Layout>
     <Footer/>

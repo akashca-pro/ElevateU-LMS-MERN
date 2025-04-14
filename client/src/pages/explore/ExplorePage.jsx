@@ -1,15 +1,14 @@
-import Categories from './Categories'
-import LoadingSpinner from '@/components/FallbackUI/LoadingSpinner'
 import ErrorComponent from '@/components/FallbackUI/ErrorComponent'
 import { useLoadCategoriesQuery } from '@/services/commonApi.js'
 import CoursesListing from './CoursesListing'
+import { CourseListingSkeleton } from '@/components/Skeletons/CourseListingSkeleton'
 
 const ExplorePage = () => {
   const { data : details ,isLoading , isError} = useLoadCategoriesQuery()
       const categories = details?.data
   
 
-  if(isLoading)return(<LoadingSpinner/>)
+  if(isLoading)return(<CourseListingSkeleton/>)
 
   if(isError)return(<ErrorComponent/>) 
 

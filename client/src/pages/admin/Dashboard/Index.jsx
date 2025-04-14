@@ -1,4 +1,3 @@
-import { ChevronDown } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import TopAnalytics from "./TopAnalytics"
 import { useDashboardMetricsQuery, useRevenueChartQuery } from '@/services/adminApi/adminAnalyticsApi.js'
