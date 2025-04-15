@@ -4,6 +4,7 @@ import apiSlice from '../services/apiSlice.js'
 import adminAuthReducer from '../features/auth/admin/adminAuthSlice.js'
 import tutorAuthReducer from '../features/auth/tutor/tutorAuthSlice.js'
 import userAuthReducer from '../features/auth/user/userAuthSlice.js'
+import courseSlice from '@/features/courseSlice.js'
 import { toast } from 'sonner'
 
 // middleware to handle 403 error
@@ -25,6 +26,7 @@ const store = configureStore({
         adminAuth : adminAuthReducer,
         tutorAuth : tutorAuthReducer,
         userAuth : userAuthReducer,
+        course : courseSlice,
         [apiSlice.reducerPath] : apiSlice.reducer
     },
     middleware : (getDefaultMiddleware) => 

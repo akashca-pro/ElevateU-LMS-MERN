@@ -48,14 +48,12 @@ const userCourseApi = apiSlice.injectEndpoints({
                 url : `user/remove-applied-coupon/${id}`,
                 method : 'DELETE'
             }),
-            invalidatesTags : ['User']
         }),
         userFetchAppliedCoupon : builder.query({
             query : (id)=>({
                 url : `user/get-applied-coupon/${id}`,
                 method : 'GET'
-            }),
-            providesTags : ['User']
+            })
         }),
         userCreateOrder : builder.mutation({
             query : (credentials) => ({
