@@ -22,15 +22,6 @@ const notificationSchema = new mongoose.Schema({
 
 },{ timestamps: true })
 
-notificationSchema.pre(['findOneAndUpdate', 'updateMany', 'updateOne', 'update'], function(next){
-    const update = this.getUpdate();
-
-    if(update.$set && update.$set.isRead){
-        update.$set.readAt = new Date()
-    }
-
-    next()
-})
 
 const Notification = mongoose.model('Notification',notificationSchema)
 

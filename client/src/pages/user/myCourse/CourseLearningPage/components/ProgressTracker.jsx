@@ -48,7 +48,7 @@ const ProgressTracker = ({ progress }) => {
       {/* S-Curve Progress Path */}
       {progress?.totalModules >= 5 && (
         <div className="relative">
-          <div className="w-full h-[200px] overflow-hidden">
+          <div className="w-full overflow-hidden">
             <svg ref={svgRef} width="100%" height="100%" viewBox="0 0 1000 200" preserveAspectRatio="none">
               <path
                 d="M0,100 C250,180 350,20 500,100 C650,180 750,20 1000,100"

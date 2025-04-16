@@ -40,12 +40,10 @@ import VideoPlayer from "@/services/Cloudinary/VideoPlayer"
 import { formatUrl } from "@/utils/formatUrls"
 import { toast } from "sonner"
 import { useSelect } from "@/hooks/useSelect"
-import { useCourseActions } from '@/hooks/useDispatch.js'
 import { CourseDetailsSkeleton } from "@/components/Skeletons/CourseDetailsSkeleton"
 import { motion } from "framer-motion"
 
 const CourseDetails = () => {
-  const { setCourseId } = useCourseActions()
   const { tutor, admin } = useSelect()
   const [selectedLesson, setSelectedLesson] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -129,7 +127,6 @@ const CourseDetails = () => {
         return null
       }
       await addToCart({ courseId: course._id }).unwrap()
-      setCourseId(courseId)
       refetchCartDetails()
       navigate(`/explore/courses/${course._id}/checkout`)
     } catch (error) {

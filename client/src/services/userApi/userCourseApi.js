@@ -41,19 +41,21 @@ const userCourseApi = apiSlice.injectEndpoints({
                 method : 'POST',
                 body : credentials
             }),
-            invalidatesTags : ['User']
+            invalidatesTags: ['Coupon'],
         }),
         userRemoveAppliedCoupon : builder.mutation({
             query : (id) => ({
                 url : `user/remove-applied-coupon/${id}`,
                 method : 'DELETE'
             }),
+            invalidatesTags: ['Coupon'],
         }),
         userFetchAppliedCoupon : builder.query({
-            query : (id)=>({
-                url : `user/get-applied-coupon/${id}`,
+            query : ({courseId})=>({
+                url : `user/get-applied-coupon/${courseId}`,
                 method : 'GET'
-            })
+            }),
+            invalidatesTags : ['Coupon']
         }),
         userCreateOrder : builder.mutation({
             query : (credentials) => ({
@@ -122,6 +124,17 @@ const userCourseApi = apiSlice.injectEndpoints({
                 method : 'GET',
             }),
             providesTags : ['User']
+        }),
+        loadCertificates : builder.query({
+            query : ({ searchQuery, page })=>({
+                url : `user/certificates`,
+                method : 'GET',
+                params : {
+                    searchQuery,
+                    page
+                }
+            }),
+            providesTags : ['User']
         })
     })
 })
@@ -147,6 +160,8 @@ export const {
     useUserBookmarkCourseMutation,
     useUserBookmarkedCoursesQuery,
     useUserRemoveBookmarkCourseMutation,
-    useUserIsBookmarkedQuery
+    useUserIsBookmarkedQuery,
+
+    useLoadCertificatesQuery
 
 } = userCourseApi
