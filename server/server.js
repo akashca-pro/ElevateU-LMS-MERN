@@ -1,3 +1,4 @@
+import './cron/deleteReadedMessages.js'
 import http from 'http'
 import express from 'express'
 import 'dotenv/config'
@@ -24,9 +25,8 @@ const io = initializeSocket(server);
 app.use((req, res, next) => {
     req.io = io;
     next();
-  });
+});
   
-
 app.use(passport.initialize())
 
 app.use(cors({

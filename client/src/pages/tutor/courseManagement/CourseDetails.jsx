@@ -440,16 +440,17 @@ const CourseDetails = () => {
       </div>
 
       {/* Tabs Section */}
-      <Tabs defaultValue="details" className="mt-8" ref={editSectionRef}>
-        <TabsList>
-          <TabsTrigger value="details">Course Details</TabsTrigger>
+      <Tabs defaultValue="details" ref={editSectionRef}>
+        <TabsList >
+          <TabsTrigger value="details">Basic</TabsTrigger>
           <TabsTrigger value="content">Content</TabsTrigger>
           <TabsTrigger value="pricing">Pricing</TabsTrigger>
-          <TabsTrigger value="reviews">Reviews</TabsTrigger>
-          <TabsTrigger value="delete">Delete Course</TabsTrigger>
+          <TabsTrigger value="reviews">Review</TabsTrigger>
+          <TabsTrigger value="delete">Delete</TabsTrigger>
         </TabsList>
-
+        <br />
         <TabsContent value="details">
+
         <p className="text-sm text-gray-600 italic bg-gray-100 p-2 rounded-md border-l-4 border-blue-500">
   <span className="font-semibold">NB:</span> Publishing request will be accepted after required fields are filled.
 </p>

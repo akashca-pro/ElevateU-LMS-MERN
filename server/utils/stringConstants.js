@@ -94,6 +94,8 @@ export const STRING_CONSTANTS = {
     LOAD_DASHBOARD_DETAILS_FAILED : 'Load dashboard details failed',
     LOAD_CHART_DATA_SUCCESS : 'Load Chart data success',
     LOAD_CHART_DATA_FAILED : 'Load Chart data failed',
+    LOAD_CERTIFICATES_SUCCESS : 'Load certificates success',
+    LOAD_CERTIFICATES_FAILED : 'Load certificates failed'
 }
 
 export const DATABASE_FIELDS = {

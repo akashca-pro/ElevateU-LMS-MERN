@@ -9,8 +9,9 @@ import { useUserLogoutMutation } from "@/services/userApi/userAuthApi"
 import { useUserLoadCartQuery } from "@/services/userApi/userCourseApi.js"
 import Notification from "./Notification"
 import { toast } from "sonner"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { GlobalSearch } from "./Search"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 const Navbar = ({ setSidebarCollapsed, isSidebarCollapsed }) => {
   const navigate = useNavigate()
@@ -214,59 +215,37 @@ const Navbar = ({ setSidebarCollapsed, isSidebarCollapsed }) => {
             </motion.div>
           ) : null}
 
-          {/* Mobile Menu Button */}
-          <motion.button
-            className="block md:hidden p-1 rounded-full hover:bg-gray-100 transition-colors"
-            onClick={() => setMenuOpen(!menuOpen)}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </motion.button>
-        </div>
-      </div>
-
-      {/* Mobile Dropdown Menu */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="absolute top-full left-0 w-full bg-white shadow-lg md:hidden z-50 overflow-hidden"
-          >
-            <motion.div
-              className="flex flex-col gap-5 p-5"
-              variants={{
-                hidden: { opacity: 0 },
-                show: {
-                  opacity: 1,
-                  transition: {
-                    staggerChildren: 0.1,
-                  },
-                },
-              }}
-              initial="hidden"
-              animate="show"
-            >
-              {/* Mobile Search Bar */}
-              <motion.div
-                className="relative w-full"
-                variants={{
-                  hidden: { y: 20, opacity: 0 },
-                  show: { y: 0, opacity: 1 },
-                }}
+          {/* Mobile Menu Button with Sheet */}
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+            <SheetTrigger asChild>
+              <motion.button
+                className="block md:hidden p-1 rounded-full hover:bg-gray-100 transition-colors"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <GlobalSearch onSearch={handleSearch} />
-              </motion.div>
+                {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </motion.button>
+            </SheetTrigger>
+            <SheetContent side="top" className="w-full">
+              <div className="flex flex-col gap-5 p-5">
+                {/* Mobile Search Bar */}
+                <div className="relative w-full">
+                  <GlobalSearch
+                    onSearch={(course) => {
+                      handleSearch(course)
+                      setMenuOpen(false)
+                    }}
+                  />
+                </div>
 
-              <motion.div
-                variants={{
-                  hidden: { y: 20, opacity: 0 },
-                  show: { y: 0, opacity: 1 },
-                }}
-              >
+                <Link
+                to={'/'}
+                className="block text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-gray-50 font-medium"
+                onClick={() => setMenuOpen(false)}
+                >
+                  Home
+                </Link>
+                    
                 <Link
                   to="/explore"
                   className="block text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-gray-50 font-medium"
@@ -274,16 +253,9 @@ const Navbar = ({ setSidebarCollapsed, isSidebarCollapsed }) => {
                 >
                   Explore
                 </Link>
-              </motion.div>
 
-              {user.isAuthenticated || tutor.isAuthenticated || admin.isAuthenticated ? (
-                <>
-                  <motion.div
-                    variants={{
-                      hidden: { y: 20, opacity: 0 },
-                      show: { y: 0, opacity: 1 },
-                    }}
-                  >
+                {user.isAuthenticated || tutor.isAuthenticated || admin.isAuthenticated ? (
+                  <>
                     <Link
                       to={`/${role}/profile`}
                       className="block text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-gray-50 font-medium"
@@ -291,30 +263,19 @@ const Navbar = ({ setSidebarCollapsed, isSidebarCollapsed }) => {
                     >
                       Profile
                     </Link>
-                  </motion.div>
 
-                  <motion.div
-                    variants={{
-                      hidden: { y: 20, opacity: 0 },
-                      show: { y: 0, opacity: 1 },
-                    }}
-                  >
                     <button
-                      onClick={handleLogout}
+                      onClick={() => {
+                        handleLogout()
+                        setMenuOpen(false)
+                      }}
                       className="w-full text-left text-red-600 hover:text-red-700 transition-colors py-2 px-3 rounded-lg hover:bg-red-50 font-medium"
                     >
                       Logout
                     </button>
-                  </motion.div>
-                </>
-              ) : (
-                <>
-                  <motion.div
-                    variants={{
-                      hidden: { y: 20, opacity: 0 },
-                      show: { y: 0, opacity: 1 },
-                    }}
-                  >
+                  </>
+                ) : (
+                  <>
                     <Link
                       to="/user/login"
                       className="block text-gray-600 hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-gray-50 font-medium"
@@ -322,14 +283,7 @@ const Navbar = ({ setSidebarCollapsed, isSidebarCollapsed }) => {
                     >
                       Log in
                     </Link>
-                  </motion.div>
 
-                  <motion.div
-                    variants={{
-                      hidden: { y: 20, opacity: 0 },
-                      show: { y: 0, opacity: 1 },
-                    }}
-                  >
                     <Link
                       to="/user/sign-up"
                       className="block text-white bg-gradient-to-r from-primary to-purple-600 py-2 px-4 rounded-lg font-medium text-center shadow-sm"
@@ -337,13 +291,13 @@ const Navbar = ({ setSidebarCollapsed, isSidebarCollapsed }) => {
                     >
                       Sign Up
                     </Link>
-                  </motion.div>
-                </>
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                  </>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
     </motion.nav>
   )
 }

@@ -23,11 +23,6 @@ import Layout from '@/components/Drawer/Layout';
 
 import Profile from '@/pages/user/ProfileDetails/Index'
 
-import Assignments from './assignments/Index';
-import Messages from './messages/Index';
-import Community from './community/Index';
-import Certificates from './certificates/Index';
-import Quiz from './quiz/Index';
 import Setting from './settings/Index';
 
 // My course 
@@ -42,6 +37,8 @@ import NotFound from '@/components/FallbackUI/NotFound';
 import BlockedUI from '@/components/FallbackUI/BlockedUI';
 import ProtectLearningPage from '@/protectors/ProtectLearningPage';
 import WalletPage from './wallet/WalletPage';
+
+import CertificatePage from './certificates/CertificatePage.jsx';
 
 const UserIndex = () => {
   return (
@@ -132,7 +129,7 @@ const UserRoutes = () => {
               </ProtectLearningPage>
               }/>
           </Route>
-          <Route path='certificates' element={<Certificates/>}/>
+          <Route path='certificates' element={<CertificatePage/>}/>
           <Route path='wallet' element={<WalletPage/>}/>
           <Route path='settings' element={<Setting/>}/>
         </Route>

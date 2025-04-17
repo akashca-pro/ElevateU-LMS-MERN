@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { Card } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
@@ -24,13 +24,11 @@ import RazorPayPayment from "./components/RazorPayPayment"
 import OrderSummary from "./components/OrderSummary"
 import CouponForm from "./components/CouponForm"
 import { formatUrl } from "@/utils/formatUrls"
-import { useSelect } from "@/hooks/useSelect"
 import EmptyCartComponent from "@/components/FallbackUI/EmptyCartComponent"
 import { CourseEnrollmentSkeleton } from "@/components/Skeletons/CourseEnrollmentSkeleton"
 
 const CourseEnrollment = () => {
-  const { course : courseId } = useSelect()
-  console.log(courseId)
+  const { courseId } = useParams()
   const navigate = useNavigate()
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [couponCode, setCouponCode] = useState("")
@@ -39,9 +37,7 @@ const CourseEnrollment = () => {
   const [user, setUser] = useState(null)
   const [course, setCourse] = useState(null)
   const { data: cartDetails, error, isLoading } = useUserLoadCartQuery(courseId, { refetchOnMountOrArgChange: true })
-
-  const { data: couponDetails } = useUserFetchAppliedCouponQuery(courseId, { refetchOnMountOrArgChange: true, })
-
+  
   useEffect(() => {
     if (cartDetails?.data) {
       setUser(cartDetails.data.user)
@@ -50,15 +46,25 @@ const CourseEnrollment = () => {
       toast.error(error?.data)
     }
   }, [cartDetails])
-
   const decodedCourseName = course ? formatUrl(course.title) : ""
-
+  
+  const { 
+    data: couponDetails,  
+  } = useUserFetchAppliedCouponQuery({courseId : course?._id}, {
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+  });
+  
   useEffect(() => {
     if (couponDetails?.data) {
-      setCouponDiscount(couponDetails?.data)
-      setCouponApplied(true)
+      setCouponDiscount(couponDetails.data);
+      setCouponApplied(true);
+    } else {
+      setCouponDiscount(null);
+      setCouponApplied(false);
     }
-  }, [couponDetails?.data])
+  }, [couponDetails]);
+
 
   const { data: details } = useUserGetPricingQuery(course?._id)
 
@@ -115,11 +121,11 @@ const CourseEnrollment = () => {
 
   const handleRemoveCoupon = async () => {
     try {
-      await removeAppliedCoupon(course._id).unwrap()
+      await removeAppliedCoupon(course?._id).unwrap()
       setCouponApplied(false)
       setCouponDiscount(null)
     } catch (error) {
-      console.Consolelog(error)
+      console.log(error)
     }
   }
 

@@ -94,9 +94,11 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 // Create API slice
 export const apiSlice = createApi({
     reducerPath: 'api',
-    baseQuery : baseQueryWithReauth,
-    tagTypes: ['Admin', 'User', 'Tutor', 'Common'],
+    baseQuery: baseQueryWithReauth,
+    tagTypes: ['Admin', 'User', 'Tutor', 'Common', 'Coupon'],
+    keepUnusedDataFor: 10, // Reduce cache time (seconds)
+    refetchOnMountOrArgChange: 0, // Refetch if older than 30 seconds
     endpoints: () => ({}),
-});
+  });
 
 export default apiSlice;

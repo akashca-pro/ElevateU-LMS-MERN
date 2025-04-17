@@ -21,6 +21,7 @@ import { applyCoupon, bookmarkCourse, fetchCurrentAppliedCoupon, getPricing, isB
 import { createOrder, failedPayment, verifyPayment } from '../controllers/order/userOrderOps.js'
 import { changeLessonOrModuleStatus, courseDetails, isCourseEnrolled, loadSelectedLesson, progressStatus, resetCourseProgress, updateProgressTracker } from '../controllers/enrolledCourse/userLearningOps.js'
 import { loadWalletDetails } from '../controllers/transactions.js'
+import { loadCertificates } from '../controllers/course/certificate.js'
 
 
 const router =  express.Router();
@@ -104,6 +105,9 @@ router.put('/reset-progress/:id',verifyAccessToken('user'),resetCourseProgress)
 
 router.get('/wallet',verifyAccessToken('user'),loadWalletDetails('User'))
 
+// Course certificates
+
+router.get('/certificates',verifyAccessToken('user'),loadCertificates)
 
 
 export default router

@@ -1,6 +1,8 @@
+import Certificate from "../../model/certificate.js";
 import Course from "../../model/course.js";
 import EnrolledCourse from "../../model/enrolledCourses.js";
 import ProgressTracker from "../../model/progressTracker.js";
+import User from "../../model/user.js";
 import ResponseHandler from "../../utils/responseHandler.js";
 import HttpStatus from "../../utils/statusCodes.js";
 import { STRING_CONSTANTS } from "../../utils/stringConstants.js"
@@ -20,6 +22,8 @@ const calculateProgress = (modules) => {
 
     return totalLessons === 0 ? 0 : Math.round((completedLessons / totalLessons) * 100);
 };
+
+// Dynamically convert modules into cumulative array based on level to figure out the user's level
 
 export const calculateLevelSize = (modules) => {
 
@@ -86,6 +90,8 @@ export const isCourseEnrolled = async (req,res) => {
 
 }
 
+// update progress tracker only when tutor add module or lessons in existing module
+
 export const updateProgressTracker = async (req,res) => {
     
     try {
@@ -124,11 +130,11 @@ export const updateProgressTracker = async (req,res) => {
                     //  New module found → Add to progress tracker
                     progressTracker.modules.push({
                         moduleId: courseModule._id,
-                        moduleTitle: courseModule.moduleTitle,
+                        moduleTitle: courseModule.title,
                         moduleProgress: 0,
                         lessons: courseModule.lessons.map(lesson => ({
                             lessonId: lesson._id,
-                            lessonTitle: lesson.lessonTitle,
+                            lessonTitle: lesson.title,
                             isCompleted: false
                         })),
                         isCompleted: false
@@ -145,7 +151,7 @@ export const updateProgressTracker = async (req,res) => {
                             // New lesson found → Add to progress tracker
                             progressModule.lessons.push({
                                 lessonId: lesson._id,
-                                lessonTitle: lesson.lessonTitle,
+                                lessonTitle: lesson.title,
                                 isCompleted: false
                             });
 
@@ -448,11 +454,15 @@ export const changeLessonOrModuleStatus = async (req,res) => {
 
             if(allLessonsCompleted){
                 updatedProgress.modules[moduleIndex].isCompleted = true;
-                await updatedProgress.save()
             }
+
+        }else{
+            throw new Error('Failed finding module index')
         }
 
-        const { cumulativeModules, currentLevel } = calculateLevelSize(progressTracker.modules)
+        // passing the module status to update the level
+
+        const { cumulativeModules, currentLevel } = calculateLevelSize(updatedProgress.modules)
 
         updatedProgress.level={
             currentLevel,
@@ -460,6 +470,47 @@ export const changeLessonOrModuleStatus = async (req,res) => {
         }
 
         await updatedProgress.save()
+
+        // Create certificate when all modules are completed
+
+        const allModulesCompleted = updatedProgress.modules.every(m => m.isCompleted === true);
+
+        if(allModulesCompleted && updatedProgress.resetCount === 0 ){
+
+        const course = await Course.findById(courseId)
+        .select('title tutor duration level categoryName')
+        .populate('tutor',' _id firstName email')
+
+        const user = await User.findById(userId)
+        .select('firstName email')
+
+        const alreadyExist = await Certificate.findOne({ 'user.id' : userId , 'course.id' : courseId})
+
+        if(!alreadyExist){
+
+            await Certificate.create({
+                user : {
+                    id : userId,
+                    name : user.firstName,
+                    email : user.email
+                },
+                tutor : {
+                    id : course.tutor._id,
+                    name : course.tutor.firstName,
+                    email : course.tutor.email,
+                    expertise : course.categoryName
+                },
+                course : {
+                    id : course._id,
+                    title : course.title,
+                    duration : course.duration,
+                    level : course.level
+                }
+            })
+
+        } 
+
+        }
 
         return ResponseHandler.success(res, STRING_CONSTANTS.PROGRESS_CHANGE_LESSON_STATUS_SUCCESS, HttpStatus.OK,updatedProgress)
 

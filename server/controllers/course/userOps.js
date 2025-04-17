@@ -148,6 +148,7 @@ export const applyCoupon = async (req,res) => {
 
 export const fetchCurrentAppliedCoupon = async (req,res) => {
     try {
+  
         const userId = req.user.id;
 
         const courseId = req.params.id;
@@ -163,7 +164,7 @@ export const fetchCurrentAppliedCoupon = async (req,res) => {
                 finalAmount : appliedCoupon.finalAmount,
             })
         } 
-        
+
         if(order && order.price.couponCode){
             return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS,HttpStatus.OK,{
                 couponCode : order.price.couponCode,
@@ -172,7 +173,7 @@ export const fetchCurrentAppliedCoupon = async (req,res) => {
             })
         }
 
-        
+        return ResponseHandler.success(res,STRING_CONSTANTS.DATA_NOT_FOUND,HttpStatus.NO_CONTENT,null)
 
     } catch (error) {
         console.log(STRING_CONSTANTS.LOADING_ERROR,error);
@@ -195,7 +196,7 @@ export const removeAppliedCoupon = async (req,res) => {
         
         const order = await Order.findOne({ userId, courseId })
 
-        if(!appliedCoupon && !order.price.couponCode){
+        if(!appliedCoupon && !order?.price.couponCode){
             return ResponseHandler.error(res,STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.BAD_REQUEST)
         }
 
