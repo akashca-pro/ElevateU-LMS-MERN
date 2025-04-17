@@ -1,10 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trophy, CheckCircle, Sparkles, ArrowLeft, RotateCcw } from "lucide-react";
+import { Trophy, CheckCircle, Sparkles, ArrowLeft, RotateCcw, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const CourseCompletionDialog = ({ isOpen, onOpenChange, title, handleResetProgress }) => {
+const CourseCompletionDialog = ({ isOpen, onOpenChange, title, handleResetProgress, courseId }) => {
   const navigate = useNavigate();
 
   return (
@@ -40,14 +40,18 @@ const CourseCompletionDialog = ({ isOpen, onOpenChange, title, handleResetProgre
           </div>
         </div>
 
-        <DialogFooter className="flex flex-col sm:flex-row gap-3">
-          <Button className="sm:flex-1 gap-2" onClick={() => navigate('/user/profile/my-courses')}>
-            <ArrowLeft className="h-4 w-4" />
-            Back to Courses
+        <DialogFooter className="grid grid-cols-3">
+          <Button onClick={() => navigate('/user/profile/my-courses')}>
+            <ArrowLeft />
+            Go Back
           </Button>
 
-          <Button className="sm:flex-1 gap-2" onClick={handleResetProgress}>
-            <RotateCcw className="h-4 w-4" />
+          <Button onClick={() => navigate('/user/profile/certificates',{ state : courseId })}>
+            View Certificate
+          </Button>
+
+          <Button onClick={handleResetProgress}>
+            <RotateCcw />
             Start Over
           </Button>
         </DialogFooter>

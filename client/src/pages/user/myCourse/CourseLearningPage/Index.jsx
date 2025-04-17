@@ -195,7 +195,7 @@ const CourseLearningPage = () => {
 
         {/* Progress reset */}
         <CourseCompletionDialog isOpen={isModalOpen} onOpenChange={handleOpenChange}
-         handleResetProgress={handleResetProgress} title={courseDetails?.title}/>
+         handleResetProgress={handleResetProgress} title={courseDetails?.title} courseId = {courseId} />
 
       {/* Course Header */}
       <div className="mb-6">

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,6 +11,7 @@ import CertificateList from "./components/Certificate-list"
 import CertificateModal from "./components/Certificate-modal"
 import EmptyCertificates from "./components/Empty-certificates"
 import CertificateSkeleton from "./components/Certificate-skeleton"
+import { useLocation } from "react-router-dom"
 
 const CertificatePage = () => {
   const [viewMode, setViewMode] = useState("grid")
@@ -18,13 +19,22 @@ const CertificatePage = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedCertificate, setSelectedCertificate] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-//   const { certificates, recentCertificates, isLoading, error } = useCertificates()
+  const location = useLocation();
 
   const { data : details, isLoading, error } = useLoadCertificatesQuery({ searchQuery, page : currentPage })
 
   const data = details?.data
   const certificates = data?.certificates
-  console.log(data)
+
+
+  useEffect(()=>{
+
+    if(location.state){
+        setSelectedCertificate(certificates?.find(c=>c.courseId === location.state))
+        setIsModalOpen(true)
+    }
+
+  },[selectedCertificate, location.state, certificates])
 
   const handleOpenCertificate = (certificate) => {
     setSelectedCertificate(certificate)

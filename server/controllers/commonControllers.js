@@ -34,7 +34,7 @@ export const updateEmail = (role) =>{
         const db = role==='user' ? User : Tutor
 
         try {
-            const ID = req.params.id
+            const ID = req[role].id
             
             const {email} = req.body
     
@@ -42,7 +42,7 @@ export const updateEmail = (role) =>{
             if(!data)
                 return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
     
-            const emailExist = await db.findOne({email , _id : {$ne : ID}})
+            const emailExist = await db.findOne({email})
             if(emailExist)
                 return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
             

@@ -37,6 +37,7 @@ export const loadCertificates = async (req,res) => {
             return {
                 id: c._id,
                 userName : c.user.name,
+                courseId : c.course.id,
                 courseName: c.course.title,
                 tutorName: c.tutor.name,
                 tutorExpertise : c.tutor.expertise,

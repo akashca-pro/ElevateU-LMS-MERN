@@ -62,7 +62,6 @@ router.delete('/delete-tutor/:id',verifyAccessToken('admin'),deleteTutor)
 router.get('/verification-request',verifyAccessToken('admin'),loadRequests)
 router.post('/control-verification',verifyAccessToken('admin'),approveOrRejectrequest)
 
-
 // category CRUD
 
 router.get('/categories',verifyAccessToken('admin'),loadCategory)
