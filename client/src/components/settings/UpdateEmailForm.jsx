@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { toast } from "sonner"
+import OtpVerificationDialog from "./OtpVerificationDialog"
 
 const formSchema = z
   .object({
@@ -20,7 +21,9 @@ const formSchema = z
     path: ["confirmEmail"],
   })
 
-export default function UpdateEmailForm() {
+export default function UpdateEmailForm({ updateEmail, verifyEmail }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [email,setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
 
@@ -33,23 +36,20 @@ export default function UpdateEmailForm() {
   })
 
   async function onSubmit(values) {
-    setIsSubmitting(true)
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    setIsSubmitting(false)
-    setIsSuccess(true)
-
-    toast.success('Email updated',{
-      description: "Your email has been updated successfully.",
-    })
-
-    // Reset success state after 3 seconds
-    setTimeout(() => {
-      setIsSuccess(false)
-      form.reset()
-    }, 3000)
+    try {
+      const toastId = toast.loading('Please wait . . . ',{
+        description : 'Sending otp'
+      })
+      setEmail(values.confirmEmail)
+      await updateEmail({email : values.confirmEmail}).unwrap()
+      toast.dismiss(toastId)
+      setIsOpen(true)
+    } catch (error) {
+      toast.error('Error',{
+        description : 'Updating email failed, please try again later'
+      })
+      console.log(error)
+    }
   }
 
   return (
@@ -112,6 +112,16 @@ export default function UpdateEmailForm() {
           </AnimatePresence>
         </form>
       </Form>
+      <OtpVerificationDialog
+      isOpen={isOpen}
+      onClose={() => setIsOpen(false)}
+      useVerifyOtp={verifyEmail}
+      email={email || 'examble@gmail.com'}
+      length={6}
+      expiresIn={300} // seconds
+      useResendOtp={updateEmail}
+      resetForm={form.reset}
+    />
     </motion.div>
   )
 }

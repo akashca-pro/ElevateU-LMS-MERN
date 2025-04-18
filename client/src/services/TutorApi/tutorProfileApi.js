@@ -13,20 +13,20 @@ const tutorProfileApi = apiSlice.injectEndpoints({
             providesTags : ['Tutor']
         }),
         tutorUpdateEmail : builder.mutation({
-            query : ({id,credentials})=>({
-                url : `tutor/update-email/${id}`,
-                method : 'POST',
+            query : (credentials)=>({
+                url : `tutor/update-email`,
+                method : 'PATCH',
                 body : credentials
             }),
-            invalidatesTags : ['Tutor']
+            invalidatesTags : ['User']
         }),
         tutorVerifyEmail : builder.mutation({
-            query : (credentials)=>({
+            query : (credentials) =>({
                 url : `tutor/verify-email`,
-                method : 'POST',
+                method : 'PATCH',
                 body : credentials
             }),
-            invalidatesTags : ['Tutor']
+            invalidatesTags : ['User']
         }),
         tutorUpdateProfile : builder.mutation({
             query : (credentials)=>({

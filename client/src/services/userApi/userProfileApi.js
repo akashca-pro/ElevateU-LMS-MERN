@@ -12,9 +12,9 @@ const userProfileApi = apiSlice.injectEndpoints({
             providesTags : ['User']
         }),
         userUpdateEmail : builder.mutation({
-            query : ({id,credentials})=>({
-                url : `user/update-email/${id}`,
-                method : 'POST',
+            query : (credentials)=>({
+                url : `user/update-email`,
+                method : 'PATCH',
                 body : credentials
             }),
             invalidatesTags : ['User']
@@ -22,7 +22,7 @@ const userProfileApi = apiSlice.injectEndpoints({
         userVerifyEmail : builder.mutation({
             query : (credentials) =>({
                 url : `user/verify-email`,
-                method : 'POST',
+                method : 'PATCH',
                 body : credentials
             }),
             invalidatesTags : ['User']

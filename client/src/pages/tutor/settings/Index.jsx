@@ -12,6 +12,9 @@ import ThemeToggle from "@/components/settings/ThemeToggle"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 
+import { useTutorUpdateEmailMutation, useTutorVerifyEmailMutation } from 
+'@/services/TutorApi/tutorProfileApi.js'
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -37,6 +40,9 @@ const itemVariants = {
 
 export default function Index() {
   const [enableEdit,setEnableEdit] = useState(true);
+  const [updateEmail] = useTutorUpdateEmailMutation()
+  const [verifyEmail] = useTutorVerifyEmailMutation()
+
   return (
     <div className="container max-w-4xl py-10 mx-auto">
       <motion.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-6">
@@ -69,7 +75,7 @@ export default function Index() {
                   <CardDescription>Update your email address associated with your account.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <UpdateEmailForm />
+                  <UpdateEmailForm updateEmail={updateEmail} verifyEmail={verifyEmail} />
                 </CardContent>
               </Card>
 

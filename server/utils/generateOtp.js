@@ -1,6 +1,8 @@
 import User from "../model/user.js";
 import Tutor from "../model/tutor.js";
 import { randomInt } from 'node:crypto';
+import OTP from "../model/otp.js";
+import { sendEmailOTP } from "./sendEmail.js";
 
 export const generateOtpCode = () => {
 
@@ -8,6 +10,31 @@ export const generateOtpCode = () => {
   const otpExpires = Date.now() + 10 * 60 * 1000;
 
   return {otp , otpExpires}
+}
+
+export const sendOtpViaEmail = async (role, email, otpType, firstName) => {
+  
+    try {
+      
+      const {otp} = generateOtpCode();
+
+      await OTP.create({
+          email,
+          role,
+          otp,
+          otpType,
+          otpExpires : new Date(Date.now() + 5 * 60 * 1000)
+      });
+
+      await sendEmailOTP(email, firstName, otp)
+
+      return true
+
+    } catch (error) {
+      console.log(error)
+      throw new Error('Error sending otp')
+    }
+
 }
 
 export const saveOtp = async (role,email,otp,otpExpires) => {

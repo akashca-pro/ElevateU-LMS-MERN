@@ -2,7 +2,7 @@ import User from "../model/user.js"
 import Tutor from "../model/tutor.js"
 import Admin from "../model/admin.js"
 import OTP from "../model/otp.js"
-import { generateOtpCode, saveOtp } from "../utils/generateOtp.js"
+import { generateOtpCode, sendOtpViaEmail } from "../utils/generateOtp.js"
 import { sendEmailOTP } from "../utils/sendEmail.js"
 import HttpStatus from "../utils/statusCodes.js"
 import ResponseHandler from "../utils/responseHandler.js"
@@ -26,34 +26,38 @@ const sortingConditions = {
 }
 
 
-//Update Email
+// Update Email
 
 export const updateEmail = (role) =>{
     return async (req,res) => {
 
-        const db = role==='user' ? User : Tutor
+        const db = roleModals[role]
 
         try {
             const ID = req[role].id
             
             const {email} = req.body
     
-            const data = await db.findById(ID)
-            if(!data)
+            const user = await db.findById(ID)
+            if(!user)
                 return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
     
             const emailExist = await db.findOne({email})
             if(emailExist)
                 return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
             
-            data.tempMail = email;
-            await data.save();
+            user.tempMail = email;
+            await user.save();
+
+            // Deleting the otp if already exist 
+
+            const otpDB = await OTP.findOne({ otpType : 'updateEmail', role, email })
+
+            if(otpDB){
+                await OTP.deleteOne({ _id: otpDB._id });
+            }
             
-            const {otp,otpExpires} = generateOtpCode();
-    
-            await saveOtp(role,data.email,otp,otpExpires);
-    
-            await sendEmailOTP(email,data.firstName,otp);
+            await sendOtpViaEmail(role, email, 'updateEmail', user.firstName)
     
             return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK)
             
@@ -65,30 +69,34 @@ export const updateEmail = (role) =>{
     }
 }
 
-// verify Email
+// verify otp for email update
 
 export const verifyEmail = (role) =>{
     return async (req,res) => {
 
-        const db = role==='user' ? User : Tutor
-    
+        
         try {
-            const {otp} = req.body;
+            const userId = req[role].id;
+
+            const db = roleModals[role]
+
+            const {otp,email} = req.body;
             
-            const data = await db.findOne({
-                otp , 
-                otpExpires : { $gt : Date.now() }
-            });
+            const otpDB = await OTP.findOne({ otp, otpType : 'updateEmail', role, email })
     
-            if(!data) 
+            if(!otpDB || new Date() > otpDB.otpExpires ) 
                 return ResponseHandler.error(res,STRING_CONSTANTS.OTP_ERROR ,HttpStatus.BAD_REQUEST);
+
+            const user = await db.findById(userId)
+
+            if(!user)
+                return ResponseHandler.error(res, STRING_CONSTANTS.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
             
-            data.email = data.tempMail;
-            data.tempMail = undefined;
-            data.otp = undefined;
-            data.otpExpires = undefined;
+            user.email = user.tempMail;
+            user.tempMail = undefined;
     
-            await data.save()
+            await user.save()
+            await OTP.deleteOne({ _id: otpDB._id });
     
             return ResponseHandler.success(res, STRING_CONSTANTS.VERIFICATION_SUCCESS, HttpStatus.OK);
     
@@ -100,7 +108,7 @@ export const verifyEmail = (role) =>{
     }
 }
 
-// Send otp 
+// Send otp for login 
 
 export const sendOtp = async(req,res) =>{
     

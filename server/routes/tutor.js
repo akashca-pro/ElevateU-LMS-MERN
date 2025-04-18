@@ -53,8 +53,8 @@ router.get('/isblocked',verifyAccessToken('tutor'),isBlock('tutor'))
 // CRUD routes
 
 router.get('/profile',verifyAccessToken('tutor'),loadProfile)
-router.post('/update-email/:id',otpLimiter,verifyAccessToken('tutor'),updateEmail('tutor'))
-router.post('/verify-email',verifyAccessToken('tutor'),verifyEmail('tutor'))
+router.patch('/update-email',verifyAccessToken('tutor'),updateEmail('tutor'))
+router.patch('/verify-email',verifyAccessToken('tutor'),verifyEmail('tutor'))
 router.post('/update-profile',verifyAccessToken('tutor'),validateForm('tutor','profile'),updateProfile)
 router.delete('/delete-account/:id',verifyAccessToken('tutor'),deleteAccount)
 

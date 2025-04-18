@@ -15,6 +15,7 @@ export const STRING_CONSTANTS = {
     TOKEN_ISSUE_ERROR : 'Token issuing failed',
     TOKEN_VERIFY_ERROR : 'Token verification error',
     DATA_NOT_FOUND : 'Data not found' ,
+    USER_NOT_FOUND : 'User not found',
     LOADING_SUCCESS : 'Loading data successfull',
     LOADING_ERROR : 'Loading data failed',
     UPDATION_SUCCESS : 'Updated data successfully',

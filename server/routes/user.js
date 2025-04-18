@@ -50,8 +50,8 @@ router.get('/isblocked',verifyAccessToken('user'),isBlock('user'))
 // CRUD routes
 
 router.get('/profile',verifyAccessToken('user'),loadProfile)
-router.post('/update-email/:id',otpLimiter,verifyAccessToken('user'),updateEmail('user'))
-router.post('/verify-email',verifyAccessToken('user'),verifyEmail('user'))
+router.patch('/update-email',verifyAccessToken('user'),updateEmail('user'))
+router.patch('/verify-email',verifyAccessToken('user'),verifyEmail('user'))
 router.post('/update-profile/:id',validateForm('user','profile'),verifyAccessToken('user'),updateProfile)
 router.delete('/delete-account/:id',verifyAccessToken('user'),deleteAccount)
 

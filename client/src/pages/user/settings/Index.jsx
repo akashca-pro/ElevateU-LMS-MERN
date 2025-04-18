@@ -8,6 +8,9 @@ import UpdatePasswordForm from "@/components/settings/UpdatePasswordForm"
 import DeleteAccount from "@/components/settings/DeleteAccount"
 import ThemeToggle from "@/components/settings/ThemeToggle"
 
+import { useUserUpdateEmailMutation, useUserVerifyEmailMutation } from 
+'@/services/userApi/userProfileApi.js'
+
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -33,6 +36,8 @@ const itemVariants = {
 }
 
 export default function Index() {
+  const [updateEmail] = useUserUpdateEmailMutation()
+  const [verifyEmail] = useUserVerifyEmailMutation()
   return (
     <div className="container max-w-4xl py-10 mx-auto">
       <motion.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-6">
@@ -61,7 +66,8 @@ export default function Index() {
                   <CardDescription>Update your email address associated with your account.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <UpdateEmailForm />
+                  <UpdateEmailForm updateEmail={updateEmail} 
+                  verifyEmail={verifyEmail} />
                 </CardContent>
               </Card>
 
