@@ -14,7 +14,13 @@ const calculateProgress = (modules) => {
     let completedLessons = 0;
 
     for (const module of modules) {
+        if(module.isAddon){
+            continue;
+        }
         for (const lesson of module.lessons) {
+            if(lesson.isAddon){
+                continue;
+            }
             totalLessons++;
             if (lesson.isCompleted) completedLessons++;
         }
@@ -101,7 +107,7 @@ export const updateProgressTracker = async (req,res) => {
         const isEnrolled = await EnrolledCourse.findOne({ userId, courseId })
 
         if(!isEnrolled)
-            return null
+            return ResponseHandler.error(res, STRING_CONSTANTS.COURSE_NOT_ENROLLED, HttpStatus.NOT_FOUND);
 
         const progressTracker = await ProgressTracker.findOne({ userId , courseId });
 
@@ -117,7 +123,7 @@ export const updateProgressTracker = async (req,res) => {
 
         // If the course has been updated after last update, check for new modules or lessons
         if (!progressTracker.lastCourseUpdate || progressTracker.lastCourseUpdate < course.updatedAt) {
-            progressTracker.lastCourseUpdate = course.updatedAt;
+            progressTracker.lastCourseUpdate = new Date(course.updatedAt);
 
             // Convert modules to a map for quick lookup
             const progressModulesMap = new Map(progressTracker.modules.map(m => [m.moduleId, m]));
@@ -135,41 +141,17 @@ export const updateProgressTracker = async (req,res) => {
                         lessons: courseModule.lessons.map(lesson => ({
                             lessonId: lesson._id,
                             lessonTitle: lesson.title,
-                            isCompleted: false
+                            isCompleted: false,
+                            isAddon : true
                         })),
-                        isCompleted: false
+                        isCompleted: false,
+                        isAddon : true
                     });
 
                     courseProgressUpdated = true;
-                } else {
-                    //  Check for new lessons inside existing modules
-                    let progressModule = progressModulesMap.get(courseModule._id);
-                    const progressLessonsMap = new Map(progressModule.lessons.map(l => [l.lessonId, l]));
-
-                    for (const lesson of courseModule.lessons) {
-                        if (!progressLessonsMap.has(lesson._id)) {
-                            // New lesson found → Add to progress tracker
-                            progressModule.lessons.push({
-                                lessonId: lesson._id,
-                                lessonTitle: lesson.title,
-                                isCompleted: false
-                            });
-
-                            progressModule.isCompleted = false; // Mark module as incomplete
-                            courseProgressUpdated = true;
-                        }
-                    }
                 }
             }
             if(courseProgressUpdated){
-            
-                const { cumulativeModules, currentLevel } = calculateLevelSize(progressTracker.modules)
-
-                progressTracker.level ={
-                    currentLevel,
-                    cumulativeModules
-                }
-
                 await progressTracker.save()
             }
         }
@@ -183,7 +165,7 @@ export const updateProgressTracker = async (req,res) => {
 
 }
 
-// load course and module details
+// load course and module details that are available when enrolled
 
 export const courseDetails = async (req,res) => {
     
@@ -241,27 +223,37 @@ export const courseDetails = async (req,res) => {
             }))
           );
         
-        const moduleDetails = courseDetails.modules.map((module) => {
-            
+            const enrolledModules = [];
+            const addOnModules = [];
+
+            courseDetails.modules.forEach((module, index) => {
+            const moduleInstance = progressTracker.modules.find(m => m.moduleId === module._id);
             const totalLessons = module.lessons.length;
-            const moduleInstance = progressTracker.modules.find(m=>m.moduleId === module._id)
+            const completedLessons = moduleInstance?.lessons
+                .filter(les => les.isCompleted)
+                .map(les => les.lessonId) || [];
 
-            const completedLessons = moduleInstance.lessons.filter(les=>les.isCompleted).map(les=>les.lessonId)
-
-            return {
+            const moduleData = {
                 _id: module._id,
                 title: module.title,
                 totalLessons,
                 lessonDetails: module.lessons.map((lesson) => ({
-                    _id : lesson._id,
-                    title: lesson.title,
-                    duration: lesson.duration,
-                    completedLessons
-                }))
+                _id: lesson._id,
+                title: lesson.title,
+                duration: lesson.duration,
+                completedLessons
+                })),
             };
-        });
 
-        const totalLessons = moduleDetails.reduce((total,module)=>{
+            if (progressTracker.modules[index]?.isAddon) {
+                addOnModules.push(moduleData);
+            } else {
+                enrolledModules.push(moduleData);
+            }
+            });
+
+
+        const totalLessons = enrolledModules.reduce((total,module)=>{
             return total + module.totalLessons
         },0)
 
@@ -275,7 +267,8 @@ export const courseDetails = async (req,res) => {
                 totalModules : courseDetails.modules.length || 0,
                 totalLessons 
             },
-            moduleDetails,
+            enrolledModules,
+            addOnModules
         }
 
         return ResponseHandler.success(res, STRING_CONSTANTS.SUCCESS,HttpStatus.OK,responseData)
@@ -285,6 +278,7 @@ export const courseDetails = async (req,res) => {
         return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
+
 
 // load current progress Status
 
@@ -302,7 +296,7 @@ export const progressStatus = async (req,res) => {
         let totalLessons;
 
         const currentModuleStatus = () => {
-            const currentModule = progressTracker.modules.find(module => !module.isCompleted);
+            const currentModule = progressTracker.modules.find(module => (!module.isCompleted && !module.isAddon) );
         
             if (!currentModule) return {
                  currentModule: progressTracker.modules[0], 
@@ -373,7 +367,8 @@ export const progressStatus = async (req,res) => {
             ...lessonData[0],
             attachments,
             isCompleted : currentLesson.isCompleted,
-            moduleId : currentModule.moduleId
+            moduleId : currentModule.moduleId,
+            isAddon : currentLesson.isAddon
         }
 
         const totalModules = progressTracker.modules.length || 0
@@ -462,7 +457,8 @@ export const changeLessonOrModuleStatus = async (req,res) => {
 
         // passing the module status to update the level
 
-        const { cumulativeModules, currentLevel } = calculateLevelSize(updatedProgress.modules)
+        const { cumulativeModules, currentLevel } = 
+        calculateLevelSize(updatedProgress.modules.filter(m=>!m.isAddon))
 
         updatedProgress.level={
             currentLevel,
@@ -473,7 +469,7 @@ export const changeLessonOrModuleStatus = async (req,res) => {
 
         // Create certificate when all modules are completed
 
-        const allModulesCompleted = updatedProgress.modules.every(m => m.isCompleted === true);
+        const allModulesCompleted = updatedProgress.modules.every(m => (m.isCompleted && !m.isAddon));
 
         if(allModulesCompleted && updatedProgress.resetCount === 0 ){
 
@@ -574,6 +570,7 @@ export const loadSelectedLesson = async (req,res) => {
             attachments,
             moduleId,
             isCompleted : lesson.isCompleted,
+            isAddon : lesson.isAddon
         }
 
         return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_CURRENT_LESSON_SUCCESS, HttpStatus.OK,result)        

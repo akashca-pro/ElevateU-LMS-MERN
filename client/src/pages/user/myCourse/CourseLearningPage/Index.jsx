@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import {ChevronLeft} from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useUserCourseDetailsQuery,useUserCourseCurrentStatusQuery, useLoadLessonDetailsQuery
-  ,useLessonOrModuleStatusChangeMutation, useResetCourseProgressMutation, useCheckEnrollmentQuery
+  ,useLessonOrModuleStatusChangeMutation, useResetCourseProgressMutation
   ,useUpdateProgressTrackerMutation
  } from '@/services/userApi/userLearningCourseApi.js'
 import VideoPlayer from "./components/VideoPlayer"
@@ -36,7 +36,9 @@ const CourseLearningPage = () => {
   = useUserCourseCurrentStatusQuery(courseId)
 
   const [courseDetails,setCourseDetails] = useState(null)
+  const [isUpdatingProgress, setIsUpdatingProgress] = useState(false)
   const [moduleDetails,setModuleDetails] = useState(null)
+  const [addonModules,setAddonModules] = useState(null)
   const [progressDetails, setProgressDetails] = useState(null)
   const [selectedModule, setSelectedModule] = useState(null)
   const [currentLesson, setCurrentLesson] = useState(null)
@@ -54,12 +56,15 @@ const CourseLearningPage = () => {
   const [isModalOpen,setIsModalOpen] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false);
   const [activeTab, setActiveTab] = useState("progress")
+  const [activeTab2, setActiveTab2] = useState("enrolled")
 
   useEffect(()=>{
 
     if(course){
       setCourseDetails(course?.data?.courseDetails)
-      setModuleDetails(course?.data?.moduleDetails)
+      setModuleDetails(course?.data?.enrolledModules)
+      setAddonModules(course?.data?.addOnModules)
+
     }
 
     if(progress){
@@ -74,13 +79,21 @@ const CourseLearningPage = () => {
   },[course, progress, lessonDetails, courseId])
 
   useEffect(()=>{
-    handleUpdateProgress()
+    if (courseId) {
+      setTimeout(()=>{
+        handleUpdateProgress()
+      },3000)
+    }
   },[courseId])
   
   // check and update progress tracker if any changes to module or lesson
+
   const handleUpdateProgress = async () => {
+
+    if (isUpdatingProgress || !courseId) return; 
   
     try {
+      setIsUpdatingProgress(true)
       const res = await updateProgressTracker(courseId).unwrap()
       refetchCourseDetails()
       refetchProgressDetails()
@@ -91,6 +104,8 @@ const CourseLearningPage = () => {
     } catch (error) {
       toast.error("Failed to update progress tracker");
       console.log(error)
+    }finally {
+      setIsUpdatingProgress(false)
     }
     
   }
@@ -231,8 +246,16 @@ const CourseLearningPage = () => {
 
         {/* Module Accordion */}
         <div>
+
+            <Tabs value={activeTab2} onValueChange={setActiveTab2} >
+            <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value='enrolled' > Enrolled Content </TabsTrigger>
+            <TabsTrigger value='addon' > Add on </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value='enrolled'>
           <Card className="border-0 shadow-lg h-full">
-            <ModuleAccordion
+            <ModuleAccordion asChild
               course={courseDetails}
               moduleDetails={moduleDetails}
               progress={progressDetails}
@@ -240,6 +263,20 @@ const CourseLearningPage = () => {
               onLessonSelect={handleLessonSelect}
             />
           </Card>
+            </TabsContent>
+            <TabsContent value = 'addon'>
+            <Card className="border-0 shadow-lg h-full">
+            <ModuleAccordion asChild
+              course={courseDetails}
+              moduleDetails={addonModules}
+              progress={progressDetails}
+              currentLessonId={currentLesson?._id}
+              onLessonSelect={handleLessonSelect}
+            />
+          </Card>
+            </TabsContent>
+            </Tabs>
+
         </div>
       </div>
 

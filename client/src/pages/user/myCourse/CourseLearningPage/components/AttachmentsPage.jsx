@@ -7,7 +7,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Search, Download, FileText, FileImage, FileArchive, FileCode, Filter, FileJson } from "lucide-react"
 
-const AttachmentsPage = ({ course, currentLesson }) => {
+const AttachmentsPage = ({ course, currentLesson, addon }) => {
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("current")
 
@@ -49,7 +49,9 @@ const AttachmentsPage = ({ course, currentLesson }) => {
   }
 
   const filteredAttachments =
-    activeTab === "current" ? filterAttachments(currentLesson) : filterAttachments(course?.attachments)
+    activeTab === "current" ? filterAttachments(currentLesson) 
+   : filterAttachments(course?.attachments)
+
 
   return (
     <div className="space-y-6">
@@ -74,7 +76,8 @@ const AttachmentsPage = ({ course, currentLesson }) => {
 
       <Card className="border-0 shadow-md">
         <CardHeader className="pb-2">
-          <CardTitle>{activeTab === "current" ? "Current Lesson Resources" : "All Course Resources"}</CardTitle>
+          <CardTitle>{activeTab === "current" ? "Current Lesson Resources" 
+          : activeTab === 'all' ? "All Course Resources" : 'Addon Resources'}</CardTitle>
         </CardHeader>
         <CardContent>
           {filteredAttachments.length > 0 ? (

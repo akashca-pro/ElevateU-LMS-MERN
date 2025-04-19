@@ -10,34 +10,7 @@ const ModuleAccordion = ({ course ,moduleDetails, progress, currentLessonId, onL
   const [openModules, setOpenModules] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
   const modulesPerPage = 3
-  const totalPages = Math.ceil(course?.totalModules / modulesPerPage)
-
-  // Find which module contains the current lesson and open it
-//   useEffect(() => {
-//     if (currentLessonId) {
-//       let foundModuleIndex = -1
-
-//       for (let i = 0; i < modules.length; i++) {
-//         const module = modules[i]
-//         for (const lesson of module.lessons) {
-//           if (lesson.id === currentLessonId) {
-//             foundModuleIndex = i
-//             if (!openModules.includes(module.id)) {
-//               setOpenModules((prev) => [...prev, module.id])
-//             }
-//             break
-//           }
-//         }
-//         if (foundModuleIndex !== -1) break
-//       }
-
-//       // If found, navigate to the page containing this module
-//       if (foundModuleIndex !== -1) {
-//         const pageForModule = Math.floor(foundModuleIndex / modulesPerPage) + 1
-//         setCurrentPage(pageForModule)
-//       }
-//     }
-//   }, [currentLessonId, modules])
+  const totalPages = Math.ceil(moduleDetails?.length/ modulesPerPage)
 
   // Toggle module open/close
   const toggleModule = (moduleId) => {

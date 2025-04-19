@@ -18,9 +18,11 @@ const progressTrackerSchema = new mongoose.Schema({
             _id : false,
             lessonTitle : { type : String },
             lessonId : {type : String, ref : 'Course.modules.lessons' },
-            isCompleted : { type : Boolean, default : false }
+            isCompleted : { type : Boolean, default : false },
+            isAddon : { type : Boolean, default : false }
         }],
-        isCompleted : { type : Boolean, default : false }
+        isCompleted : { type : Boolean, default : false },
+        isAddon : { type : Boolean, default : false }
     }],
 
     level : {

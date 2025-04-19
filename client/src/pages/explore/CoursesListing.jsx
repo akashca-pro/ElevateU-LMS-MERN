@@ -331,8 +331,8 @@ const CoursesListing = ({ categories }) => {
                     className="mb-4"
                   />
                   <div className="flex justify-between text-sm text-gray-500">
-                    <span>${queryParams.filter.priceRange[0]}</span>
-                    <span>${queryParams.filter.priceRange[1]}</span>
+                    <span>₹{queryParams.filter.priceRange[0]}</span>
+                    <span>₹{queryParams.filter.priceRange[1]}</span>
                   </div>
                 </div>
               </div>

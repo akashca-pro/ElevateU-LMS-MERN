@@ -173,6 +173,8 @@ const CourseDetails = () => {
   const handleLessonChange = (moduleIndex, lessonIndex, field, value) => {
     
     if(field === 'title' && lockedLessons.has(`${moduleIndex}-${lessonIndex}`)) return 
+    if(field === 'videoUrl' && lockedLessons.has(`${moduleIndex}-${lessonIndex}`)) return 
+    if(field === 'duration' && lockedLessons.has(`${moduleIndex}-${lessonIndex}`)) return 
 
     const courseCopy = JSON.parse(JSON.stringify(course))
     courseCopy.modules[moduleIndex].lessons[lessonIndex][field] = value;
@@ -181,6 +183,9 @@ const CourseDetails = () => {
   }
 
   const handleLessonAttachment = (moduleIndex, lessonIndex, updatedAttachments ) =>{
+
+    if(lockedLessons.has(`${moduleIndex}-${lessonIndex}`)) return 
+
     const courseCopy = JSON.parse(JSON.stringify(course))
     courseCopy.modules[moduleIndex].lessons[lessonIndex].attachments = updatedAttachments;
     setCourse(courseCopy);
@@ -188,7 +193,7 @@ const CourseDetails = () => {
   }
 
   const handleRemoveModule = (moduleIndex) => {
-    // if(lockedModules.has(index)) return 
+    if(lockedModules.has(moduleIndex)) return 
 
     const courseCopy = JSON.parse(JSON.stringify(course));
     courseCopy.modules.splice(moduleIndex,1);
@@ -197,7 +202,7 @@ const CourseDetails = () => {
   }
   
   const handleRemoveLesson = (moduleIndex, lessonIndex) => {
-    // if(lockedLessons.has(`${moduleIndex}-${lessonIndex}`)) return 
+    if(lockedLessons.has(`${moduleIndex}-${lessonIndex}`)) return 
 
     const courseCopy = JSON.parse(JSON.stringify(course))
     courseCopy.modules[moduleIndex].lessons.splice(lessonIndex,1);
