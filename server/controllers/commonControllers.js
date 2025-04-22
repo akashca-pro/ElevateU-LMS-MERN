@@ -73,8 +73,6 @@ export const updateEmail = (role) =>{
 
 export const verifyEmail = (role) =>{
     return async (req,res) => {
-
-        
         try {
             const userId = req[role].id;
 
@@ -439,6 +437,82 @@ export const getCourses = (sort) => async (req,res) => {
     } catch (error) {
         console.log(STRING_CONSTANTS.LOADING_ERROR,error)
         return ResponseHandler.success(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// check and store new password in the temp and send otp to the mail
+
+export const updatePassword = (role) => async (req,res) => {
+    
+    try {
+
+        const userId = req[role].id;
+        const db = roleModals[role]
+
+        const { currPass, newPass } = req.body;
+
+        const user = await db.findById(userId)
+        .select('_id password tempPassword email firstName ');
+
+        if(!await bcrypt.compare(currPass, user.password))
+            return ResponseHandler.error(res, STRING_CONSTANTS.INVALID_PASSWORD, HttpStatus.BAD_REQUEST);
+
+        const hashedPassword = await bcrypt.hash(newPass, 10);
+
+        user.tempPassword = hashedPassword;
+
+        user.save();
+
+        const { otp } = generateOtpCode();
+
+        await OTP.create({
+            email : user.email,
+            role,
+            otp,
+            otpType : 'changePassword',
+            otpExpires : new Date(Date.now() + 5 * 60 * 1000)
+        });
+
+        await sendEmailOTP(email, firstName, otp)
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK)
+        
+    } catch (error) {
+        console.log(STRING_CONSTANTS.SERVER,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER,HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// verify otp and update the password from the temp password
+
+export const verifyOtpForPasswordChange = (role) => async (req,res) => {
+    
+    try {
+
+        const { otp } = req.query;
+        const userId = req[role].id;
+        const db = roleModals[role];
+
+        const user = await db.findById(userId)
+        .select('_id password tempPassword firstName email')
+
+        const otpDB = await OTP.findOne({ role, otpType : 'changePassword', otp , email})
+
+        if(!otpDB || new Date() > otpDB.otpExpires)
+            return ResponseHandler.error(res, STRING_CONSTANTS.OTP_ERROR, HttpStatus.BAD_REQUEST);
+
+        user.password = user.tempPassword;
+        user.tempPassword = undefined
+
+        await user.save()
+
+        await OTP.deleteOne({ _id : otpDB._id })
+        
+    } catch (error) {
+        console.log(STRING_CONSTANTS.SERVER,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER,HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }

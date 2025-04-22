@@ -8,7 +8,9 @@ import UpdatePasswordForm from "@/components/settings/UpdatePasswordForm"
 import DeleteAccount from "@/components/settings/DeleteAccount"
 import ThemeToggle from "@/components/settings/ThemeToggle"
 
-import { useUserUpdateEmailMutation, useUserVerifyEmailMutation } from 
+import { useUserUpdateEmailMutation, useUserVerifyEmailMutation,
+useUpdatePasswordMutation, useVerifyOtpForPasswordMutation
+ } from 
 '@/services/userApi/userProfileApi.js'
 
 
@@ -36,8 +38,12 @@ const itemVariants = {
 }
 
 export default function Index() {
-  const [updateEmail] = useUserUpdateEmailMutation()
-  const [verifyEmail] = useUserVerifyEmailMutation()
+  const [updateEmail] = useUserUpdateEmailMutation();
+  const [verifyEmail] = useUserVerifyEmailMutation();
+
+  const [updatePassword] = useUpdatePasswordMutation();
+  const [verifyPassword] = useVerifyOtpForPasswordMutation();
+
   return (
     <div className="container max-w-4xl py-10 mx-auto">
       <motion.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-6">
@@ -77,7 +83,7 @@ export default function Index() {
                   <CardDescription>Change your password to keep your account secure.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <UpdatePasswordForm />
+                  <UpdatePasswordForm/>
                 </CardContent>
               </Card>
 

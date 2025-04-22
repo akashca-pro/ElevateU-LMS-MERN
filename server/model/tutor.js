@@ -87,6 +87,10 @@ const tutorSchema = mongoose.Schema({
         type : String,
         expires : 600
     },
+    tempPassword : {
+        type : String,
+        expires : 600
+    },
     status : {
         type : String,
         enum : ['pending','approved','rejected','none'],

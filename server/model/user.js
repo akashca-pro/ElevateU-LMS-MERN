@@ -63,6 +63,10 @@ const userSchema  = new mongoose.Schema({
         type : String,
         expires : 600
     },
+    tempPassword : {
+        type : String,
+        expires : 600
+    },
     isBlocked : {
         type : Boolean,
         default : false
