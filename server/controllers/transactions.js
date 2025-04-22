@@ -28,15 +28,19 @@ const source = {
     'Admin' : {nameLabel : 'adminId', amountLabel : 'adminPayout', transactionType : 'admin_withdrawal'}
 }
 
+
 const handleWithdrawalTransaction = async ({ role ,id, amount}) => {
     try {
+
+        const roundedAmount = parseFloat(amount.toFixed(2));
+
         const transaction = await Transaction.create({
             type : source[role].transactionType,
             source : {
                 [source[role].nameLabel] : id
             },
             amount : {
-                [source[role].amountLabel] : amount
+                [source[role].amountLabel] : roundedAmount
             }
         })
 
@@ -44,17 +48,17 @@ const handleWithdrawalTransaction = async ({ role ,id, amount}) => {
         const withdrawTransaction = {
             transactionId : transaction._id,
             type: 'debit',
-            amount,
+            amount : roundedAmount,
             purpose: 'withdrawal',
             status: 'completed',
-            description: `You withdrew ${amount} `  
+            description: `You withdrew ${roundedAmount} `  
         }
 
         await Wallet.updateOne(
             { userId : id, userModel : role },
             {
                 $push : { transactions : withdrawTransaction },
-                $inc : { balance : -amount , totalWithdrawals : amount}
+                $inc : { balance : -roundedAmount , totalWithdrawals : roundedAmount}
             }
         )
 

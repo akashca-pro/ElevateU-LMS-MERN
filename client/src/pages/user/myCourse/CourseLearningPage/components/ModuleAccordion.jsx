@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { motion } from "framer-motion"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, Play, PlayCircle, ChevronLeft, ChevronRight } from "lucide-react"
 
-const ModuleAccordion = ({ course ,moduleDetails, progress, currentLessonId, onLessonSelect }) => {
+const ModuleAccordion = ({ course ,moduleDetails, progress, currentLessonId, onLessonSelect, enrolledLastIndex = 0 }) => {
   const [openModules, setOpenModules] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
   const modulesPerPage = 3
@@ -81,7 +81,7 @@ const ModuleAccordion = ({ course ,moduleDetails, progress, currentLessonId, onL
                 >
                   <div className="flex flex-col items-start text-left">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">Module {absoluteModuleIndex + 1}:</span>
+                      <span className="font-medium">Module {absoluteModuleIndex + 1 + enrolledLastIndex }:</span>
                       {isModuleCompleted(module._id) && (
                         <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
                           <CheckCircle className="h-3 w-3 mr-1" />
@@ -128,7 +128,7 @@ const ModuleAccordion = ({ course ,moduleDetails, progress, currentLessonId, onL
                             </div>
                             <div className="flex flex-col items-start">
                               <span className="font-medium">
-                                {absoluteModuleIndex + 1}.{lessonIndex + 1} {lesson.title}
+                                {absoluteModuleIndex + 1 + enrolledLastIndex}.{lessonIndex + 1} {lesson.title}
                               </span>
                               <span className="text-xs text-gray-500 mt-1">{lesson.duration} min</span>
                             </div>

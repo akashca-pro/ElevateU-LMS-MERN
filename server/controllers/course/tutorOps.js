@@ -5,10 +5,7 @@ import ResponseHandler from '../../utils/responseHandler.js'
 import HttpStatus from '../../utils/statusCodes.js'
 import { STRING_CONSTANTS } from '../../utils/stringConstants.js'
 import { saveNotification, sendNotification } from '../../utils/LiveNotification.js'
-
-function normalizeTitle(title) {
-    return title.trim().replace(/\s+/g, ' ').toLowerCase();
-}
+import EnrolledCourse from '../../model/enrolledCourses.js'
 
 // create a course
 export const createCourse = async (req,res) => {
@@ -27,14 +24,20 @@ export const createCourse = async (req,res) => {
 
         if(tutorCheck.draftCount >= 3 && draft)
             return ResponseHandler.error(res, STRING_CONSTANTS.DRAFT_LIMIT, HttpStatus.FORBIDDEN);
+        
+        await Tutor.findByIdAndUpdate(
+            tutorId,
+            { $inc: { courseCount: 1 } },
+        );
 
         await Course.create({
             ...formData,
             title : formData.title.trim(),
             tutor : tutorId,
             draft : draft ? true : false,
-            status : !draft ? 'pending' : 'draft' 
+            status : !draft ? 'pending' : 'draft',
         });
+
 
         return ResponseHandler.success(res, STRING_CONSTANTS.CREATION_SUCCESS, HttpStatus.CREATED)
 
@@ -222,7 +225,14 @@ export const deleteCourse = async (req,res) => {
         
         await Tutor.findByIdAndUpdate(tutorId, { $inc : { $courseCount : -1 } })
         
-        await Course.findOneAndDelete({_id : courseId , tutor : tutorId})
+        const isEnrolled = await EnrolledCourse.findOne({ courseId })
+
+        if(isEnrolled){
+            await Course.findByIdAndUpdate(courseId, { $set : { isArchive : true , isPublished : false } })
+            return ResponseHandler.success(res, STRING_CONSTANTS.DELETION_SUCCESS,HttpStatus.OK)
+        }
+
+        await Course.findByIdAndDelete(courseId)
 
         return ResponseHandler.success(res,STRING_CONSTANTS.DELETION_SUCCESS, HttpStatus.OK)
 

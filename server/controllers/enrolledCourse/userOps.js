@@ -11,6 +11,7 @@ import { calculateLevelSize } from "./userLearningOps.js";
 import Wallet from "../../model/wallet.js";
 import Transaction from "../../model/transaction.js";
 import 'dotenv/config'
+import Tutor from "../../model/tutor.js";
 
 // handle transaction and wallet update
 
@@ -25,8 +26,8 @@ const handleTransactionAndWalletUpdate = async ({
 
         const finalPrice = orderDetails.price.finalPrice;
     
-        const tutorPayout = (finalPrice * 0.8).toFixed(2);
-        const adminPayout = (finalPrice * 0.2).toFixed(2);
+        const tutorPayout = parseFloat((finalPrice * 0.8).toFixed(2));
+        const adminPayout = parseFloat((finalPrice * 0.2).toFixed(2));
 
         // Transaction
         const transaction = await Transaction.create({
@@ -233,7 +234,9 @@ export const enrollInCourse = async (req,res) => {
 
         course.totalEnrollment += 1;
 
-        await course.save() 
+        await course.save()
+        
+        await Tutor.findByIdAndUpdate(tutorId, { $inc : { students : 1 } })
 
         // add enrolled course to user schema
         const user = await User.findByIdAndUpdate(userId,{ $addToSet : { enrolledCourses : courseId } ,
@@ -252,12 +255,14 @@ export const enrollInCourse = async (req,res) => {
             lessons: module.lessons.map((lesson)=>({
                 lessonId : lesson._id,
                 lessonTitle : lesson.title,
-                isCompleted : false           
+                isCompleted : false,
+                isAddon : false           
             })),   
-            isCompleted: false      
+            isCompleted: false,
+            isAddon : false      
         }));
 
-      const { currentLevel, cumulativeModules } = calculateLevelSize(course.modules)
+      const { currentLevel, cumulativeModules } = calculateLevelSize(modules)
 
         const level = {
             currentLevel, 
@@ -301,7 +306,7 @@ export const loadEnrolledCourses = async (req,res) => {
         const skip = (page-1) * limit
         const {search, filter} = req.query
 
-        let filterQuery = { isPublished : true };
+        let filterQuery = {};
         let sort = { createdAt: -1 }; // Default sorting (Newest first)
 
         if (filter === "oldest") {
@@ -350,28 +355,6 @@ export const loadEnrolledCourses = async (req,res) => {
     } catch (error) {
         console.log(STRING_CONSTANTS.LOADING_ERROR, error);
         return ResponseHandler.error(res,STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-
-}
-
-// load enrolled course
-
-export const loadEnrolledCourse = async (req,res) => {
-
-    try {
-        const userId = req.user.id;
-        const courseId  = req.params.id;
-        
-        const course = await EnrolledCourse.findOne({ userId , courseId });
-
-        if(!course)
-            return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NO_CONTENT);
-
-        return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK,course);
-
-    } catch (error) {
-        console.log(STRING_CONSTANTS.LOADING_ERROR,error);
-        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER,HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }

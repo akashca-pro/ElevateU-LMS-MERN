@@ -32,7 +32,7 @@ const calculateProgress = (modules) => {
 // Dynamically convert modules into cumulative array based on level to figure out the user's level
 
 export const calculateLevelSize = (modules) => {
-
+ 
     const totalModules = modules.length || 0;
     const levels = 5;
     
@@ -68,7 +68,7 @@ export const calculateLevelSize = (modules) => {
     if (completedModules >= totalModules) {
       currentLevel = 5; // All levels completed
     } else {
-      currentLevel = completedLevels + 1; // Current level being worked on
+      currentLevel = completedLevels; // Current level being worked on
     }
 
     return { cumulativeModules, currentLevel }
@@ -279,7 +279,6 @@ export const courseDetails = async (req,res) => {
     }
 }
 
-
 // load current progress Status
 
 export const progressStatus = async (req,res) => {
@@ -424,8 +423,10 @@ export const changeLessonOrModuleStatus = async (req,res) => {
             }
         });
 
-        if(alreadyUpdated)
+        if(alreadyUpdated){
+            console.log('here ')
             return ResponseHandler.success(res, STRING_CONSTANTS.EXIST, HttpStatus.ALREADY_REPORTED);
+        }
 
         const updatedProgress = await ProgressTracker.findOneAndUpdate(
             { userId, courseId, "modules.moduleId": moduleId, "modules.lessons.lessonId": lessonId },
@@ -437,6 +438,7 @@ export const changeLessonOrModuleStatus = async (req,res) => {
                 new: true
             }
         );
+
 
         if(!updatedProgress)
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.BAD_REQUEST);
@@ -597,10 +599,12 @@ export const resetCourseProgress = async (req,res) => {
         }
 
         progressTracker.modules.forEach((module) => {
-            module.lessons.forEach((lesson) => {
-              lesson.isCompleted = false;
-            });
-            module.isCompleted = false;
+            if (!module.isAddon) { 
+              module.lessons.forEach((lesson) => {
+                lesson.isCompleted = false;
+              });
+              module.isCompleted = false;
+            }
           });
       
         progressTracker.level.currentLevel = 1;

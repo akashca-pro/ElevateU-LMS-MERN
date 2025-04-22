@@ -148,7 +148,7 @@ const Enrolled = () => {
             </p>
             <Button
               className="mt-6 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
-              onClick={() => navigate("/courses")}
+              onClick={() => navigate("/explore")}
             >
               Browse Courses
             </Button>

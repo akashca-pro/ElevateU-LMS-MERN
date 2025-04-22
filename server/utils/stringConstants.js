@@ -1,4 +1,4 @@
-export const STRING_CONSTANTS = {
+export const STRING_CONSTANTS = Object.freeze({
     REGISTRATION_SUCCESS : 'Registration success',
     REGISTRATION_ERROR : 'Registration error',
     LOGIN_SUCCESS : 'Login success',
@@ -97,7 +97,7 @@ export const STRING_CONSTANTS = {
     LOAD_CHART_DATA_FAILED : 'Load Chart data failed',
     LOAD_CERTIFICATES_SUCCESS : 'Load certificates success',
     LOAD_CERTIFICATES_FAILED : 'Load certificates failed'
-}
+})
 
 export const DATABASE_FIELDS = {
     ID:'_id',

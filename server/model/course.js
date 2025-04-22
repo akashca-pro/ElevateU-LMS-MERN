@@ -74,6 +74,8 @@ const courseSchema = new mongoose.Schema(
       
       draft : { type : Boolean, default : false },
 
+      isArchive : { type : Boolean, default : false }
+
     },
     { timestamps: true }
   );
