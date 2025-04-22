@@ -5,9 +5,19 @@ import { useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const Index = () => {
-  const [year,setYear] = useState(new Date().getFullYear())
-  const { data : revenueData } = useRevenueChartQuery({ year })
+  const [year, setYear] = useState(new Date().getFullYear())
+  const [month, setMonth] = useState((new Date().getMonth() + 1).toString()) // '1' to '12'
+  const [viewType, setViewType] = useState("yearly")
+  const { data: revenueData } = useRevenueChartQuery({
+    year,
+    viewType,
+    month: viewType === "monthly" || viewType === "weekly" ? month : undefined,
+  });
+
+  console.log(revenueData)
+
   const { data : details } = useDashboardMetricsQuery()
+
   const metrics = [
     {
       value: details?.data?.totalEarnings || 0,
@@ -44,20 +54,47 @@ const Index = () => {
 
         {/* Chart Section */}
         <div className="rounded-lg border border-gray-100 bg-white p-6">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Revenue</h2>
-            <Select onValueChange={(value) => setYear(value)} defaultValue="2025">
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Select Year" />
+        <div className="flex gap-4 justify-end">
+          {/* Year Selector */}
+          <Select onValueChange={(value) => setYear(value)} defaultValue={String(year)}>
+            <SelectTrigger className="w-[100px]">
+              <SelectValue placeholder="Year" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="2025">2025</SelectItem>
               <SelectItem value="2024">2024</SelectItem>
               <SelectItem value="2023">2023</SelectItem>
-              <SelectItem value="2022">2022</SelectItem>
             </SelectContent>
           </Select>
-          </div>
+
+          {/* View Type Selector */}
+          <Select onValueChange={(value) => setViewType(value)} defaultValue={viewType}>
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="View Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="yearly">Yearly</SelectItem>
+              <SelectItem value="monthly">Monthly</SelectItem>
+              <SelectItem value="weekly">Weekly</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Show Month Selector for monthly/weekly */}
+          {(viewType === "monthly" || viewType === "weekly") && (
+            <Select onValueChange={(value) => setMonth(value)} defaultValue={String(month)}>
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Month" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 12 }, (_, i) => (
+                  <SelectItem key={i + 1} value={String(i + 1)}>
+                    {new Date(0, i).toLocaleString("default", { month: "short" })}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
 
           <div className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -73,8 +110,19 @@ const Index = () => {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tickMargin={10} />
-                <YAxis axisLine={false} tickLine={false} tickMargin={10} tickFormatter={(value) => `${value}k`} />
+                <XAxis
+              dataKey={
+                viewType === "yearly"
+                  ? "month"
+                  : viewType === "monthly"
+                  ? "date"
+                  : 'week'
+              }
+              axisLine={false}
+              tickLine={false}
+              tickMargin={10}
+            />
+                <YAxis axisLine={false} tickLine={false} tickMargin={10} tickFormatter={(value) => `₹${value}`} />
              
                 <Area type="monotone" dataKey="income" stroke="#7C3AED" strokeWidth={2} fill="url(#income)" />
                 <Area type="monotone" dataKey="profit" stroke="#7C3AED" strokeWidth={2} fill="url(#profit)" />

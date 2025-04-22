@@ -34,16 +34,29 @@ const adminDashboardApi = apiSlice.injectEndpoints({
             }),
             providesTags : ['Admin']
         }),
-        revenueChart : builder.query({
-            query : ({ year })=>({
-                url : `admin/dashboard/revenue-chart-data`,
-                method : 'GET',
-                params : {
-                    year
-                }
-            }),
-            providesTags : ['Admin']
-        })
+        revenueChart: builder.query({
+            query: ({ year, month, viewType, weekType }) => {
+              const params = {
+                year,
+                viewType,
+              };
+          
+              if (viewType === "monthly" || viewType === "weekly") {
+                params.month = month;
+              }
+          
+              if (viewType === "weekly") {
+                params.weekType = weekType; // this can be 'this' or 'last'
+              }
+          
+              return {
+                url: `admin/dashboard/revenue-chart-data`,
+                method: "GET",
+                params,
+              };
+            },
+            providesTags: ["Admin"],
+          })
     })  
 })
 

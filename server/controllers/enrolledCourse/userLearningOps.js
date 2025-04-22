@@ -424,7 +424,6 @@ export const changeLessonOrModuleStatus = async (req,res) => {
         });
 
         if(alreadyUpdated){
-            console.log('here ')
             return ResponseHandler.success(res, STRING_CONSTANTS.EXIST, HttpStatus.ALREADY_REPORTED);
         }
 

@@ -96,7 +96,8 @@ export const STRING_CONSTANTS = Object.freeze({
     LOAD_CHART_DATA_SUCCESS : 'Load Chart data success',
     LOAD_CHART_DATA_FAILED : 'Load Chart data failed',
     LOAD_CERTIFICATES_SUCCESS : 'Load certificates success',
-    LOAD_CERTIFICATES_FAILED : 'Load certificates failed'
+    LOAD_CERTIFICATES_FAILED : 'Load certificates failed',
+    MONTH_IS_REQURED : 'Month is required'
 })
 
 export const DATABASE_FIELDS = {

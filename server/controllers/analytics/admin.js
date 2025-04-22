@@ -167,50 +167,143 @@ export const dashboardDetails = async (req,res) => {
 
 // Revenue data for chart analysis
 
-export const revenueChartAnalysis = async (req,res) => {
-    
+export const revenueChartAnalysis = async (req, res) => {
     try {
-        const year = parseInt(req.query.year) || new Date().getFullYear();
-
-        const matchFilter = { 
-            type: 'course_purchase',
+  
+      const year = parseInt(req.query.year) || new Date().getFullYear();
+      const month = parseInt(req.query.month); // Optional, only needed for monthly and weekly view
+      const viewType = req.query.viewType || 'yearly';
+  
+      const matchFilter = { type: 'course_purchase' };
+  
+      let groupStage = {};
+      let projectData = [];
+  
+      if (viewType === 'yearly') {
+        // Yearly View: Monthly Aggregation
+        matchFilter.createdAt = {
+          $gte: new Date(`${year}-01-01`),
+          $lt: new Date(`${year + 1}-01-01`)
+        };
+  
+        groupStage = {
+          _id: { month: { $month: "$createdAt" } },
+          totalRevenue: { $sum: "$amount.adminPayout" }
+        };
+  
+        projectData = Array.from({ length: 12 }, (_, i) => {
+          const monthName = new Date(0, i).toLocaleString('default', { month: 'short' });
+          return { month: monthName, income: 0, profit: 0 };
+        });
+      }
+  
+      else if (viewType === 'monthly') {
+        // Monthly View: Daily Aggregation
+        if (!month) {
+          return res.status(400).json({ message: "Month is required for monthly view" });
         }
-
-        if(year){
-            matchFilter.createdAt =  {
-                $gte: new Date(`${year}-01-01`),
-                $lt: new Date(`${year + 1}-01-01`)
-              }
+  
+        const startOfMonth = new Date(year, month - 1, 1);
+        const endOfMonth = new Date(year, month, 1);
+  
+        matchFilter.createdAt = {
+          $gte: startOfMonth,
+          $lt: endOfMonth
+        };
+  
+        groupStage = {
+          _id: { day: { $dayOfMonth: "$createdAt" } },
+          totalRevenue: { $sum: "$amount.adminPayout" }
+        };
+  
+        const daysInMonth = new Date(year, month, 0).getDate();
+  
+        projectData = Array.from({ length: daysInMonth }, (_, i) => ({
+          date: `${i + 1}`, income: 0, profit: 0
+        }));
+      }
+  
+      else if (viewType === 'weekly') {
+        // Weekly View: Week-wise Aggregation for the selected month
+        if (!month) {
+          return res.status(400).json({ message: "Month is required for weekly view" });
         }
-
-        const revenueData = await Transaction.aggregate([
-            { $match :  matchFilter },
-            {
-                $group: {
-                  _id: { month: { $month: "$createdAt" } },
-                  totalRevenue: { $sum: "$amount.adminPayout" }
-                }
-            },
-            {
-                $sort: { "_id.month": 1 }
+  
+        const startOfMonth = new Date(year, month - 1, 1);
+        const endOfMonth = new Date(year, month, 0); // last day of the month
+  
+        matchFilter.createdAt = {
+          $gte: startOfMonth,
+          $lt: new Date(endOfMonth.getFullYear(), endOfMonth.getMonth(), endOfMonth.getDate() + 1)
+        };
+  
+        groupStage = {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+            week: {
+              $ceil: { $divide: [{ $dayOfMonth: "$createdAt" }, 7] }  // Week number in the month
             }
-        ])
-
-        const monthlyRevenue = Array.from({ length: 12 }, (_, i) => {
-            const month = i + 1;
-            const found = revenueData.find(r => r._id.month === month);
-            return {
-              month: new Date(0, i).toLocaleString('default', { month: 'short' }),
-              income: found?.totalRevenue || 0,
-              profit: found?.totalRevenue || 0 
-            };
-          });
-
-        return ResponseHandler.success(res, STRING_CONSTANTS.LOAD_CHART_DATA_SUCCESS,HttpStatus.OK,monthlyRevenue)
-
+          },
+          totalRevenue: { $sum: "$amount.adminPayout" }
+        };
+  
+        // Assume up to 5 weeks in a month
+        projectData = Array.from({ length: 5 }, (_, i) => ({
+          week: `Week ${i + 1}`,
+          income: 0,
+          profit: 0
+        }));
+      }
+  
+      const revenueData = await Transaction.aggregate([
+        { $match: matchFilter },
+        { $group: groupStage },
+        { $sort: { "_id": 1 } }
+      ]);
+  
+      // Fill the chart data based on the view
+      if (viewType === 'yearly') {
+        revenueData.forEach(r => {
+          const monthIndex = r._id.month - 1;
+          projectData[monthIndex].income = r.totalRevenue;
+          projectData[monthIndex].profit = r.totalRevenue;
+        });
+      }
+  
+      else if (viewType === 'monthly') {
+        revenueData.forEach(r => {
+          const dayIndex = r._id.day - 1;
+          if (projectData[dayIndex]) {
+            projectData[dayIndex].income = r.totalRevenue;
+            projectData[dayIndex].profit = r.totalRevenue;
+          }
+        });
+      }
+  
+      else if (viewType === 'weekly') {
+        revenueData.forEach(r => {
+          const weekIndex = r._id.week - 1; // week is 1-based
+          if (projectData[weekIndex]) {
+            projectData[weekIndex].income = r.totalRevenue;
+            projectData[weekIndex].profit = r.totalRevenue;
+          }
+        });
+      }
+  
+      return ResponseHandler.success(
+        res,
+        STRING_CONSTANTS.LOAD_CHART_DATA_SUCCESS,
+        HttpStatus.OK,
+        projectData
+      );
+  
     } catch (error) {
-        console.log(STRING_CONSTANTS.SERVER,error);
-        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
+      console.error(STRING_CONSTANTS.SERVER, error);
+      return ResponseHandler.error(
+        res,
+        STRING_CONSTANTS.SERVER,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
-
-}
+  };
