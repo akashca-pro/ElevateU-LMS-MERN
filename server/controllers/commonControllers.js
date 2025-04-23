@@ -2,6 +2,7 @@ import User from "../model/user.js"
 import Tutor from "../model/tutor.js"
 import Admin from "../model/admin.js"
 import OTP from "../model/otp.js"
+import bcrypt from 'bcryptjs'
 import { generateOtpCode, sendOtpViaEmail } from "../utils/generateOtp.js"
 import { sendEmailOTP } from "../utils/sendEmail.js"
 import HttpStatus from "../utils/statusCodes.js"
@@ -474,7 +475,7 @@ export const updatePassword = (role) => async (req,res) => {
             otpExpires : new Date(Date.now() + 5 * 60 * 1000)
         });
 
-        await sendEmailOTP(email, firstName, otp)
+        await sendEmailOTP(user.email, user.firstName, otp)
 
         return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK)
         
@@ -491,14 +492,14 @@ export const verifyOtpForPasswordChange = (role) => async (req,res) => {
     
     try {
 
-        const { otp } = req.query;
+        const { otp } = req.body;
         const userId = req[role].id;
         const db = roleModals[role];
 
         const user = await db.findById(userId)
         .select('_id password tempPassword firstName email')
 
-        const otpDB = await OTP.findOne({ role, otpType : 'changePassword', otp , email})
+        const otpDB = await OTP.findOne({ role, otpType : 'changePassword', otp , email : user.email})
 
         if(!otpDB || new Date() > otpDB.otpExpires)
             return ResponseHandler.error(res, STRING_CONSTANTS.OTP_ERROR, HttpStatus.BAD_REQUEST);
@@ -509,7 +510,42 @@ export const verifyOtpForPasswordChange = (role) => async (req,res) => {
         await user.save()
 
         await OTP.deleteOne({ _id : otpDB._id })
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.PASSWORD_RESET_SUCCESS, HttpStatus.OK);
         
+    } catch (error) {
+        console.log(STRING_CONSTANTS.SERVER,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER,HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// resend otp for update password 
+
+export const resendOtpForPasswordChange = (role) => async (req,res) => {
+    
+    try {
+        const userId = req[role].id;
+        const db = roleModals[role];
+
+        const user = await db.findById(userId).select('_id email firstName')
+
+        await OTP.findOneAndDelete({ email : user.email, otpType : 'changePassword', role })
+
+        const { otp } = generateOtpCode();
+
+        await OTP.create({
+            email : user.email,
+            role,
+            otp,
+            otpType : 'changePassword',
+            otpExpires : new Date(Date.now() + 5 * 60 * 1000)
+        });
+
+        await sendEmailOTP(user.email, user.firstName, otp)
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK)
+
     } catch (error) {
         console.log(STRING_CONSTANTS.SERVER,error);
         return ResponseHandler.error(res, STRING_CONSTANTS.SERVER,HttpStatus.INTERNAL_SERVER_ERROR)

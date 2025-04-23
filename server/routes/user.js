@@ -13,7 +13,7 @@ import {refreshAccessToken, verifyAccessToken,verifyRefreshToken} from '../utils
 import {otpLimiter} from '../middleware/rateLimiting.js';
 import { validateForm } from '../middleware/validation.js'
 
-import { updateEmail, verifyEmail , isBlock, updatePassword, verifyOtpForPasswordChange} from '../controllers/commonControllers.js';
+import { updateEmail, verifyEmail , isBlock, updatePassword, verifyOtpForPasswordChange, resendOtpForPasswordChange} from '../controllers/commonControllers.js';
 
 import passport from 'passport'
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js'
@@ -52,8 +52,9 @@ router.get('/isblocked',verifyAccessToken('user'),isBlock('user'))
 router.get('/profile',verifyAccessToken('user'),loadProfile)
 router.patch('/update-email',verifyAccessToken('user'),updateEmail('user'))
 router.patch('/verify-email',verifyAccessToken('user'),verifyEmail('user'))
-router.patch('profile/update-password',verifyAccessToken('user'),updatePassword)
-router.patch('profile/update-password/verify-otp',verifyAccessToken('user'),verifyOtpForPasswordChange)
+router.patch('/profile/update-password',verifyAccessToken('user'),updatePassword('user'))
+router.patch('/profile/update-password/re-send-otp',verifyAccessToken('user'),resendOtpForPasswordChange('user'))
+router.patch('/profile/update-password/verify-otp',verifyAccessToken('user'),verifyOtpForPasswordChange('user'))
 router.post('/update-profile/:id',validateForm('user','profile'),verifyAccessToken('user'),updateProfile)
 router.delete('/delete-account/:id',verifyAccessToken('user'),deleteAccount)
 

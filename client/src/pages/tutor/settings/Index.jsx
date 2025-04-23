@@ -12,7 +12,10 @@ import ThemeToggle from "@/components/settings/ThemeToggle"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 
-import { useTutorUpdateEmailMutation, useTutorVerifyEmailMutation } from 
+import { useTutorUpdateEmailMutation, useTutorVerifyEmailMutation,
+  useTutorUpdatePasswordMutation, useTutorVerifyOtpForPasswordMutation,
+  useTutorResendOtpForPasswordChangeMutation
+ } from 
 '@/services/TutorApi/tutorProfileApi.js'
 
 const containerVariants = {
@@ -42,6 +45,10 @@ export default function Index() {
   const [enableEdit,setEnableEdit] = useState(true);
   const [updateEmail] = useTutorUpdateEmailMutation()
   const [verifyEmail] = useTutorVerifyEmailMutation()
+
+    const [updatePassword] = useTutorUpdatePasswordMutation();
+    const [verifyPassword] = useTutorVerifyOtpForPasswordMutation();
+    const [resendOtpForPass] = useTutorResendOtpForPasswordChangeMutation();
 
   return (
     <div className="container max-w-4xl py-10 mx-auto">
@@ -85,7 +92,9 @@ export default function Index() {
                   <CardDescription>Change your password to keep your account secure.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <UpdatePasswordForm />
+                  <UpdatePasswordForm updatePassword={updatePassword} 
+                  verifyPassword={verifyPassword}
+                  resendOtpForPass={resendOtpForPass}/>
                 </CardContent>
               </Card>
 

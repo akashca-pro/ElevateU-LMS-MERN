@@ -9,7 +9,8 @@ import DeleteAccount from "@/components/settings/DeleteAccount"
 import ThemeToggle from "@/components/settings/ThemeToggle"
 
 import { useUserUpdateEmailMutation, useUserVerifyEmailMutation,
-useUpdatePasswordMutation, useVerifyOtpForPasswordMutation
+useUserUpdatePasswordMutation, useUserVerifyOtpForPasswordMutation,
+useUserResendOtpForPasswordChangeMutation
  } from 
 '@/services/userApi/userProfileApi.js'
 
@@ -41,8 +42,9 @@ export default function Index() {
   const [updateEmail] = useUserUpdateEmailMutation();
   const [verifyEmail] = useUserVerifyEmailMutation();
 
-  const [updatePassword] = useUpdatePasswordMutation();
-  const [verifyPassword] = useVerifyOtpForPasswordMutation();
+  const [updatePassword] = useUserUpdatePasswordMutation();
+  const [verifyPassword] = useUserVerifyOtpForPasswordMutation();
+  const [resendOtpForPass] = useUserResendOtpForPasswordChangeMutation()
 
   return (
     <div className="container max-w-4xl py-10 mx-auto">
@@ -83,7 +85,9 @@ export default function Index() {
                   <CardDescription>Change your password to keep your account secure.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <UpdatePasswordForm/>
+                  <UpdatePasswordForm updatePassword={updatePassword} 
+                  verifyPassword={verifyPassword}
+                  resendOtpForPass={resendOtpForPass}/>
                 </CardContent>
               </Card>
 

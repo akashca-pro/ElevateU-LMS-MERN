@@ -9,7 +9,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react"
+import { Loader2, CheckCircle2, AlertCircle, X } from "lucide-react"
 import OtpInput from "./OtpInput"
 import { toast } from "sonner"
 
@@ -21,7 +21,8 @@ const OtpVerificationDialog = ({
   length = 6,
   expiresIn = 1, // seconds
   useResendOtp,
-  resetForm
+  resetForm,
+  toastMessage
 }) => {
   const [allowClose, setAllowClose] = useState(false)
   const [otp, setOtp] = useState("")
@@ -76,15 +77,13 @@ const OtpVerificationDialog = ({
 
     try {
       await useVerifyOtp({otp,email}).unwrap()
-      toast.success('Update Email Success',{
-        description : `Email is updated to ${email}`
-      })
+      toast.success(`${toastMessage}`)
       setAllowClose(true)
       resetForm()
       onClose()
     } catch (error) {
       console.log(error)
-      setError(error?.data.message)
+      setError(error?.data.message || 'something went wrong')
     } finally {
       setIsLoading(false)
     }
@@ -97,12 +96,12 @@ const OtpVerificationDialog = ({
         description : 'Sending otp'
       })
       await useResendOtp({email}).unwrap()
-      toast.success('Sending OTP success',{
-        description : `New OTP sent to ${email}`,
+      toast.success('New OTP send to your registered email',{
         id : toastId
       })
       setTimeLeft(expiresIn)
       setError("")
+      setOtp('')
     } catch (error) {
       toast.error('Error',{
         description : 'Resend otp failed'
@@ -125,7 +124,7 @@ const OtpVerificationDialog = ({
           }
         }}
       >
-      <DialogContent className="sm:max-w-md overflow-hidden border-none">
+      <DialogContent className="sm:max-w-md overflow-hidden border-none [&>button[data-radix-dialog-close]]:hidden">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -242,6 +241,25 @@ const OtpVerificationDialog = ({
                 >
                   {timeLeft > 0 ? "Resend code" : "Resend code"}
                 </Button>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.3 }}
+                className="text-center w-full"
+              >
+              <Button
+                variant="ghost"
+                size="icon"
+                className= "text-sm text-gray-500 hover:text-gray-800"
+                onClick={() => {
+                  setAllowClose(true)
+                  onClose()
+                  setAllowClose(false)
+                }}
+              >
+                Cancel
+              </Button>
               </motion.div>
             </DialogFooter>
           </div>

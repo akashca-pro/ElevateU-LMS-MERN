@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { toast } from "sonner"
+import OtpVerificationDialog from "./OtpVerificationDialog"
 
 const passwordSchema = z
   .object({
@@ -26,7 +27,8 @@ const passwordSchema = z
     path: ["confirmPassword"],
   })
 
-export default function UpdatePasswordForm() {
+export default function UpdatePasswordForm({ updatePassword, verifyPassword, resendOtpForPass }) {
+  const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
@@ -43,17 +45,23 @@ export default function UpdatePasswordForm() {
 
   async function onSubmit(values) {
     setIsSubmitting(true)
+    const toastId = toast.loading('Please wait . . .')
+    try {
+      await updatePassword(
+        { currPass : values.currentPassword, newPass : values.newPassword  }).unwrap()
+      toast.dismiss(toastId)
+      setIsOpen(true)
+      form.reset()
+    } catch (error) {
+      toast.error('Error',{
+        description : `${error?.data?.message}`,
+        id : toastId
+      })
+      console.log(error)
+    }finally{
+      setIsSubmitting(false)
+    }
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    setIsSubmitting(false)
-
-    toast.success('Password updated',{
-      description: "Your password has been updated successfully.",
-    })
-
-    form.reset()
   }
 
   return (
@@ -181,6 +189,17 @@ export default function UpdatePasswordForm() {
           </Button>
         </form>
       </Form>
+      <OtpVerificationDialog
+      isOpen={isOpen}
+      onClose={() => setIsOpen(false)}
+      useVerifyOtp={verifyPassword}
+      email={'your Registered Email'}
+      length={6}
+      expiresIn={300} // seconds
+      useResendOtp={resendOtpForPass}
+      resetForm={form.reset}
+      toastMessage = {'Password Updated'}
+    />
     </motion.div>
   )
 }

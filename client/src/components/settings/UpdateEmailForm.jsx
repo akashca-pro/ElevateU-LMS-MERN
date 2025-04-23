@@ -36,17 +36,18 @@ export default function UpdateEmailForm({ updateEmail, verifyEmail }) {
   })
 
   async function onSubmit(values) {
+    const toastId = toast.loading('Please wait . . . ',{
+      description : 'Sending otp'
+    })
     try {
-      const toastId = toast.loading('Please wait . . . ',{
-        description : 'Sending otp'
-      })
       setEmail(values.confirmEmail)
       await updateEmail({email : values.confirmEmail}).unwrap()
       toast.dismiss(toastId)
       setIsOpen(true)
     } catch (error) {
       toast.error('Error',{
-        description : 'Updating email failed, please try again later'
+        description : `${error?.data?.message}`,
+        id : toastId
       })
       console.log(error)
     }
@@ -116,11 +117,12 @@ export default function UpdateEmailForm({ updateEmail, verifyEmail }) {
       isOpen={isOpen}
       onClose={() => setIsOpen(false)}
       useVerifyOtp={verifyEmail}
-      email={email || 'examble@gmail.com'}
+      email={email || 'Your Registered Email'}
       length={6}
       expiresIn={300} // seconds
       useResendOtp={updateEmail}
       resetForm={form.reset}
+      toastMessage = {'Email Updated'}
     />
     </motion.div>
   )

@@ -57,7 +57,7 @@ const userProfileApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags : ['Admin']
         }),
-        updatePassword : builder.mutation({
+        userUpdatePassword : builder.mutation({
             query : (credentials) => ({
                 url : `user/profile/update-password`,
                 method : 'PATCH',
@@ -65,11 +65,18 @@ const userProfileApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags : ['User']
         }),
-        verifyOtpForPassword : builder.mutation({
+        userVerifyOtpForPassword : builder.mutation({
             query : (credentials) => ({
                 url : `user/profile/update-password/verify-otp`,
                 method : 'PATCH',
                 body : credentials
+            }),
+            invalidatesTags : ['User']
+        }),
+        userResendOtpForPasswordChange : builder.mutation({
+            query : ()=>({
+                url : `user/profile/update-password/re-send-otp`,
+                method : 'PATCH',
             }),
             invalidatesTags : ['User']
         })
@@ -85,7 +92,8 @@ export const {
     useUserDeleteAccountMutation,
     useUserLoadNotificationsQuery,
     useUserReadNotificationsMutation,
-    useUpdatePasswordMutation,
-    useVerifyOtpForPasswordMutation
+    useUserUpdatePasswordMutation,
+    useUserVerifyOtpForPasswordMutation,
+    useUserResendOtpForPasswordChangeMutation
 
 } = userProfileApi
