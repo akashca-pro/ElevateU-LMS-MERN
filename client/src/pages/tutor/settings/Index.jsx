@@ -14,7 +14,8 @@ import { useState } from "react"
 
 import { useTutorUpdateEmailMutation, useTutorVerifyEmailMutation,
   useTutorUpdatePasswordMutation, useTutorVerifyOtpForPasswordMutation,
-  useTutorResendOtpForPasswordChangeMutation
+  useTutorResendOtpForPasswordChangeMutation,
+  useTutorDeactivateAccountMutation
  } from 
 '@/services/TutorApi/tutorProfileApi.js'
 
@@ -46,9 +47,11 @@ export default function Index() {
   const [updateEmail] = useTutorUpdateEmailMutation()
   const [verifyEmail] = useTutorVerifyEmailMutation()
 
-    const [updatePassword] = useTutorUpdatePasswordMutation();
-    const [verifyPassword] = useTutorVerifyOtpForPasswordMutation();
-    const [resendOtpForPass] = useTutorResendOtpForPasswordChangeMutation();
+  const [updatePassword] = useTutorUpdatePasswordMutation();
+  const [verifyPassword] = useTutorVerifyOtpForPasswordMutation();
+  const [resendOtpForPass] = useTutorResendOtpForPasswordChangeMutation()
+
+  const [deactivateAccount] = useTutorDeactivateAccountMutation()
 
   return (
     <div className="container max-w-4xl py-10 mx-auto">
@@ -100,11 +103,11 @@ export default function Index() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Delete Account</CardTitle>
-                  <CardDescription>Permanently delete your account and all associated data.</CardDescription>
+                  <CardTitle>Deactivate Account</CardTitle>
+                  <CardDescription>Deactivate your account and all associated data.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <DeleteAccount />
+                  <DeleteAccount deactivateAccount={deactivateAccount} />
                 </CardContent>
               </Card>
             </TabsContent>

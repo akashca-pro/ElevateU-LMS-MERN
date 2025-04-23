@@ -14,7 +14,7 @@ const apiMiddleware = (store) => (next) => (action) => {
       if (status === 403) {
         toast.dismiss()
         window.dispatchEvent(new CustomEvent('userBlocked', {
-          detail: { message: 'User blocked' }
+          detail: { message: action?.payload?.data?.message || 'User blocked' }
         }));
       }
     }

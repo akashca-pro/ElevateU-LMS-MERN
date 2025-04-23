@@ -18,23 +18,25 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 
-export default function DeleteAccount() {
+export default function DeleteAccount({ deactivateAccount }) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [confirmText, setConfirmText] = useState("")
   const [isOpen, setIsOpen] = useState(false)
 
   const handleDelete = async () => {
     setIsDeleting(true)
+    try {
+      await deactivateAccount().unwrap()
+    } catch (error) {
+      console.log(error)
+      toast.error('Error',{
+        description : 'Account deactivation failed'
+      })
+    }finally{
+      setIsDeleting(false)
+      setIsOpen(false)
+    }
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    setIsDeleting(false)
-    setIsOpen(false)
-
-    toast.success('Account deleted',{
-      description: "Your account has been permanently deleted.",
-    })
   }
 
   return (
@@ -44,11 +46,10 @@ export default function DeleteAccount() {
           <div className="flex items-start gap-3">
             <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <p className="font-medium text-destructive">Warning: This action is irreversible</p>
+              <p className="font-medium text-destructive">Caution: This will deactivate your account</p>
               <p className="text-sm text-muted-foreground">
-                Deleting your account will permanently remove all your data, including your profile, courses, and
-                payment information. This action cannot be undone.
-              </p>
+              Deactivating your account will disable your access and hide your data, including your profile, courses, and
+              payment information </p>
             </div>
           </div>
         </div>
@@ -57,27 +58,26 @@ export default function DeleteAccount() {
           <AlertDialogTrigger asChild>
             <Button variant="destructive" className="w-full sm:w-auto">
               <Trash2 className="mr-2 h-4 w-4" />
-              Delete Account
+              Deactivate Account
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogTitle>Are you sure you want to deactivate?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete your account and remove all your data from
-                our servers.
+                This action cannot be undone. This will disable your account from all our servers.
               </AlertDialogDescription>
             </AlertDialogHeader>
 
             <div className="space-y-2 py-2">
               <Label htmlFor="confirm" className="text-sm font-medium">
-                Type <span className="font-semibold">delete my account</span> to confirm
+                Type <span className="font-semibold">deactivate my account</span> to confirm
               </Label>
               <Input
                 id="confirm"
                 value={confirmText}
                 onChange={(e) => setConfirmText(e.target.value)}
-                placeholder="delete my account"
+                placeholder="deactivate my account"
                 className="w-full"
               />
             </div>
@@ -87,7 +87,7 @@ export default function DeleteAccount() {
               <AlertDialogAction
                 onClick={(e) => {
                   e.preventDefault()
-                  if (confirmText === "delete my account") {
+                  if (confirmText === "deactivate my account") {
                     handleDelete()
                   } else {
                     toast({
@@ -98,15 +98,15 @@ export default function DeleteAccount() {
                   }
                 }}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                disabled={confirmText !== "delete my account" || isDeleting}
+                disabled={confirmText !== "deactivate my account" || isDeleting}
               >
                 {isDeleting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Deleting...
+                    Deactivating...
                   </>
                 ) : (
-                  "Delete Account"
+                  "Deactivate Account"
                 )}
               </AlertDialogAction>
             </AlertDialogFooter>

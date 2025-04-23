@@ -32,7 +32,8 @@ export const registerTutor = async (req,res) => {
             email,
             password : hashedPassword, 
             firstName,
-            isVerified : true
+            isVerified : true,
+            isActive : true
         });
     
         await tutor.save();
@@ -87,6 +88,9 @@ export const loginTutor = async (req,res) => {
         if(!tutor.isVerified)
             return ResponseHandler.error(res,STRING_CONSTANTS.VERIFICATION_ERROR ,HttpStatus.NOT_ACCEPTABLE);
         
+        if(!tutor.isActive)
+            return ResponseHandler.error(res,STRING_CONSTANTS.ACCOUNT_IS_DEACTIVATED,HttpStatus.FORBIDDEN)
+
        const accessToken = generateAccessToken(tutor._id);
     
         // Set access token as cookie (24 hour)
@@ -132,6 +136,9 @@ export const forgotPassword = async (req,res) => {
         if(!tutor)
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
 
+        if(!tutor.isActive)
+            return ResponseHandler.error(res,STRING_CONSTANTS.ACCOUNT_IS_DEACTIVATED,HttpStatus.FORBIDDEN)
+
         const {otp} = generateOtpCode();
 
         await OTP.create({
@@ -163,6 +170,9 @@ export const verifyResetLink = async (req,res) => {
 
         if(!tutor) 
             return ResponseHandler.error(res,STRING_CONSTANTS.OTP_ERROR ,HttpStatus.BAD_REQUEST);
+
+        if(!tutor.isActive)
+            return ResponseHandler.error(res,STRING_CONSTANTS.ACCOUNT_IS_DEACTIVATED,HttpStatus.FORBIDDEN)
 
         const otpRecord = await OTP.findOne({role , email , otp , otpType })
         

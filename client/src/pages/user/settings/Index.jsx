@@ -10,7 +10,8 @@ import ThemeToggle from "@/components/settings/ThemeToggle"
 
 import { useUserUpdateEmailMutation, useUserVerifyEmailMutation,
 useUserUpdatePasswordMutation, useUserVerifyOtpForPasswordMutation,
-useUserResendOtpForPasswordChangeMutation
+useUserResendOtpForPasswordChangeMutation,
+useUserDeactivateAccountMutation
  } from 
 '@/services/userApi/userProfileApi.js'
 
@@ -45,6 +46,8 @@ export default function Index() {
   const [updatePassword] = useUserUpdatePasswordMutation();
   const [verifyPassword] = useUserVerifyOtpForPasswordMutation();
   const [resendOtpForPass] = useUserResendOtpForPasswordChangeMutation()
+
+  const [deactivateAccount] = useUserDeactivateAccountMutation()
 
   return (
     <div className="container max-w-4xl py-10 mx-auto">
@@ -93,11 +96,11 @@ export default function Index() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Delete Account</CardTitle>
-                  <CardDescription>Permanently delete your account and all associated data.</CardDescription>
+                  <CardTitle>Deactivate Account</CardTitle>
+                  <CardDescription>Deactivate your account and all associated data.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <DeleteAccount />
+                  <DeleteAccount deactivateAccount={deactivateAccount} />
                 </CardContent>
               </Card>
             </TabsContent>

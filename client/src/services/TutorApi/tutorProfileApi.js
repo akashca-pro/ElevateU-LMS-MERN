@@ -87,6 +87,13 @@ const tutorProfileApi = apiSlice.injectEndpoints({
                 method : 'PATCH',
             }),
             invalidatesTags : ['Tutor']
+        }),
+        tutorDeactivateAccount : builder.mutation({
+            query : ()=>({
+                url : `tutor/profile/deactivate-account`,
+                method : 'PATCH'
+            }),
+            invalidatesTags : ['Tutor']
         })
     })
 })
@@ -103,6 +110,7 @@ export const {
     useTutorReadNotificationsMutation,
     useTutorUpdatePasswordMutation,
     useTutorResendOtpForPasswordChangeMutation,
-    useTutorVerifyOtpForPasswordMutation
+    useTutorVerifyOtpForPasswordMutation,
+    useTutorDeactivateAccountMutation
 
 } = tutorProfileApi

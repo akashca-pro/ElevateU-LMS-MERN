@@ -44,6 +44,7 @@ export const STRING_CONSTANTS = Object.freeze({
     NOT_ALLOWED : 'Access Restricted',
     ALLOWED : 'Access Granted',
     INVALID_FILTER : 'Invalid Filter',
+    ACCOUNT_IS_DEACTIVATED : 'Account is deactivated',
     PRICING_SUCCESS : 'Pricing success',
     PRICING_FAILED : 'Pricing failed' ,
     PAYMENT_SUCCESS : 'Payment Success',

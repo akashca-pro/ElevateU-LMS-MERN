@@ -265,6 +265,9 @@ export const isBlock = (role) => async (req,res) => {
         if(user.isBlocked)
             return ResponseHandler.error(res, STRING_CONSTANTS.BLOCKED, HttpStatus.FORBIDDEN); 
 
+        if(!user.isActive)
+            return ResponseHandler.error(res, STRING_CONSTANTS.ACCOUNT_IS_DEACTIVATED,HttpStatus.FORBIDDEN)
+
         return ResponseHandler.success(res, STRING_CONSTANTS.SUCCESS, HttpStatus.OK, id)
 
     } catch (error) {
@@ -545,6 +548,32 @@ export const resendOtpForPasswordChange = (role) => async (req,res) => {
         await sendEmailOTP(user.email, user.firstName, otp)
 
         return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK)
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.SERVER,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER,HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// soft delete user profile
+
+export const softDeleteUser = (role) => async (req,res) => {
+    
+    try {
+        const userId = req[role].id;
+        const db = roleModals[role]
+
+        const user = await db.findById(userId)
+
+        if(!user)
+            return ResponseHandler.error(res, STRING_CONSTANTS.USER_NOT_FOUND,HttpStatus.NOT_FOUND)
+
+        user.isActive = false
+
+        await user.save()
+
+        return ResponseHandler.success(res,STRING_CONSTANTS.DELETION_SUCCESS,HttpStatus.OK);
 
     } catch (error) {
         console.log(STRING_CONSTANTS.SERVER,error);

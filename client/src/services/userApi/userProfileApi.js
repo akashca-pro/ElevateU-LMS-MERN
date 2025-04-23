@@ -79,6 +79,13 @@ const userProfileApi = apiSlice.injectEndpoints({
                 method : 'PATCH',
             }),
             invalidatesTags : ['User']
+        }),
+        userDeactivateAccount : builder.mutation({
+            query : ()=>({
+                url : `user/profile/deactivate-account`,
+                method : 'PATCH'
+            }),
+            invalidatesTags : ['User']
         })
     })
 })
@@ -94,6 +101,7 @@ export const {
     useUserReadNotificationsMutation,
     useUserUpdatePasswordMutation,
     useUserVerifyOtpForPasswordMutation,
-    useUserResendOtpForPasswordChangeMutation
+    useUserResendOtpForPasswordChangeMutation,
+    useUserDeactivateAccountMutation
 
 } = userProfileApi

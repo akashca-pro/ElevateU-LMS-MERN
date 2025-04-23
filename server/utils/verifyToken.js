@@ -47,11 +47,14 @@ export const verifyAccessToken = (role) => async(req, res, next) => {
     
             const db = getRoleModel(role);
     
-            const data = await db.findById(decoded.id)
+            const user = await db.findById(decoded.id)
             
-            if(data.isBlocked)
+            if(user.isBlocked)
                 return ResponseHandler.error(res,STRING_CONSTANTS.NOT_ALLOWED, HttpStatus.FORBIDDEN)
     
+            if(!user.isActive)
+                return ResponseHandler.error(res,STRING_CONSTANTS.ACCOUNT_IS_DEACTIVATED,HttpStatus.FORBIDDEN)
+
             next();
         } catch (error) {
             console.log(STRING_CONSTANTS.TOKEN_ISSUE_ERROR,error);

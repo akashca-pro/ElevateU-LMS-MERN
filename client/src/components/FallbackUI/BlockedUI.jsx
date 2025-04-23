@@ -8,11 +8,13 @@ import { Ban, Home } from "lucide-react"
 
 const BlockedUI = ({ children }) => {
   const [isBlocked,setIsBlocked] = useState(false);
+  const [blockMessage, setBlockMessage] = useState('');
 
   useEffect(()=>{
 
-    const handleBlockEvent = () => {
+    const handleBlockEvent = (event) => {
       setIsBlocked(true)
+      setBlockMessage(event.detail?.message || 'You have been blocked.');
     }
 
     window.addEventListener('userBlocked',handleBlockEvent)
@@ -31,7 +33,7 @@ const BlockedUI = ({ children }) => {
             <CardHeader>
               <CardTitle className="text-center text-2xl font-bold text-red-600 flex items-center justify-center">
                 <Ban className="mr-2 h-6 w-6" />
-                Account Blocked
+                {blockMessage}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -43,9 +45,13 @@ const BlockedUI = ({ children }) => {
               >
                 <span className="text-6xl">🚫</span>
               </motion.div>
-              <p className="text-center text-gray-600 mb-4">
+              { /deactivated/i.test(blockMessage)
+              ?<p className="text-center text-gray-600 mb-4">
+              Your account has been deactivated by you. You can contact support to reactivate it anytime.
+            </p>
+              :<p className="text-center text-gray-600 mb-4">
                 Your account has been blocked due to a violation of our terms of service.
-              </p>
+              </p>}
               <motion.p
                 className="text-sm text-center text-gray-500"
                 initial={{ opacity: 0 }}

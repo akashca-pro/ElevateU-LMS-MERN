@@ -49,7 +49,7 @@ const userSchema  = new mongoose.Schema({
         trim : true,
     },
     socialLinks : {
-        type : [String], // example ['http://instagram....','http://facebook...']
+        type : [String]
     },
     isVerified : {
         type : Boolean,

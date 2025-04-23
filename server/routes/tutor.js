@@ -4,14 +4,14 @@ import {registerTutor, loginTutor, forgotPassword, verifyResetLink, logoutTutor 
     passportCallback,authFailure,authLoad, isTutorVerified
 } from '../controllers/tutor/tutorAuth.js'
 
-import {loadProfile,updateProfile,deleteAccount,requestVerification
+import {loadProfile,updateProfile,requestVerification
 } from '../controllers/tutor/tutorOps.js'
 
 import {refreshAccessToken, verifyAccessToken, verifyRefreshToken} from '../utils/verifyToken.js'
 import {otpLimiter} from '../middleware/rateLimiting.js';
 import { validateForm } from '../middleware/validation.js'
 
-import { updateEmail, verifyEmail, isBlock, resendOtpForPasswordChange, verifyOtpForPasswordChange, updatePassword} from '../controllers/commonControllers.js';
+import { updateEmail, verifyEmail, isBlock, resendOtpForPasswordChange, verifyOtpForPasswordChange, updatePassword, softDeleteUser} from '../controllers/commonControllers.js';
 
 import {createCourse, updateCourse, requestPublish, deleteCourse, loadCourses, courseDetails,
 courseTitleExist,
@@ -59,7 +59,7 @@ router.patch('/profile/update-password',verifyAccessToken('tutor'),updatePasswor
 router.patch('/profile/update-password/re-send-otp',verifyAccessToken('tutor'),resendOtpForPasswordChange('tutor'))
 router.patch('/profile/update-password/verify-otp',verifyAccessToken('tutor'),verifyOtpForPasswordChange('tutor'))
 router.post('/update-profile',verifyAccessToken('tutor'),validateForm('tutor','profile'),updateProfile)
-router.delete('/delete-account/:id',verifyAccessToken('tutor'),deleteAccount)
+router.patch('/profile/deactivate-account',verifyAccessToken('tutor'),softDeleteUser('tutor'))
 
 // request verification from admin
 

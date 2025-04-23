@@ -4,7 +4,7 @@ import {registerUser,loginUser,logoutUser,forgotPassword,verifyResetLink,
     passportCallback, authFailure ,authLoad
 } from '../controllers/user/userAuth.js'
 
-import {loadProfile,updateProfile,deleteAccount
+import {loadProfile,updateProfile
 } from '../controllers/user/userOps.js'
 
 import {addToCart, enrollInCourse, getCartDetails, loadEnrolledCourses} from '../controllers/enrolledCourse/userOps.js'
@@ -13,7 +13,7 @@ import {refreshAccessToken, verifyAccessToken,verifyRefreshToken} from '../utils
 import {otpLimiter} from '../middleware/rateLimiting.js';
 import { validateForm } from '../middleware/validation.js'
 
-import { updateEmail, verifyEmail , isBlock, updatePassword, verifyOtpForPasswordChange, resendOtpForPasswordChange} from '../controllers/commonControllers.js';
+import { updateEmail, verifyEmail , isBlock, updatePassword, verifyOtpForPasswordChange, resendOtpForPasswordChange, softDeleteUser} from '../controllers/commonControllers.js';
 
 import passport from 'passport'
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js'
@@ -56,7 +56,7 @@ router.patch('/profile/update-password',verifyAccessToken('user'),updatePassword
 router.patch('/profile/update-password/re-send-otp',verifyAccessToken('user'),resendOtpForPasswordChange('user'))
 router.patch('/profile/update-password/verify-otp',verifyAccessToken('user'),verifyOtpForPasswordChange('user'))
 router.post('/update-profile/:id',validateForm('user','profile'),verifyAccessToken('user'),updateProfile)
-router.delete('/delete-account/:id',verifyAccessToken('user'),deleteAccount)
+router.patch('/profile/deactivate-account',verifyAccessToken('user'),softDeleteUser('user'))
 
 // course bookmark
 
