@@ -48,7 +48,7 @@ app.use('/api/user',userRouter);
 app.use('/api/tutor',tutorRouter)
 
 //Admin route
-app.use('/api/admin',adminRouter)
+app.use('/api/admin',adminRouter) 
 
 //error handling
 app.use(notFound)

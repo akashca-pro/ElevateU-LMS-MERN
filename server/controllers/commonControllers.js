@@ -554,7 +554,7 @@ export const resendOtpForPasswordChange = (role) => async (req,res) => {
         return ResponseHandler.error(res, STRING_CONSTANTS.SERVER,HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
-}
+} 
 
 // soft delete user profile
 

@@ -49,10 +49,10 @@ export const verifyAccessToken = (role) => async(req, res, next) => {
     
             const user = await db.findById(decoded.id)
             
-            if(user.isBlocked)
+            if(user.isBlocked && role !== 'admin')
                 return ResponseHandler.error(res,STRING_CONSTANTS.NOT_ALLOWED, HttpStatus.FORBIDDEN)
     
-            if(!user.isActive)
+            if(!user.isActive && role !== 'admin')
                 return ResponseHandler.error(res,STRING_CONSTANTS.ACCOUNT_IS_DEACTIVATED,HttpStatus.FORBIDDEN)
 
             next();
