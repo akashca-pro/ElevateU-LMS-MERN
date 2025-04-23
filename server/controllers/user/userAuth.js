@@ -1,8 +1,7 @@
 import User from '../../model/user.js'
-import RefreshToken from '../../model/refreshToken.js'
 import OTP from '../../model/otp.js'
 import bcrypt from 'bcryptjs'
-import {generateAccessToken,generateRefreshToken} from '../../utils/generateToken.js'
+import {generateAccessToken} from '../../utils/generateToken.js'
 import { generateOtpCode } from '../../utils/generateOtp.js'
 import {sendToken,clearToken} from '../../utils/tokenManage.js'
 import {sendEmailResetPassword} from '../../utils/sendEmail.js'
@@ -33,7 +32,8 @@ export const registerUser = async (req,res) => {
             email,
             password : hashedPassword, 
             firstName,
-            isVerified : true
+            isVerified : true,
+            isActive : true
         });
     
         await user.save();
@@ -84,6 +84,9 @@ export const loginUser = async (req,res) => {
 
         if(!user.isVerified)
             return ResponseHandler.error(res,STRING_CONSTANTS.VERIFICATION_ERROR ,HttpStatus.NOT_ACCEPTABLE);
+
+        if(!user.isActive)
+            return ResponseHandler.error(res,STRING_CONSTANTS.ACCOUNT_IS_DEACTIVATED,HttpStatus.FORBIDDEN)
         
        const accessToken = generateAccessToken(user._id);
     
@@ -125,6 +128,9 @@ export const forgotPassword = async (req,res) => {
         if(!user)
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
 
+        if(!user.isActive)
+            return ResponseHandler.error(res,STRING_CONSTANTS.ACCOUNT_IS_DEACTIVATED,HttpStatus.FORBIDDEN)
+
         const {otp} = generateOtpCode();
 
         await OTP.create({
@@ -157,6 +163,9 @@ export const verifyResetLink = async (req,res) => {
 
         if(!user) 
             return ResponseHandler.error(res,STRING_CONSTANTS.OTP_ERROR ,HttpStatus.BAD_REQUEST);
+
+        if(!user.isActive)
+            return ResponseHandler.error(res,STRING_CONSTANTS.ACCOUNT_IS_DEACTIVATED,HttpStatus.FORBIDDEN)
 
         const otpRecord = await OTP.findOne({role , email , otp , otpType })
         

@@ -1,66 +1,48 @@
-import { useEffect, useState } from "react";
+// Sidebar.jsx (updated close button positioning)
+import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useSelect } from "@/hooks/useSelect";
-import { ChevronLeft } from "lucide-react";
+import { X } from "lucide-react";
+import { motion } from "framer-motion";
 
-const Sidebar = ({ onToggle, menuItems }) => {
-  const { user, tutor } = useSelect();
-  const [isCollapsed, setIsCollapsed] = useState(true);
-  const [activeItem, setActiveItem] = useState("Profile");
+const Sidebar = ({ isOpen, onToggle, menuItems }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    if (location.pathname === `/${user.isAuthenticated ? "user" : "tutor"}/profile/messages`) {
-      setActiveItem("Messages");
-    } else if (location.pathname === `/${user.isAuthenticated ? "user" : tutor.isAuthenticated ? "tutor" : "admin"}/profile`) {
-      setActiveItem("Profile");
-    }
-  }, [location.pathname, user, tutor]);
-
-  const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
-    if (onToggle) {
-      onToggle(!isCollapsed);
-    }
-  };
-
   return (
-    <div
-      className={`fixed left-0 top-0 z-50 min-h-screen bg-white transition-all duration-300 border-r border-gray-200 flex flex-col 
-        ${isCollapsed ? "w-8" : "w-64"}`}
+    <motion.div
+      initial={{ x: -300 }}
+      animate={{ x: 0 }}
+      exit={{ x: -300 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="fixed top-0 left-0 w-64 h-full bg-white z-50 shadow-xl border-r border-gray-200"
     >
-      {/* Sidebar Navigation */}
-      <nav className={`px-3 py-4 flex-1 overflow-hidden transition-opacity duration-300 ${isCollapsed ? "opacity-0" : "opacity-100"}`}>
+  
+
+      <nav className="mt-6 space-y-2 px-4">
         {menuItems.map((item) => {
           const Icon = item.icon;
+          const isActive = location.pathname === item.path;
+
           return (
-            <button
+            <motion.button
               key={item.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
               onClick={() => {
-                setActiveItem(item.title);
                 navigate(item.path);
+                onToggle();
               }}
-              className={`flex items-center w-full rounded-lg p-3 mb-1 transition-colors 
-                ${activeItem === item.title ? "bg-[#1A064F] text-white" : "text-gray-600 hover:bg-gray-100"}
-                ${isCollapsed ? "justify-center" : "justify-start"}`}
+              className={`flex items-center w-full p-3 rounded-lg text-sm transition-all
+                ${isActive ? "bg-[#1A064F] text-white" : "hover:bg-gray-100 text-gray-800"}`}
             >
-              <Icon size={20} />
-              {!isCollapsed && <span className="ml-3 text-sm font-medium">{item.title}</span>}
-            </button>
+              <Icon className="h-5 w-5" />
+              <span className="ml-3">{item.title}</span>
+            </motion.button>
           );
         })}
       </nav>
-
-      {/* Toggle Button (Moves Along with Sidebar) */}
-      <button
-        className={`absolute top-14 right-[-12px] p-2 bg-white border rounded-full shadow-md transition-transform duration-300 
-          ${isCollapsed ? "translate-x-0" : "translate-x-0"}`}
-        onClick={toggleSidebar}
-      >
-        <ChevronLeft className={`h-5 w-5 text-gray-600 transition-transform duration-300 ${isCollapsed ? "rotate-180" : ""}`} />
-      </button>
-    </div>
+    </motion.div>
   );
 };
 

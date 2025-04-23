@@ -13,6 +13,7 @@ import {useAdminLoadUsersQuery, useAdminToggleUserBlockMutation} from '@/service
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { AlertDialogDelete } from "@/components/AlertDialog";
+import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 
 const StudentList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,9 +31,10 @@ const StudentList = () => {
     const data = students?.data;
 
   return (
-    <div className="container mx-auto p-6">
+    <Card className="container mx-auto p-6">
+      <CardTitle>
       <h1 className="mb-8 text-2xl font-bold">Students List</h1>
-
+      </CardTitle>
       {/* Search and Filter */}
       <div className="mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="relative w-full md:w-96">
@@ -46,14 +48,21 @@ const StudentList = () => {
           <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
         </div >
         <div className="flex flex-wrap justify-end gap-2 w-full md:w-auto">
-          <FilterBox onSelect={setFilteredQuery}/>
+          <FilterBox onSelect={setFilteredQuery}
+          options={[
+            { value: "latest", label: "Latest" },
+            { value: "oldest", label: "Oldest" },
+            { value: "Not-Active", label: "Not-Active" },
+
+        ]}          
+          />
         </div>
       </div>
     
       {/* Table */}
    
         { error || isLoading ? <p className="text-center">No users found</p> : 
-        <div className="overflow-x-auto">
+        <CardContent className="overflow-x-auto">
           <Table>
           <TableHeader>
             <TableRow>
@@ -95,12 +104,11 @@ const StudentList = () => {
             ))}
           </TableBody>
         </Table>
-        </div>}
+        </CardContent>}
         
 
       {/* Pagination */}
-      { error || isLoading ? <p className="text-center"></p> : 
-      (<div className="mt-6 flex items-center justify-center gap-2 flex-wrap">
+      { data?.users.length > 0 && <CardFooter className="mt-6 flex items-center justify-center gap-2 flex-wrap">
         <button
           className="rounded-lg p-2 hover:bg-gray-100 disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -126,8 +134,8 @@ const StudentList = () => {
         >
           <ChevronRight className="h-5 w-5 text-gray-600" />
         </button>
-      </div>)}
-    </div>
+      </CardFooter>}
+    </Card>
   );
 };
 

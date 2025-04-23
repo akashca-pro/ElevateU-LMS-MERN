@@ -2,7 +2,8 @@ import User from "../model/user.js"
 import Tutor from "../model/tutor.js"
 import Admin from "../model/admin.js"
 import OTP from "../model/otp.js"
-import { generateOtpCode, saveOtp } from "../utils/generateOtp.js"
+import bcrypt from 'bcryptjs'
+import { generateOtpCode, sendOtpViaEmail } from "../utils/generateOtp.js"
 import { sendEmailOTP } from "../utils/sendEmail.js"
 import HttpStatus from "../utils/statusCodes.js"
 import ResponseHandler from "../utils/responseHandler.js"
@@ -10,8 +11,6 @@ import { DATABASE_FIELDS, STRING_CONSTANTS } from "../utils/stringConstants.js"
 import Category from "../model/category.js"
 import EnrolledCourse from "../model/enrolledCourses.js"
 import Course from "../model/course.js"
-import RefreshToken from "../model/refreshToken.js"
-import { generateRefreshToken } from "../utils/generateToken.js"
 
 const roleModals = {
     user : User,
@@ -28,34 +27,38 @@ const sortingConditions = {
 }
 
 
-//Update Email
+// Update Email
 
 export const updateEmail = (role) =>{
     return async (req,res) => {
 
-        const db = role==='user' ? User : Tutor
+        const db = roleModals[role]
 
         try {
-            const ID = req.params.id
+            const ID = req[role].id
             
             const {email} = req.body
     
-            const data = await db.findById(ID)
-            if(!data)
+            const user = await db.findById(ID)
+            if(!user)
                 return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
     
-            const emailExist = await db.findOne({email , _id : {$ne : ID}})
+            const emailExist = await db.findOne({email})
             if(emailExist)
                 return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
             
-            data.tempMail = email;
-            await data.save();
+            user.tempMail = email;
+            await user.save();
+
+            // Deleting the otp if already exist 
+
+            const otpDB = await OTP.findOne({ otpType : 'updateEmail', role, email })
+
+            if(otpDB){
+                await OTP.deleteOne({ _id: otpDB._id });
+            }
             
-            const {otp,otpExpires} = generateOtpCode();
-    
-            await saveOtp(role,data.email,otp,otpExpires);
-    
-            await sendEmailOTP(email,data.firstName,otp);
+            await sendOtpViaEmail(role, email, 'updateEmail', user.firstName)
     
             return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK)
             
@@ -67,30 +70,32 @@ export const updateEmail = (role) =>{
     }
 }
 
-// verify Email
+// verify otp for email update
 
 export const verifyEmail = (role) =>{
     return async (req,res) => {
-
-        const db = role==='user' ? User : Tutor
-    
         try {
-            const {otp} = req.body;
+            const userId = req[role].id;
+
+            const db = roleModals[role]
+
+            const {otp,email} = req.body;
             
-            const data = await db.findOne({
-                otp , 
-                otpExpires : { $gt : Date.now() }
-            });
+            const otpDB = await OTP.findOne({ otp, otpType : 'updateEmail', role, email })
     
-            if(!data) 
+            if(!otpDB || new Date() > otpDB.otpExpires ) 
                 return ResponseHandler.error(res,STRING_CONSTANTS.OTP_ERROR ,HttpStatus.BAD_REQUEST);
+
+            const user = await db.findById(userId)
+
+            if(!user)
+                return ResponseHandler.error(res, STRING_CONSTANTS.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
             
-            data.email = data.tempMail;
-            data.tempMail = undefined;
-            data.otp = undefined;
-            data.otpExpires = undefined;
+            user.email = user.tempMail;
+            user.tempMail = undefined;
     
-            await data.save()
+            await user.save()
+            await OTP.deleteOne({ _id: otpDB._id });
     
             return ResponseHandler.success(res, STRING_CONSTANTS.VERIFICATION_SUCCESS, HttpStatus.OK);
     
@@ -102,7 +107,7 @@ export const verifyEmail = (role) =>{
     }
 }
 
-// Send otp 
+// Send otp for login 
 
 export const sendOtp = async(req,res) =>{
     
@@ -179,54 +184,6 @@ export const loadCategories = async (req,res) => {
     } catch (error) {
         console.log(STRING_CONSTANTS.LOADING_ERROR, error);
         return ResponseHandler.error(res, STRING_CONSTANTS.LOADING_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-
-}
-
-// Load course
-
-export const getCourses = (sort) => async (req,res) => {
-    
-    try {
-        let sortQuery;
-
-        if(sort === 'top-rated'){
-            sortQuery = {rating : -1}
-        }else if(sort === 'best-selling'){
-            sortQuery = {totalEnrollment : -1}
-        }else if(sort === 'new-releases'){
-            sortQuery = {createdAt : -1}
-        }else if (sort === 'trending'){
-            const oneWeekAgo = new Date()
-            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
-            const trendingEnrollments = await EnrolledCourse.aggregate( 
-                [ {$match : { createdAt : {$gte : oneWeekAgo} } },
-                  { $group : { _id : '$course' , count : { $sum : 1 } } },
-                  { $sort : { count : -1 } },
-                  { $limit : 10 }
-                ]);
-        
-            const trendingCoursesIds = trendingEnrollments.map((e)=>e._id)
-            const trendingCourses = await Course.find({ _id : { $in : trendingCoursesIds } , isPublished : true })
-            .select('_id title tutor totalEnrollment category duration thumbnail rating')
-            .populate('tutor','name profileImage')
-            .exec()
-
-            return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.ok,trendingCourses)
-        };
-
-        const courses = await Course.find({ isPublished :true })
-        .select('_id title tutor totalEnrollment category duration thumbnail rating')
-        .sort(sortQuery)
-        .limit(10)
-        .populate('tutor','firstName profileImage')
-        .exec();
-
-        return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.ok,courses)
-
-    } catch (error) {
-        console.log(STRING_CONSTANTS.LOADING_ERROR,error)
-        return ResponseHandler.success(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }
@@ -308,6 +265,9 @@ export const isBlock = (role) => async (req,res) => {
         if(user.isBlocked)
             return ResponseHandler.error(res, STRING_CONSTANTS.BLOCKED, HttpStatus.FORBIDDEN); 
 
+        if(!user.isActive)
+            return ResponseHandler.error(res, STRING_CONSTANTS.ACCOUNT_IS_DEACTIVATED,HttpStatus.FORBIDDEN)
+
         return ResponseHandler.success(res, STRING_CONSTANTS.SUCCESS, HttpStatus.OK, id)
 
     } catch (error) {
@@ -338,6 +298,10 @@ export const loadCourses = async (req,res) => {
               if (parsedFilter.search) {
                 filter.title = { $regex: parsedFilter.search, $options: "i" };
               }
+
+              if(parsedFilter.category){
+                filter.category = parsedFilter.category
+              }
           
               if (parsedFilter.tutors && parsedFilter.tutors.length > 0) {
                 filter.tutor = { $in: parsedFilter.tutors };
@@ -359,8 +323,8 @@ export const loadCourses = async (req,res) => {
                 filter.duration = { $gte: parsedFilter.duration[0], $lte: parsedFilter.duration[1] };
               }
           
-              if (parsedFilter.hasCertification !== undefined) {
-                filter.hasCertification = parsedFilter.hasCertification;
+              if (parsedFilter.hasCertification === true) {
+                filter.hasCertification = true;
               }
               
             } catch (error) {
@@ -389,7 +353,6 @@ export const loadCourses = async (req,res) => {
                 currentPage: page,
                 totalPages: 0,
               })
-
 
         return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, {
             courses,
@@ -430,6 +393,191 @@ export const loadCourseTitles = async (req,res) => {
     } catch (error) {
         console.log(STRING_CONSTANTS.LOADING_ERROR,error);
         return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// Load course
+
+export const getCourses = (sort) => async (req,res) => {
+    
+    try {
+        let sortQuery;
+
+        if(sort === 'top-rated'){
+            sortQuery = {rating : -1}
+        }else if(sort === 'best-selling'){
+            sortQuery = {totalEnrollment : -1}
+        }else if(sort === 'new-releases'){
+            sortQuery = {createdAt : -1}
+        }else if (sort === 'trending'){
+            const oneWeekAgo = new Date()
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+            const trendingEnrollments = await EnrolledCourse.aggregate( 
+                [ {$match : { createdAt : {$gte : oneWeekAgo} } },
+                  { $group : { _id : '$course' , count : { $sum : 1 } } },
+                  { $sort : { count : -1 } },
+                  { $limit : 10 }
+                ]);
+        
+            const trendingCoursesIds = trendingEnrollments.map((e)=>e._id)
+            const trendingCourses = await Course.find({ _id : { $in : trendingCoursesIds } , isPublished : true })
+            .select('_id title tutor totalEnrollment category duration thumbnail rating')
+            .populate('tutor','name profileImage')
+            .exec()
+
+            return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.ok,trendingCourses)
+        };
+
+        const courses = await Course.find({ isPublished :true })
+        .select('_id title tutor totalEnrollment category duration thumbnail rating')
+        .sort(sortQuery)
+        .limit(10)
+        .populate('tutor','firstName profileImage')
+        .exec();
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.ok,courses)
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.LOADING_ERROR,error)
+        return ResponseHandler.success(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// check and store new password in the temp and send otp to the mail
+
+export const updatePassword = (role) => async (req,res) => {
+    
+    try {
+
+        const userId = req[role].id;
+        const db = roleModals[role]
+
+        const { currPass, newPass } = req.body;
+
+        const user = await db.findById(userId)
+        .select('_id password tempPassword email firstName ');
+
+        if(!await bcrypt.compare(currPass, user.password))
+            return ResponseHandler.error(res, STRING_CONSTANTS.INVALID_PASSWORD, HttpStatus.BAD_REQUEST);
+
+        const hashedPassword = await bcrypt.hash(newPass, 10);
+
+        user.tempPassword = hashedPassword;
+
+        user.save();
+
+        const { otp } = generateOtpCode();
+
+        await OTP.create({
+            email : user.email,
+            role,
+            otp,
+            otpType : 'changePassword',
+            otpExpires : new Date(Date.now() + 5 * 60 * 1000)
+        });
+
+        await sendEmailOTP(user.email, user.firstName, otp)
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK)
+        
+    } catch (error) {
+        console.log(STRING_CONSTANTS.SERVER,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER,HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// verify otp and update the password from the temp password
+
+export const verifyOtpForPasswordChange = (role) => async (req,res) => {
+    
+    try {
+
+        const { otp } = req.body;
+        const userId = req[role].id;
+        const db = roleModals[role];
+
+        const user = await db.findById(userId)
+        .select('_id password tempPassword firstName email')
+
+        const otpDB = await OTP.findOne({ role, otpType : 'changePassword', otp , email : user.email})
+
+        if(!otpDB || new Date() > otpDB.otpExpires)
+            return ResponseHandler.error(res, STRING_CONSTANTS.OTP_ERROR, HttpStatus.BAD_REQUEST);
+
+        user.password = user.tempPassword;
+        user.tempPassword = undefined
+
+        await user.save()
+
+        await OTP.deleteOne({ _id : otpDB._id })
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.PASSWORD_RESET_SUCCESS, HttpStatus.OK);
+        
+    } catch (error) {
+        console.log(STRING_CONSTANTS.SERVER,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER,HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// resend otp for update password 
+
+export const resendOtpForPasswordChange = (role) => async (req,res) => {
+    
+    try {
+        const userId = req[role].id;
+        const db = roleModals[role];
+
+        const user = await db.findById(userId).select('_id email firstName')
+
+        await OTP.findOneAndDelete({ email : user.email, otpType : 'changePassword', role })
+
+        const { otp } = generateOtpCode();
+
+        await OTP.create({
+            email : user.email,
+            role,
+            otp,
+            otpType : 'changePassword',
+            otpExpires : new Date(Date.now() + 5 * 60 * 1000)
+        });
+
+        await sendEmailOTP(user.email, user.firstName, otp)
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.OTP_SENT, HttpStatus.OK)
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.SERVER,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER,HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+} 
+
+// soft delete user profile
+
+export const softDeleteUser = (role) => async (req,res) => {
+    
+    try {
+        const userId = req[role].id;
+        const db = roleModals[role]
+
+        const user = await db.findById(userId)
+
+        if(!user)
+            return ResponseHandler.error(res, STRING_CONSTANTS.USER_NOT_FOUND,HttpStatus.NOT_FOUND)
+
+        user.isActive = false
+
+        await user.save()
+
+        return ResponseHandler.success(res,STRING_CONSTANTS.DELETION_SUCCESS,HttpStatus.OK);
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.SERVER,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER,HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 }

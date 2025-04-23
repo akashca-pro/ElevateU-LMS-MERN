@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
 import LoadingSpinner from '@/components/FallbackUI/LoadingSpinner'
 import { AlertDialogDelete } from '@/components/AlertDialog'
+import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card'
 
 const Index = () => {
     const [searchQuery, setSearchQuery] = useState("")
@@ -18,7 +19,7 @@ const Index = () => {
     const [filteredQuery,setFilteredQuery] = useState('latest')
     const limit = 7;
     const navigate = useNavigate()
-    const {data : coupon, isLoading , error ,refetch} = useAdminLoadCoursesQuery({
+    const {data : course, isLoading , error ,refetch} = useAdminLoadCoursesQuery({
     page : currentPage,
     search : searchQuery,
     limit,
@@ -26,14 +27,15 @@ const Index = () => {
   })
 
   
-  const data = coupon?.data
-  console.log(data)
+  const data = course?.data
 
   if(isLoading) return(<LoadingSpinner/>)
  
   return (
-    <div className='container mx-auto p-6 max-w-full overflow-x-auto'>
-    <h1 className="mb-8 text-2xl font-bold text-center md:text-left">Course Management</h1>
+    <Card className="container mx-auto px-4 py-8">
+      <CardTitle>
+      <h1 className="mb-8 text-2xl font-bold text-center md:text-left">Course Management</h1>
+      </CardTitle>
 
     <div className="mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
     <div className="relative w-full md:w-96">
@@ -48,11 +50,17 @@ const Index = () => {
         </div >
         <div className="flex flex-wrap justify-end gap-2 w-full md:w-auto">
             {/* <FormModal useAction={useAdminCreateCouponMutation} refetch={refetch}/>  */}
-          <FilterBox onSelect={setFilteredQuery} selectValue={'Not-Active'}/>
+          <FilterBox onSelect={setFilteredQuery} 
+          options={[
+            { value: "latest", label: "Latest" },
+            { value: "oldest", label: "Oldest" },
+            { value: "Not-Active", label: "Not-Active" },
+        ]}          
+          />
         </div>
     </div>
 
-    <div className="overflow-x-auto">
+    <CardContent className="overflow-x-auto">
     { error ? <p className="text-center">No course found</p> :
         <Table>
             <TableCaption>List of available course</TableCaption>
@@ -88,12 +96,15 @@ const Index = () => {
                     <FormModal useAction={useAdminUpdateCouponMutation} existValues={data?.coupons[index]} refetch={refetch}/> 
                 </TableCell> */}
                 <TableCell>
-                { course.status === 'draft' || course.status === 'pending' ? 'Awaiting approval' : <AlertDialogDelete
+                {course.status === 'pending' ? 'Awaiting approval' 
+                : course.status === 'rejected' 
+                ? 'Course Rejected' 
+                : <AlertDialogDelete
                 onSuccess={refetch}
                 id={{courseId : course?._id , tutorId : course?.tutor._id}}
-                btnName={`${course.status === 'suspended' ? 'Go Live' : 'Suspend'}`} 
-                btnClass={`${course.status === 'suspended' ? 'bg-green-600' : 'bg-red-600' }
-                 text-white px-3 py-1 rounded text-sm hover:${course.status === 'suspended' ? 'bg-green-700' : 'bg-red-700' }`}
+                btnName={`${course?.isSuspended ? 'Go Live' : 'Suspend'}`} 
+                btnClass={`${course?.isSuspended ? 'bg-green-600' : 'bg-red-600' }
+                 text-white px-3 py-1 rounded text-sm hover:${course?.isSuspended ? 'bg-green-700' : 'bg-red-700' }`}
                 deleteApi={useAdminAllowOrSuspendCourseMutation}
                 />  }
                 </TableCell>
@@ -101,10 +112,10 @@ const Index = () => {
                ))}
             </TableBody>
         </Table> }
-    </div>
+    </CardContent>
 
     {/* Pagination */}
-    <div className="mt-6 flex items-center justify-center gap-2 flex-wrap">
+    { data?.courses?.length > 0 && <CardFooter className="mt-6 flex items-center justify-center gap-2 flex-wrap">
         <button
           className="rounded-lg p-2 hover:bg-gray-100 disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -130,9 +141,9 @@ const Index = () => {
         >
           <ChevronRight className="h-5 w-5 text-gray-600" />
         </button>
-      </div>
+      </CardFooter>}
 
-    </div>
+    </Card>
   )
 }
 

@@ -4,6 +4,7 @@ import apiSlice from '../services/apiSlice.js'
 import adminAuthReducer from '../features/auth/admin/adminAuthSlice.js'
 import tutorAuthReducer from '../features/auth/tutor/tutorAuthSlice.js'
 import userAuthReducer from '../features/auth/user/userAuthSlice.js'
+
 import { toast } from 'sonner'
 
 // middleware to handle 403 error
@@ -13,7 +14,7 @@ const apiMiddleware = (store) => (next) => (action) => {
       if (status === 403) {
         toast.dismiss()
         window.dispatchEvent(new CustomEvent('userBlocked', {
-          detail: { message: 'User blocked' }
+          detail: { message: action?.payload?.data?.message || 'User blocked' }
         }));
       }
     }

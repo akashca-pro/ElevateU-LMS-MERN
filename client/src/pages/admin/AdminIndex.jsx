@@ -1,9 +1,11 @@
 import React from 'react'
-import { Outlet, Route,Routes } from 'react-router-dom'
+import { Navigate, Outlet, Route,Routes } from 'react-router-dom'
 
 import {LayoutDashboard, SquareUser, Settings, ListCollapse, ClockArrowUp, 
 GraduationCap, Contact, BellRing,
-Sticker,BookOpen} from 'lucide-react'
+Sticker,BookOpen,
+IndianRupee,
+Landmark} from 'lucide-react'
 
 import {useAdminSignupMutation, useAdminLoginMutation} from '@/services/adminApi/adminAuthApi'
 import {useAdminAuthActions} from '@/hooks/useDispatch'
@@ -33,11 +35,13 @@ import TutorsLayout from './Tutors/Index'
 import TutorsList from './Tutors/TutorsList'
 import TutorsDetails from './Tutors/TutorsDetails'
 
-
 import CategoryList from './Category/List'
 import CouponList from './Coupon/Index'
 
 import CourseList from './Courses/Index'
+import WalletPage from './Wallet/WalletPage'
+
+import Transaction from './Transactions/Index'
 
 const AdminIndex = () => {
   return (
@@ -49,24 +53,34 @@ const AdminIndex = () => {
 
 const menuItems = [
   { id: 1, title: "Dashboard", icon: LayoutDashboard, path: "/admin/profile/dashboard" },
-  { id: 2, title: "Profile", icon: SquareUser, path: "/admin/profile" },
-  { id: 3, title: "Category Management", icon: ListCollapse, path: "/admin/profile/category" },
-  { id: 4, title: "Course Management", icon: BookOpen, path: "/admin/profile/courses" },
-  { id: 5, title: "Coupon Management", icon: Sticker, path: "/admin/profile/coupon" },
-  { id: 6, title: "Order Management", icon: ClockArrowUp, path: "/admin/profile/orders" },
-  { id: 7, title: "Notifications", icon: BellRing, path: "/admin/profile/notification" },
-  { id: 8, title: "Students", icon: GraduationCap, path: "/admin/profile/students" },
-  { id: 9, title: "Tutors", icon: Contact, path: "/admin/profile/tutors" },
-  { id: 10, title: "Settings", icon: Settings, path: "/admin/profile/settings" },
+  { id: 2, title: "Revenue", icon: IndianRupee, path: "/admin/profile/revenue" },
+  { id: 3, title: "Profile", icon: SquareUser, path: "/admin/profile" },
+  { id: 4, title: "Category Management", icon: ListCollapse, path: "/admin/profile/category" },
+  { id: 5, title: "Course Management", icon: BookOpen, path: "/admin/profile/courses" },
+  { id: 6, title: "Coupon Management", icon: Sticker, path: "/admin/profile/coupon" },
+  { id: 7, title: "Orders List", icon: ClockArrowUp, path: "/admin/profile/orders" },
+  { id: 8, title: "Transactions", icon: Landmark, path: "/admin/profile/transactions" },
+  { id: 9, title: "Notifications", icon: BellRing, path: "/admin/profile/notification" },
+  { id: 10, title: "Students", icon: GraduationCap, path: "/admin/profile/students" },
+  { id: 11, title: "Tutors", icon: Contact, path: "/admin/profile/tutors" },
+  { id: 12, title: "Settings", icon: Settings, path: "/admin/profile/settings" },
 ]
 
 const ProtectedLayout = () =>{
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(true);
   
   return (
     <>
     <ProtectedRoute role={'admin'}>
-    <Navbar/>
-    <Layout menuItems={menuItems}>
+    <Navbar 
+      setSidebarCollapsed={setSidebarCollapsed} 
+      isSidebarCollapsed={sidebarCollapsed}
+        />
+    <Layout 
+      menuItems={menuItems} 
+      sidebarCollapsed={sidebarCollapsed}
+      setSidebarCollapsed={setSidebarCollapsed}
+    >
     <Outlet/>
     </Layout>
     <Footer/>
@@ -79,6 +93,7 @@ const AdminRoutes = ()=>{
   return (
     <Routes>
       <Route path='/' element={<AdminIndex/>}>
+        <Route index element={<Navigate to='/admin/login' />} />
         <Route path='sign-up' element={
           <ProtectAuthPage>
           <SignUp role={'admin'} useSignup={useAdminSignupMutation}/>
@@ -92,10 +107,12 @@ const AdminRoutes = ()=>{
         <Route path='profile' element={<ProtectedLayout/>}>
           <Route index element={<Profile/>}/>
           <Route path='dashboard' element={<Dashboard/>}/>
+          <Route path='revenue' element={<WalletPage/>}/>
           <Route path='category' element={<CategoryList/>}/>
           <Route path='courses' element={<CourseList/>}/>
           <Route path='coupon' element={<CouponList/>}/>
           <Route path='orders' element={<Orders/>}/>
+          <Route path='transactions' element={<Transaction/>} />
           <Route path='notification' element={<Notification/>}/>
           <Route path='students' element={<StudentsLayout/>}>
             <Route index element={<StudentList/>}/>

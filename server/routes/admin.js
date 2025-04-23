@@ -20,6 +20,10 @@ import {refreshAccessToken, verifyAccessToken,verifyRefreshToken} from '../utils
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js'
 import { validateForm } from '../middleware/validation.js'
 import { createCoupon, deleteCoupon, loadCoupons, updateCoupons } from '../controllers/admin/adminCouponOps.js'
+import { loadOrderDetails } from '../controllers/order/adminOrderOps.js'
+import { adminWithdrawAmount, approveOrRejectWithdrawRequest, loadWalletDetails, loadWithdrawRequests } from '../controllers/transactions.js'
+import { loadTransactionList } from '../controllers/admin/transactions.js'
+import { bestSellingCategory, bestSellingCourse, revenueChartAnalysis, dashboardDetails } from '../controllers/analytics/admin.js'
 
 const router = express.Router()
 
@@ -58,7 +62,6 @@ router.delete('/delete-tutor/:id',verifyAccessToken('admin'),deleteTutor)
 router.get('/verification-request',verifyAccessToken('admin'),loadRequests)
 router.post('/control-verification',verifyAccessToken('admin'),approveOrRejectrequest)
 
-
 // category CRUD
 
 router.get('/categories',verifyAccessToken('admin'),loadCategory)
@@ -91,5 +94,29 @@ router.delete('/delete-course/:id',verifyAccessToken('admin'),deleteCourse)
 router.get('/load-notifications',verifyAccessToken('admin'),loadNotifications('admin'))
 router.post('/read-notifications',verifyAccessToken('admin'),readNotifications)
 
+// order manage
+
+router.get('/orders',verifyAccessToken('admin'),loadOrderDetails);
+
+// wallet
+
+router.get('/wallet',verifyAccessToken('admin'),loadWalletDetails('Admin'))
+router.post('/wallet/withdraw',verifyAccessToken('admin'),adminWithdrawAmount)
+
+// withdraw request
+
+router.get('/withdraw-request',verifyAccessToken('admin'),loadWithdrawRequests)
+router.patch('/withdraw-request/approve-or-reject',verifyAccessToken('admin'),approveOrRejectWithdrawRequest)
+
+// transactions
+
+router.get('/transactions',verifyAccessToken('admin'),loadTransactionList)
+
+// analytics
+
+router.get('/dashboard',verifyAccessToken('admin'),dashboardDetails)
+router.get('/dashboard/best-selling-course',verifyAccessToken('admin'),bestSellingCourse)
+router.get('/dashboard/best-selling-category',verifyAccessToken('admin'),bestSellingCategory)
+router.get('/dashboard/revenue-chart-data',revenueChartAnalysis)
 
 export default router

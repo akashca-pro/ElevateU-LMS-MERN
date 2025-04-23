@@ -4,20 +4,22 @@ import {registerTutor, loginTutor, forgotPassword, verifyResetLink, logoutTutor 
     passportCallback,authFailure,authLoad, isTutorVerified
 } from '../controllers/tutor/tutorAuth.js'
 
-import {loadProfile,updateProfile,deleteAccount,requestVerification
+import {loadProfile,updateProfile,requestVerification
 } from '../controllers/tutor/tutorOps.js'
 
 import {refreshAccessToken, verifyAccessToken, verifyRefreshToken} from '../utils/verifyToken.js'
 import {otpLimiter} from '../middleware/rateLimiting.js';
 import { validateForm } from '../middleware/validation.js'
 
-import { updateEmail, verifyEmail, isBlock} from '../controllers/commonControllers.js';
+import { updateEmail, verifyEmail, isBlock, resendOtpForPasswordChange, verifyOtpForPasswordChange, updatePassword, softDeleteUser} from '../controllers/commonControllers.js';
 
 import {createCourse, updateCourse, requestPublish, deleteCourse, loadCourses, courseDetails,
 courseTitleExist,
 } from '../controllers/course/tutorOps.js'
 import passport from 'passport';
 import { loadNotifications, readNotifications } from '../controllers/notificationController.js';
+import { loadWalletDetails } from '../controllers/transactions.js';
+import { addBankAccountDetails, intiateWithdrawalRequest, loadExistingBankDetails, loadWithdrawalRequest } from '../controllers/wallet/tutorWallet.js';
 
 
 const router = express.Router()
@@ -51,10 +53,13 @@ router.get('/isblocked',verifyAccessToken('tutor'),isBlock('tutor'))
 // CRUD routes
 
 router.get('/profile',verifyAccessToken('tutor'),loadProfile)
-router.post('/update-email/:id',otpLimiter,verifyAccessToken('tutor'),updateEmail('tutor'))
-router.post('/verify-email',verifyAccessToken('tutor'),verifyEmail('tutor'))
+router.patch('/update-email',verifyAccessToken('tutor'),updateEmail('tutor'))
+router.patch('/verify-email',verifyAccessToken('tutor'),verifyEmail('tutor'))
+router.patch('/profile/update-password',verifyAccessToken('tutor'),updatePassword('tutor'))
+router.patch('/profile/update-password/re-send-otp',verifyAccessToken('tutor'),resendOtpForPasswordChange('tutor'))
+router.patch('/profile/update-password/verify-otp',verifyAccessToken('tutor'),verifyOtpForPasswordChange('tutor'))
 router.post('/update-profile',verifyAccessToken('tutor'),validateForm('tutor','profile'),updateProfile)
-router.delete('/delete-account/:id',verifyAccessToken('tutor'),deleteAccount)
+router.patch('/profile/deactivate-account',verifyAccessToken('tutor'),softDeleteUser('tutor'))
 
 // request verification from admin
 
@@ -68,12 +73,22 @@ router.get('/view-course/:id',verifyAccessToken('tutor'),courseDetails)
 router.post('/update-course',verifyAccessToken('tutor'),updateCourse)
 router.post('/publish-course',verifyAccessToken('tutor'),validateForm('tutor','course'),requestPublish)
 router.delete('/delete-course/:id',verifyAccessToken('tutor'),deleteCourse)
-router.get('/check-title/:title',verifyAccessToken('tutor'),courseTitleExist)
+router.get('/check-title',verifyAccessToken('tutor'),courseTitleExist)
 
 // notification
 
 router.get('/load-notifications',verifyAccessToken('tutor'),loadNotifications('tutor'))
 router.post('/read-notifications',verifyAccessToken('tutor'),readNotifications)
 
+// wallet 
+
+router.get('/wallet',verifyAccessToken('tutor'),loadWalletDetails('Tutor'))
+
+// bank account
+
+router.get('/bank-details',verifyAccessToken('tutor'),loadExistingBankDetails)
+router.post('/bank-details',verifyAccessToken('tutor'),addBankAccountDetails)
+router.post('/withdrawal-request',verifyAccessToken('tutor'),intiateWithdrawalRequest)
+router.get('/withdrawal-request',verifyAccessToken('tutor'),loadWithdrawalRequest)
 
 export default router

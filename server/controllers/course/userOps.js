@@ -1,4 +1,5 @@
 import AppliedCoupon from "../../model/AppliedCoupons.js";
+import Bookmark from "../../model/bookmark.js";
 import Coupon from "../../model/coupon.js";
 import Course from "../../model/course.js"
 import Order from "../../model/order.js";
@@ -38,6 +39,8 @@ export const getPricingDetails = (originalPrice, discount) => {
     };
 };
 
+// load pricing to checkout
+
 export const getPricing = async (req,res) => {
     
     try {
@@ -58,6 +61,8 @@ export const getPricing = async (req,res) => {
     }
 
 }
+
+// apply coupon
 
 export const applyCoupon = async (req,res) => {
     
@@ -139,8 +144,11 @@ export const applyCoupon = async (req,res) => {
 
 }
 
+// fetch current applied coupon
+
 export const fetchCurrentAppliedCoupon = async (req,res) => {
     try {
+  
         const userId = req.user.id;
 
         const courseId = req.params.id;
@@ -156,7 +164,7 @@ export const fetchCurrentAppliedCoupon = async (req,res) => {
                 finalAmount : appliedCoupon.finalAmount,
             })
         } 
-        
+
         if(order && order.price.couponCode){
             return ResponseHandler.success(res, STRING_CONSTANTS.LOADING_SUCCESS,HttpStatus.OK,{
                 couponCode : order.price.couponCode,
@@ -165,13 +173,15 @@ export const fetchCurrentAppliedCoupon = async (req,res) => {
             })
         }
 
-        
+        return ResponseHandler.success(res,STRING_CONSTANTS.DATA_NOT_FOUND,HttpStatus.NO_CONTENT,null)
 
     } catch (error) {
         console.log(STRING_CONSTANTS.LOADING_ERROR,error);
         return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
+
+// remove applied coupon
 
 export const removeAppliedCoupon = async (req,res) => {
     
@@ -186,7 +196,7 @@ export const removeAppliedCoupon = async (req,res) => {
         
         const order = await Order.findOne({ userId, courseId })
 
-        if(!appliedCoupon && !order.price.couponCode){
+        if(!appliedCoupon && !order?.price.couponCode){
             return ResponseHandler.error(res,STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.BAD_REQUEST)
         }
 
@@ -211,6 +221,140 @@ export const removeAppliedCoupon = async (req,res) => {
 
     } catch (error) {
         console.log(STRING_CONSTANTS.DELETION_ERROR,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+}
+
+// bookmark a course
+
+export const bookmarkCourse = async (req,res) => {
+    
+    try {
+        const userId = req.user.id;
+        const {courseId} = req.body;
+
+        const bookmarkCourse = await Bookmark.findOne({ userId , courseIdArray : courseId });
+
+        if(bookmarkCourse)
+            return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
+
+        await Bookmark.findOneAndUpdate(
+            { userId }, 
+            { $addToSet: { courseIdArray: courseId } },
+            { new: true, upsert: true }
+        );
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.CREATION_SUCCESS, HttpStatus.OK);
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.CREATION_ERROR,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER,HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+}
+
+// check a course is bookmarked
+
+export const isBookMarked = async (req,res) => {
+    
+    try {
+        const userId = req.user.id;
+        const courseId = req.params.id;
+        const isBookMarked = await Bookmark.findOne({ userId, courseIdArray : { $in : courseId } });
+
+        if(isBookMarked)
+            return ResponseHandler.success(res, STRING_CONSTANTS.SUCCESS, HttpStatus.OK);
+
+        return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.DATA_NOT_FOUND,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+}
+
+// load all bookmark courses
+
+export const loadBookmarkCourses = async (req,res) => {
+    
+    try {
+        const userId = req.user.id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const skip = (page-1) * limit;
+       
+        const {search, filter} = req.query
+
+        let filterQuery = { isPublished : true };
+        let sort = { createdAt: -1 }; // Default sorting (Newest first)
+
+        if (filter === "oldest") {
+            sort = { createdAt: 1 }; // Oldest first
+        }  
+
+        if (search) {
+            filterQuery.title =  { $regex: search, $options: "i" } 
+        }   
+
+          const bookmarkedCourses = await Bookmark.find({ userId }).select("courseIdArray -_id");
+          const courseIds = bookmarkedCourses.flatMap(bookmark => bookmark.courseIdArray);
+  
+
+        if(courseIds.length === 0){
+            return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS,HttpStatus.NO_CONTENT);
+        }
+
+        const totalCourses = await Course.countDocuments({ _id: { $in: courseIds }, ...filterQuery })
+        
+        const courses = await Course.find({ _id: { $in: courseIds }, ...filterQuery })
+        .select(`title thumbnail level isFree price discount 
+            tutor rating totalEnrollment duration category categoryName`)
+        .populate({
+                path : 'tutor',
+                select : 'firstName profileImage '
+            })
+        .skip(skip)
+        .limit(limit)
+        .sort(sort);
+
+
+        return ResponseHandler.success(res,STRING_CONSTANTS.LOADING_SUCCESS, HttpStatus.OK, {
+            courses,
+            total: totalCourses, 
+            currentPage: page,
+            totalPages: Math.ceil(totalCourses / limit)
+        })
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.LOADING_ERROR,error);
+        return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+// remove bookmark 
+
+export const removeBookmarkCourse = async (req,res) => {
+    
+    try {
+        const userId = req.user.id;
+        const courseId = req.params.id;
+
+        const bookmark = await Bookmark.findOne({ userId, courseIdArray : { $in : courseId } })
+
+        if(!bookmark)
+            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+        await Bookmark.findOneAndUpdate(
+            { userId }, 
+            { $pull: { courseIdArray: courseId } });
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.UPDATION_SUCCESS,HttpStatus.OK);
+
+    } catch (error) {
+        console.log(STRING_CONSTANTS.UPDATION_ERROR,error);
         return ResponseHandler.error(res, STRING_CONSTANTS.SERVER, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

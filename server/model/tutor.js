@@ -41,6 +41,10 @@ const tutorSchema = mongoose.Schema({
         type : String,
         trim : true
     },
+    tagLine : {
+        type : String,
+        default : ''
+    },
     dob : {
         type : String,
         default : ''
@@ -61,6 +65,12 @@ const tutorSchema = mongoose.Schema({
         type: Number,
         default: 0,
     },
+    bankDetails : {
+        accountNumber : { type : String},
+        ifsc : { type : String },
+        bankName : { type : String},
+        holderName : { type : String}
+    },
     isVerified : {
         type : Boolean,
         default : false
@@ -74,6 +84,10 @@ const tutorSchema = mongoose.Schema({
         default : false
     },
     tempMail :{
+        type : String,
+        expires : 600
+    },
+    tempPassword : {
         type : String,
         expires : 600
     },
@@ -104,6 +118,27 @@ const tutorSchema = mongoose.Schema({
         default : 0
     }
 },{timestamps : true});
+
+tutorSchema.post('save', async function (doc) {
+    
+    try {
+        const Wallet = (await import('./wallet.js')).default;
+
+        const existingWallet = await Wallet.findOne({ userId : doc._id, userModel : 'Tutor' })
+        if(!existingWallet){
+            await Wallet.create({
+                userId : doc._id,
+                userModel : 'Tutor',
+                balance : 0,
+                isActive : true
+            });
+        }
+
+    } catch (error) {
+        console.error('Error creating tutor wallet:', error);
+    }
+
+})
 
 const Tutor = mongoose.model("Tutor",tutorSchema);
 

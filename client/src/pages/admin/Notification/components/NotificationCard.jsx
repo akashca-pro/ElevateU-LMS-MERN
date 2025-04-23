@@ -2,6 +2,7 @@ import {useAdminVerificationRequestQuery, useAdminApproveOrRequestMutation} from
 import { useAdminLoadPendingRequestQuery, useAdminApproveOrRejectCourseMutation } from '@/services/adminApi/adminCourseApi.js'
 import CoursePublishRequests from "./CoursePublishRequests";
 import TutorVerificationRequest from "./tutorVerificationRequest";
+import WithdrawRequests from './WithdrawRequests';
 
 
 export function NotificationCard() {
@@ -14,8 +15,7 @@ export function NotificationCard() {
   const [courseApproveOrReject] = useAdminApproveOrRejectCourseMutation()
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Tutor verification requests */}
+    <div className="flex flex-col container mx-auto p-6 gap-3">
 
       <TutorVerificationRequest VerificationRequests={VerificationRequests}
        refetchVerificationRequest={refetchVerificationRequest} 
@@ -24,6 +24,8 @@ export function NotificationCard() {
       <CoursePublishRequests courseApproveOrReject={courseApproveOrReject} 
       publishRequests={publishRequests}
       refetchPublishRequest={refetchPublishRequest}  />
+
+      <WithdrawRequests/>
 
     </div>
   );

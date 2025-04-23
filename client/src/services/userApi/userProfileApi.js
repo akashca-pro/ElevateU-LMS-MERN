@@ -12,9 +12,9 @@ const userProfileApi = apiSlice.injectEndpoints({
             providesTags : ['User']
         }),
         userUpdateEmail : builder.mutation({
-            query : ({id,credentials})=>({
-                url : `user/update-email/${id}`,
-                method : 'POST',
+            query : (credentials)=>({
+                url : `user/update-email`,
+                method : 'PATCH',
                 body : credentials
             }),
             invalidatesTags : ['User']
@@ -22,7 +22,7 @@ const userProfileApi = apiSlice.injectEndpoints({
         userVerifyEmail : builder.mutation({
             query : (credentials) =>({
                 url : `user/verify-email`,
-                method : 'POST',
+                method : 'PATCH',
                 body : credentials
             }),
             invalidatesTags : ['User']
@@ -57,6 +57,36 @@ const userProfileApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags : ['Admin']
         }),
+        userUpdatePassword : builder.mutation({
+            query : (credentials) => ({
+                url : `user/profile/update-password`,
+                method : 'PATCH',
+                body : credentials
+            }),
+            invalidatesTags : ['User']
+        }),
+        userVerifyOtpForPassword : builder.mutation({
+            query : (credentials) => ({
+                url : `user/profile/update-password/verify-otp`,
+                method : 'PATCH',
+                body : credentials
+            }),
+            invalidatesTags : ['User']
+        }),
+        userResendOtpForPasswordChange : builder.mutation({
+            query : ()=>({
+                url : `user/profile/update-password/re-send-otp`,
+                method : 'PATCH',
+            }),
+            invalidatesTags : ['User']
+        }),
+        userDeactivateAccount : builder.mutation({
+            query : ()=>({
+                url : `user/profile/deactivate-account`,
+                method : 'PATCH'
+            }),
+            invalidatesTags : ['User']
+        })
     })
 })
 
@@ -68,6 +98,10 @@ export const {
     useUserUpdateProfileMutation,
     useUserDeleteAccountMutation,
     useUserLoadNotificationsQuery,
-    useUserReadNotificationsMutation
+    useUserReadNotificationsMutation,
+    useUserUpdatePasswordMutation,
+    useUserVerifyOtpForPasswordMutation,
+    useUserResendOtpForPasswordChangeMutation,
+    useUserDeactivateAccountMutation
 
 } = userProfileApi

@@ -56,7 +56,7 @@ const roleValidations = {
         body('courseDetails.title')
         .trim()
         .isLength({ min : 5 })
-        .withMessage('Course title is required'),
+        .withMessage('Course title is required and atleast 5 characters'),
 
         body('courseDetails.description')
         .trim()
@@ -108,9 +108,19 @@ const roleValidations = {
         body('courseDetails.modules.*.lessons.*.videoUrl')
         .trim()
         .notEmpty()
-        .withMessage('Video is required of each lesson')
+        .withMessage('Video is required of each lesson'),
 
+        body('courseDetails.modules.*.lessons.*.duration')
+        .notEmpty().withMessage('Duration is required')
+        .isNumeric().withMessage('Duration must be a number')
+        .custom((value) => {
+          if (Number(value) <= 0) {
+            throw new Error('Duration must be greater than zero');
+          }
+          return true;
+        })
         ]
+
     },
     admin : {
         login : [

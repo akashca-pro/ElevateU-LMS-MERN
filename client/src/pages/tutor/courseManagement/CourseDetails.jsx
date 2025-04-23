@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react"
-import equal from "fast-deep-equal"
 import { useNavigate, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AlertCircle, Edit2, Plus, Clock, Users, BookOpen, Award, Copy, Car, X } from "lucide-react"
+import { AlertCircle, Edit2, Plus, Clock, Users, BookOpen, Award, Copy, Car, X, Trash2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { useTutorLoadCourseQuery, useTutorUpdateCourseMutation, useTutorDeleteCourseMutation, 
@@ -26,6 +25,7 @@ import { FileUpload } from "./CreateCourse/FileUpload"
 import { toast } from "sonner"
 import DeleteCourseCard from "./CreateCourse/DeleteCourseCard"
 import validateUpdatedData from "./CreateCourse/validateUpdatedData"
+import { Checkbox } from "@/components/ui/checkbox"
 
 
 const CourseDetails = () => {
@@ -38,19 +38,37 @@ const CourseDetails = () => {
   const [categories,setCategories] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
   const [isDataChanged,setIsDataChanged] = useState(false)
-  const [prevData,setPrevData] = useState(null)
+  const [lockedModules, setLockedModules] = useState(new Set());
+  const [lockedLessons, setLockedLessons] = useState(new Set());
   const [formErrors,setFormErrors] = useState(null)
   const editSectionRef = useRef(null)
 
-  const { data: courseDetails, isLoading, isError, refetch } = useTutorLoadCourseQuery(courseId)
+  const { data: courseDetails, isLoading, isError, refetch } = useTutorLoadCourseQuery(courseId,{
+    refetchOnMountOrArgChange : true
+  })
   const { data : categoryDetails } = useLoadCategoriesQuery()
 
   useEffect(() => {
     if (courseDetails?.data) {
       setCourse(JSON.parse(JSON.stringify(courseDetails.data)));
-      setPrevData(course)
     }
     setCategories(categoryDetails?.data)
+
+    if(courseDetails?.data && courseDetails?.data?.modules?.length > 0 ){
+      const modSet = new Set();
+      const lessonSet = new Set();
+
+      courseDetails?.data?.modules?.forEach((mod,modIndex)=>{
+        modSet.add(modIndex);
+        mod?.lessons.forEach((_,lessonIndex)=>{
+          lessonSet.add(`${modIndex}-${lessonIndex}`)
+        })
+      })
+
+      setLockedModules(modSet);
+      setLockedLessons(lessonSet);
+
+    }
 
   }, [courseDetails, isEditing, categoryDetails]);
 
@@ -65,7 +83,6 @@ const CourseDetails = () => {
        
       const errors = validateUpdatedData(course)
       setFormErrors(errors)
-      console.log(course)
       await updateCourse({formData : course}).unwrap()
       toast.success('Data updated successfully',{id : toastId});
       setIsEditing(false)
@@ -84,6 +101,12 @@ const CourseDetails = () => {
     const { name, value } = e.target
     setCourse({ ...course, [name]: value })
     setIsDataChanged(true)
+  }
+
+  const handleCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setCourse((prev) => ({ ...prev, [name]: checked }));
+    setIsDataChanged(true);
   }
 
   const handleInputArrayChange = (field, index, value) => {
@@ -137,6 +160,9 @@ const CourseDetails = () => {
   }
 
   const handleModuleChange = (index, field, value) => {
+
+  if(field === 'title' && lockedModules.has(index)) return 
+
    const courseCopy = JSON.parse(JSON.stringify(course))
    courseCopy.modules[index][field] = value;
    setCourse(courseCopy);
@@ -145,12 +171,45 @@ const CourseDetails = () => {
   }
 
   const handleLessonChange = (moduleIndex, lessonIndex, field, value) => {
+    
+    if(field === 'title' && lockedLessons.has(`${moduleIndex}-${lessonIndex}`)) return 
+    if(field === 'videoUrl' && lockedLessons.has(`${moduleIndex}-${lessonIndex}`)) return 
+    if(field === 'duration' && lockedLessons.has(`${moduleIndex}-${lessonIndex}`)) return 
+
     const courseCopy = JSON.parse(JSON.stringify(course))
     courseCopy.modules[moduleIndex].lessons[lessonIndex][field] = value;
     setCourse(courseCopy);
     setIsDataChanged(true)
   }
+
+  const handleLessonAttachment = (moduleIndex, lessonIndex, updatedAttachments ) =>{
+
+    if(lockedLessons.has(`${moduleIndex}-${lessonIndex}`)) return 
+
+    const courseCopy = JSON.parse(JSON.stringify(course))
+    courseCopy.modules[moduleIndex].lessons[lessonIndex].attachments = updatedAttachments;
+    setCourse(courseCopy);
+    setIsDataChanged(true)
+  }
+
+  const handleRemoveModule = (moduleIndex) => {
+    if(lockedModules.has(moduleIndex)) return 
+
+    const courseCopy = JSON.parse(JSON.stringify(course));
+    courseCopy.modules.splice(moduleIndex,1);
+    setCourse(courseCopy)
+    setIsDataChanged(true)
+  }
   
+  const handleRemoveLesson = (moduleIndex, lessonIndex) => {
+    if(lockedLessons.has(`${moduleIndex}-${lessonIndex}`)) return 
+
+    const courseCopy = JSON.parse(JSON.stringify(course))
+    courseCopy.modules[moduleIndex].lessons.splice(lessonIndex,1);
+    setCourse(courseCopy)
+    setIsDataChanged(true)
+  }
+
   const handleDeleteCourse = async() =>{
     const toastId = toast.loading('Deleting course . . .');
       try {
@@ -166,6 +225,12 @@ const CourseDetails = () => {
   const handleSubmitApproval = async() =>{
     const toastId = toast.loading('Please Wait . . . ')
     try {
+
+      if(course?.isSuspended){
+        toast.error('Course Suspended',{ description : `You can't initiate publish request ` , id  : toastId});
+        return null
+      }
+
        const response = await publishCourse({ courseDetails : course }).unwrap()
        toast.success('Request Submitted',{id : toastId , duration : 5000 ,
         description : response?.message
@@ -362,13 +427,15 @@ const CourseDetails = () => {
               {course.status !== "approved" && (
                 <Button 
                 onClick={handleSubmitApproval}
-                disabled = {course?.status === 'pending' || course?.status === 'approved' || isEditing}
+                disabled = {course?.status === 'pending' || course?.status === 'approved' || isEditing || course?.status === 'suspended'}
                 className="w-full justify-start" variant="default">
                   <Clock className="mr-2 h-4 w-4" />
                    {course?.status === 'pending' 
                    ? 'Request Pending' 
                    : course?.status === 'approved'
                    ? 'Already approved' 
+                   : course?.status === 'suspended'
+                   ? 'Suspended'
                    : 'Submit for Approval'}
                 </Button>
               )}
@@ -378,16 +445,17 @@ const CourseDetails = () => {
       </div>
 
       {/* Tabs Section */}
-      <Tabs defaultValue="details" className="mt-8" ref={editSectionRef}>
-        <TabsList>
-          <TabsTrigger value="details">Course Details</TabsTrigger>
+      <Tabs defaultValue="details" ref={editSectionRef}>
+        <TabsList >
+          <TabsTrigger value="details">Basic</TabsTrigger>
           <TabsTrigger value="content">Content</TabsTrigger>
           <TabsTrigger value="pricing">Pricing</TabsTrigger>
-          <TabsTrigger value="reviews">Reviews</TabsTrigger>
-          <TabsTrigger value="delete">Delete Course</TabsTrigger>
+          <TabsTrigger value="reviews">Review</TabsTrigger>
+          <TabsTrigger value="delete">Delete</TabsTrigger>
         </TabsList>
-
+        <br />
         <TabsContent value="details">
+
         <p className="text-sm text-gray-600 italic bg-gray-100 p-2 rounded-md border-l-4 border-blue-500">
   <span className="font-semibold">NB:</span> Publishing request will be accepted after required fields are filled.
 </p>
@@ -460,20 +528,32 @@ const CourseDetails = () => {
                 </Button>
                   </div>
                 ))}
+              <Button type="button" variant="outline" size="sm" 
+              onClick={() => handleInputAddItemsToArray('whatYouLearn')}
+              className="mt-2"
+              disabled={!isEditing}
+              >
+              <Plus className="mr-2 h-3 w-3" />
+              Add Description
+            </Button>
                 <p className={`${formErrors?.whatYouLearn ? 'text-red-500' : 'text-blue-500' } text-sm font-semibold opacity-80`}>
                   {formErrors ? formErrors.whatYouLearn : 'Required Field'} 
                 </p>
-              <br/>
-            <Button type="button" variant="outline" size="sm" 
-            onClick={() => handleInputAddItemsToArray('whatYouLearn')}
-             className="mt-2"
-             disabled={!isEditing}
-             >
-            <Plus className="mr-2 h-3 w-3" />
-            Add Description
-          </Button>
 
               </div>
+
+              <div className="flex items-center space-x-2">
+              <Checkbox
+                disabled={!isEditing}
+                id="hasCertification"
+                name="hasCertification"
+                checked={course.hasCertification}
+                onCheckedChange={(checked) =>
+                  handleCheckboxChange({ target: { name: "hasCertification", checked } })
+                }
+              />
+              <Label htmlFor="hasCertification">Certification Provided</Label>
+            </div>
 
                 <div>
                   <Label htmlFor="category">Category</Label>
@@ -535,11 +615,14 @@ const CourseDetails = () => {
             <CardHeader>
             <CardTitle className="flex justify-between items-center">
                 Course Content
-                {!isEditing && (
+                {!isEditing ? (
                   <Button onClick={handleEdit}>
                     <Edit2 className="mr-2 h-4 w-4" /> Edit
                   </Button>
-                )}
+                ) : ( <div className="flex gap-2" >
+                  <Button disabled = {!isDataChanged} onClick={handleSave}>Save Changes</Button>
+                  <Button variant='destructive' onClick={()=>(setIsEditing((prev)=>!prev) , setIsDataChanged(false))}>Cancel</Button>
+                </div> )}
                 
               </CardTitle>
             </CardHeader>
@@ -558,7 +641,6 @@ const CourseDetails = () => {
                           placeholder = 'Enter Module Title'
                           onChange={(e) => {
                             e.stopPropagation();
-                            // console.log(e.target.value)
                             handleModuleChange(moduleIndex, "title", e.target.value);
                           }}
                           onClick={(e) => e.stopPropagation()}
@@ -610,12 +692,17 @@ const CourseDetails = () => {
 
                           <div>
                             <Label>Attachments</Label>
-                            <FileUpload
-                             value={lesson.attachments || []}
-                              onChange={(urls)=> handleLessonChange(moduleIndex, lessonIndex, 'attachments' , urls)}
-                              disabled={!isEditing ? true : false}
-                            />
+                          <FileUpload
+                            value={lesson.attachments} // Array of {link, title} objects
+                            onChange={(updatedAttachments) => {
+                              // updatedAttachments is array of {link, title}
+                              handleLessonAttachment(moduleIndex, lessonIndex, updatedAttachments);
+                            }}
+                            disabled={!isEditing}
+                            multiple={true}
+                          />
                           </div>
+
                           <div>
                         <Label htmlFor="duration">Duration ( In minutes )</Label>
                         <Input
@@ -631,13 +718,25 @@ const CourseDetails = () => {
                             </p>
                     </div>
                           </div>
+                          {isEditing && (
+                      <Button onClick={()=>handleRemoveLesson(moduleIndex,lessonIndex)} className="mt-4" variant='destructive'>
+                        <Trash2/> Remove lesson
+                      </Button>
+                    )}
                         </div>
                       ))}
+                      <div className="flex justify-between items-center w-full mt-2" >
                       {isEditing && (
                         <Button onClick={() => handleAddLesson(moduleIndex)} variant="outline" className="mt-2">
                           <Plus className="mr-2 h-4 w-4" /> Add Lesson
                         </Button>
                       )}
+                      {isEditing && (
+                        <Button onClick={() => handleRemoveModule(moduleIndex)} variant="destructive" className="mt-2">
+                          <Trash2 className="mr-2 h-4 w-4" /> Remove module
+                        </Button>
+                      )}
+                      </div>
                     </AccordionContent>
                   </AccordionItem>
                 ))}
@@ -656,11 +755,14 @@ const CourseDetails = () => {
             <CardHeader>
             <CardTitle className="flex justify-between items-center">
                 Pricing
-                {!isEditing && (
+                {!isEditing ? (
                   <Button onClick={handleEdit}>
                     <Edit2 className="mr-2 h-4 w-4" /> Edit
                   </Button>
-                )}
+                ) : ( <div className="flex gap-2" >
+                  <Button disabled = {!isDataChanged} onClick={handleSave}>Save Changes</Button>
+                  <Button variant='destructive' onClick={()=>(setIsEditing((prev)=>!prev) , setIsDataChanged(false))}>Cancel</Button>
+                </div> )}
               </CardTitle>
             </CardHeader>
             <CardContent>

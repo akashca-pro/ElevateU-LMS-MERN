@@ -50,10 +50,12 @@ const tutorCourseApi = apiSlice.injectEndpoints({
             invalidatesTags : ['Tutor']
         }),
         tutorCheckTitleCourse : builder.query({
-            query : (id) => ({
-                url : `tutor/check-title/${id}`,
+            query : (title) => ({
+                url : `tutor/check-title?title=${title}`,
                 method : 'GET'
-            }) 
+            }),
+            keepUnusedDataFor : 0,
+            refetchOnMountOrArgChange: true,
         }),
         
     })

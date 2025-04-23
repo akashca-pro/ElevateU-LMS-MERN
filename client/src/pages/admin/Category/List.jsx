@@ -11,6 +11,7 @@ import { AlertDialogDelete } from "@/components/AlertDialog"
 import { Badge } from "@/components/ui/badge"
 import { FilterBox } from "@/components/FilterBox"
 import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card"
 
 const List = () => {
   
@@ -28,9 +29,10 @@ const List = () => {
   const data = category?.data;
  
   return (
-    <div className="container mx-auto p-6 max-w-full overflow-x-auto">
+    <Card className="container mx-auto px-4 py-8">
+      <CardTitle>
       <h1 className="mb-8 text-2xl font-bold text-center md:text-left">Category Management</h1>
-
+      </CardTitle>
       {/* Search and Filter */}
       <div className="mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="relative w-full md:w-96">
@@ -46,12 +48,18 @@ const List = () => {
         <div className="flex flex-wrap justify-end gap-2 w-full md:w-auto">
           <FormModal title={'Add Category'} useCategory={useAdminAddCategoryMutation} 
           style={"bg-blue-600 hover:bg-blue-700 rounded-lg border border-gray-300 px-4 py-2"} type={'add'}/>
-          <FilterBox onSelect={setFilteredQuery} selectValue={'Not-Active'}/>
+          <FilterBox onSelect={setFilteredQuery} 
+          options={[
+            { value: "latest", label: "Latest" },
+            { value: "oldest", label: "Oldest" },
+            { value: "Not-Active", label: "Not-Active" },
+        ]}
+          />
         </div>
       </div>
 
      { error || isLoading ? <p className="text-center">No category found</p> : 
-     <div className="overflow-x-auto">
+     <CardContent className="overflow-x-auto">
      <Table>
         <TableCaption>List of available categories</TableCaption>
         <TableHeader>
@@ -95,11 +103,12 @@ const List = () => {
           ))}
         </TableBody>
       </Table>
-      </div>
+      </CardContent>
       }
 
       {/* Pagination */}
-      <div className="mt-6 flex items-center justify-center gap-2 flex-wrap">
+      { data?.categories?.length > 0 
+      && <CardFooter className="mt-6 flex items-center justify-center gap-2 flex-wrap">
         <button
           className="rounded-lg p-2 hover:bg-gray-100 disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -125,8 +134,8 @@ const List = () => {
         >
           <ChevronRight className="h-5 w-5 text-gray-600" />
         </button>
-      </div>
-    </div>
+      </CardFooter>}
+    </Card>
   )
 }
 

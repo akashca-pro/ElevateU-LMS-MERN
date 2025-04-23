@@ -1,3 +1,4 @@
+import './cron/deleteReadedMessages.js'
 import http from 'http'
 import express from 'express'
 import 'dotenv/config'
@@ -16,7 +17,6 @@ import { initializeSocket } from './services/socketServer.js'
 
 connectDB();
 
-
 const app= express()
 const server = http.createServer(app);
 
@@ -25,9 +25,8 @@ const io = initializeSocket(server);
 app.use((req, res, next) => {
     req.io = io;
     next();
-  });
+});
   
-
 app.use(passport.initialize())
 
 app.use(cors({
@@ -49,7 +48,7 @@ app.use('/api/user',userRouter);
 app.use('/api/tutor',tutorRouter)
 
 //Admin route
-app.use('/api/admin',adminRouter)
+app.use('/api/admin',adminRouter) 
 
 //error handling
 app.use(notFound)

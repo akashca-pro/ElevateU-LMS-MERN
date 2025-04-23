@@ -13,20 +13,20 @@ const tutorProfileApi = apiSlice.injectEndpoints({
             providesTags : ['Tutor']
         }),
         tutorUpdateEmail : builder.mutation({
-            query : ({id,credentials})=>({
-                url : `tutor/update-email/${id}`,
-                method : 'POST',
+            query : (credentials)=>({
+                url : `tutor/update-email`,
+                method : 'PATCH',
                 body : credentials
             }),
-            invalidatesTags : ['Tutor']
+            invalidatesTags : ['User']
         }),
         tutorVerifyEmail : builder.mutation({
-            query : (credentials)=>({
+            query : (credentials) =>({
                 url : `tutor/verify-email`,
-                method : 'POST',
+                method : 'PATCH',
                 body : credentials
             }),
-            invalidatesTags : ['Tutor']
+            invalidatesTags : ['User']
         }),
         tutorUpdateProfile : builder.mutation({
             query : (credentials)=>({
@@ -65,6 +65,36 @@ const tutorProfileApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags : ['Admin']
         }),
+        tutorUpdatePassword : builder.mutation({
+            query : (credentials) => ({
+                url : `tutor/profile/update-password`,
+                method : 'PATCH',
+                body : credentials
+            }),
+            invalidatesTags : ['Tutor']
+        }),
+        tutorVerifyOtpForPassword : builder.mutation({
+            query : (credentials) => ({
+                url : `tutor/profile/update-password/verify-otp`,
+                method : 'PATCH',
+                body : credentials
+            }),
+            invalidatesTags : ['Tutor']
+        }),
+        tutorResendOtpForPasswordChange : builder.mutation({
+            query : ()=>({
+                url : `tutor/profile/update-password/re-send-otp`,
+                method : 'PATCH',
+            }),
+            invalidatesTags : ['Tutor']
+        }),
+        tutorDeactivateAccount : builder.mutation({
+            query : ()=>({
+                url : `tutor/profile/deactivate-account`,
+                method : 'PATCH'
+            }),
+            invalidatesTags : ['Tutor']
+        })
     })
 })
 
@@ -77,6 +107,10 @@ export const {
     useTutorDeleteProfileMutation,
     useTutorRequestVerificationMutation,
     useTutorLoadNotificationsQuery,
-    useTutorReadNotificationsMutation
+    useTutorReadNotificationsMutation,
+    useTutorUpdatePasswordMutation,
+    useTutorResendOtpForPasswordChangeMutation,
+    useTutorVerifyOtpForPasswordMutation,
+    useTutorDeactivateAccountMutation
 
 } = tutorProfileApi

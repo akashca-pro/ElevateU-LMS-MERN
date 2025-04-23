@@ -63,24 +63,3 @@ export const updateProfile = async (req,res) => {
     }
 
 }
-
-// delete account
-
-export const deleteAccount = async (req,res) =>{
-
-    try {
-        const user_ID = req.params.id
-        const user = await User.findById(user_ID)
-        if(!user) 
-            return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
-
-        await User.findByIdAndDelete(user_ID)
-
-        return ResponseHandler.success(res,STRING_CONSTANTS.DELETION_SUCCESS, HttpStatus.OK)
-
-    } catch (error) {
-        console.log(STRING_CONSTANTS.DELETION_ERROR, error);
-        return ResponseHandler.error(res,STRING_CONSTANTS.DELETION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-
-}

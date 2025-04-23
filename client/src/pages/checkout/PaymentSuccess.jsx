@@ -1,14 +1,12 @@
 
 import { Button } from "@/components/ui/button"
-import { formatUrl } from "@/utils/formatUrls"
-import { CheckCircle2, ArrowRight, BookOpen, LibraryBig } from "lucide-react"
+import { CheckCircle2, BookOpen, LibraryBig } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
 
 const PaymentSuccess = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const orderDetails = location.state
-  const decodedCourseName = formatUrl(orderDetails?.courseTitle)
 
   setTimeout(()=>{
 
@@ -38,7 +36,7 @@ const PaymentSuccess = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Amount Paid</p>
-              <p className="font-medium">₹{orderDetails.amountPaid}</p>
+              <p className="font-medium">₹{orderDetails?.amountPaid}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Payment Method</p>
@@ -57,7 +55,7 @@ const PaymentSuccess = () => {
         </p>
 
         <div className="flex flex-row gap-4">
-        <Button size="lg" className="flex-1 " onClick={()=>navigate(`/user/profile/my-courses/${decodedCourseName}`,{replace : true})}>
+        <Button size="lg" className="flex-1 " onClick={()=>navigate(`/user/profile/my-courses/${orderDetails?.courseId}`,{replace : true})}>
          Learn Now <BookOpen className="h-4 w-4" />
         </Button>
         <Button size="lg" className="flex-1 " onClick={()=>navigate(`/user/profile/my-courses?tab=enrolled`,{replace : true})}>

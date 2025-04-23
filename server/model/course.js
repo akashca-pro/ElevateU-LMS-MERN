@@ -8,7 +8,11 @@ const lessonSchema = new mongoose.Schema({
     title : { type :String,  },
     videoUrl : {type : String, }, // cloudinary video url
     duration : {type : Number, default : 0},
-    attachments : [{type : String}],
+    attachments : [{
+        _id : false,
+        title : { type : String },
+        link : { type : String }
+    }],
 
 })
 
@@ -48,13 +52,15 @@ const courseSchema = new mongoose.Schema(
 
       isPublished: { type: Boolean, default: false },
 
-      status: { type: String, enum: ["pending", "approved", "rejected", "draft","suspended"], default: "draft" },
+      status: { type: String, enum: ["pending", "approved", "rejected", "draft", "suspended"], default: "draft" },
+
+      isSuspended : { type : Boolean, default : false },
 
       reason: { type: String },
 
       rating: { type: Number, default: 0 }, // Overall Rating
 
-      duration: { type: Number, default: 0 }, // Total course duration in minutes
+      duration: { type: Number, default: 0 , required: function () { return !this.draft }}, // Total course duration in minutes
 
       level: { type: String, enum: ["Beginner", "Intermediate", "Advanced"], default: "Beginner" },
 
@@ -67,6 +73,9 @@ const courseSchema = new mongoose.Schema(
       hasCertification : { type : Boolean , default : false},
       
       draft : { type : Boolean, default : false },
+
+      isArchive : { type : Boolean, default : false }
+
     },
     { timestamps: true }
   );
@@ -179,6 +188,8 @@ courseSchema.pre("save", async function (next) {
         next(error);
     }
 });
+
+
 
 
 const Course = mongoose.model('Course',courseSchema)

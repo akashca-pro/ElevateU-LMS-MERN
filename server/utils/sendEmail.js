@@ -24,7 +24,7 @@ To ensure the security of your account, we require you to verify your email addr
 
 Your OTP Code: ${otp}
 
-This code is valid for the next 10 minutes.
+This code is valid for the next 5 minutes.
 If you did not request this OTP, please ignore this email or contact our support team for assistance.
 Thank you for choosing ElevateU. We're excited to have you on board and look forward to helping you achieve your learning goals.
 

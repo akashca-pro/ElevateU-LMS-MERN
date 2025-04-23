@@ -49,7 +49,7 @@ const userSchema  = new mongoose.Schema({
         trim : true,
     },
     socialLinks : {
-        type : [String], // example ['http://instagram....','http://facebook...']
+        type : [String]
     },
     isVerified : {
         type : Boolean,
@@ -63,6 +63,10 @@ const userSchema  = new mongoose.Schema({
         type : String,
         expires : 600
     },
+    tempPassword : {
+        type : String,
+        expires : 600
+    },
     isBlocked : {
         type : Boolean,
         default : false
@@ -72,6 +76,27 @@ const userSchema  = new mongoose.Schema({
     cart : { type : String , ref : 'Course' },
     
 },{timestamps : true});
+
+userSchema.post('save', async function (doc) {
+    
+    try {
+        const Wallet = (await import('./wallet.js')).default;
+
+        const existingWallet = await Wallet.findOne({ userId : doc._id, userModel : 'User' })
+        if(!existingWallet){
+            await Wallet.create({
+                userId : doc._id,
+                userModel : 'User',
+                balance : 0,
+                isActive : true
+            });
+        }
+
+    } catch (error) {
+        console.error('Error creating user wallet:', error);
+    }
+
+})
 
 const User = mongoose.model("User",userSchema);
 

@@ -10,7 +10,9 @@ const notificationSchema = new mongoose.Schema({
     senderId : { type : String, refPath : 'senderType' },
     senderType : { type : String, enum : ['User','Tutor','Admin'],required : function(){ return !!this.senderId }},
 
-    type : { type : String, enum : ['publish_request','verify_profile','new_enrollment','payment_update','publish_course','suspend_course'] },
+    type : { type : String, 
+        enum : ['publish_request','verify_profile','new_enrollment','payment_update','course_approved','course_rejected'
+            ,'suspend_course','suspension_removed','withdraw_request','withdraw_rejected','withdraw_approved'] },
 
     message : {type : String, required : true},
 
@@ -20,15 +22,6 @@ const notificationSchema = new mongoose.Schema({
 
 },{ timestamps: true })
 
-notificationSchema.pre(['findOneAndUpdate', 'updateMany', 'updateOne', 'update'], function(next){
-    const update = this.getUpdate();
-
-    if(update.$set && update.$set.isRead){
-        update.$set.readAt = new Date()
-    }
-
-    next()
-})
 
 const Notification = mongoose.model('Notification',notificationSchema)
 
