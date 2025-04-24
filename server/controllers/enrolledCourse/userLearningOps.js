@@ -178,7 +178,6 @@ export const courseDetails = async (req,res) => {
         if(!isEnrolled)
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.BAD_REQUEST);
 
-        
         const courseDetails = await Course.findById(courseId)
         .populate('tutor','firstName lastName profileImage bio expertise experience socialLinks')
         
@@ -317,7 +316,7 @@ export const progressStatus = async (req,res) => {
             };
         };
 
-        let { currentModule, currentLesson, moduleProgress, 
+        const { currentModule, currentLesson, moduleProgress, 
             completedLessons
 
          } = currentModuleStatus();
@@ -446,24 +445,23 @@ export const changeLessonOrModuleStatus = async (req,res) => {
 
         if(moduleIndex !== -1){
             const module = updatedProgress.modules[moduleIndex];
+            
             const allLessonsCompleted = module.lessons.every(lesson=> lesson.isCompleted)
 
             if(allLessonsCompleted){
                 updatedProgress.modules[moduleIndex].isCompleted = true;
+
+                const { cumulativeModules, currentLevel } = 
+                calculateLevelSize(updatedProgress.modules.filter(m=>!m.isAddon))
+        
+                updatedProgress.level={
+                    currentLevel,
+                    cumulativeModules
+                }
             }
 
         }else{
             throw new Error('Failed finding module index')
-        }
-
-        // passing the module status to update the level
-
-        const { cumulativeModules, currentLevel } = 
-        calculateLevelSize(updatedProgress.modules.filter(m=>!m.isAddon))
-
-        updatedProgress.level={
-            currentLevel,
-            cumulativeModules
         }
 
         await updatedProgress.save()

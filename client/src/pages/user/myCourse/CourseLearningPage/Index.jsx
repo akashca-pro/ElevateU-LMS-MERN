@@ -267,7 +267,7 @@ const CourseLearningPage = () => {
             <TabsContent value = 'addon'>
             <Card className="border-0 shadow-lg h-full">
             <ModuleAccordion asChild
-              enrolledLastIndex={moduleDetails.length}
+              enrolledLastIndex={moduleDetails?.length}
               course={courseDetails}
               moduleDetails={addonModules}
               progress={progressDetails}

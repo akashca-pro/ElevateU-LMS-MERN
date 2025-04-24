@@ -26,7 +26,7 @@ const progressTrackerSchema = new mongoose.Schema({
     }],
 
     level : {
-        currentLevel : { type : Number , enum : [1,2,3,4,5] , default : 1},
+        currentLevel : { type : Number , enum : [0,1,2,3,4,5] , default : 0},
         cumulativeModules : [{ type : Number }],
     },
 

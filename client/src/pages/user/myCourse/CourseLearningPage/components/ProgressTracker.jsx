@@ -15,7 +15,7 @@ const ProgressTracker = ({ progress }) => {
   };
 
   const svgRef = useRef(null);
-  const currentLevelIndex = progress?.currentLevel - 1;
+  const currentLevelIndex = progress?.currentLevel === 0 ? 0 : progress?.currentLevel - 1 ;
   const levels = [
     { level: 1, name: "Beginner", threshold: 0, description: "Starting your journey" },
     { level: 2, name: "Explorer", threshold: 25, description: "Building foundations" },
@@ -37,16 +37,19 @@ const ProgressTracker = ({ progress }) => {
               <Trophy className="h-8 w-8 text-primary" />
             </div>
             <div className="text-center md:text-left">
-              <h3 className="text-xl font-bold mb-1">{currentLevel?.name} Level</h3>
-              <p className="text-gray-600 dark:text-gray-400">{currentLevel?.description}</p>
-              <p className="text-gray-600 dark:text-gray-400">{getAchievementMessage(currentLevel?.level)}</p>
+              <h3 className="text-xl font-bold mb-1">
+                {progress?.currentLevel === 0 ? 'Zero' : currentLevel?.name} Level</h3>
+              {progress?.currentLevel !== 0 && <p className="text-gray-600 dark:text-gray-400">
+                {currentLevel?.description}</p>}
+              <p className="text-gray-600 dark:text-gray-400">
+                {getAchievementMessage(currentLevel?.level)}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* S-Curve Progress Path */}
-      {progress?.totalModules >= 5 && (
+      {(progress?.totalModules >= 5 && progress?.currentLevel !== 0) && (
         <div className="relative">
           <div className="w-full overflow-hidden">
             <svg ref={svgRef} width="100%" height="100%" viewBox="0 0 1000 200" preserveAspectRatio="none">

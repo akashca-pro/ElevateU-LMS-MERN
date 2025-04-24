@@ -4,7 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MoreHorizontal, BarChart3, ChevronLeft, ChevronRight, Search} from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import {useNavigate, useParams } from "react-router-dom";
+import {useNavigate } from "react-router-dom";
 import {useTutorLoadCoursesQuery } from '@/services/TutorApi/tutorCourseApi';
 import { useLoadCategoriesQuery } from '@/services/commonApi';
 import {CreateCourseButton} from './CreateCourse/Course-create-button.jsx';

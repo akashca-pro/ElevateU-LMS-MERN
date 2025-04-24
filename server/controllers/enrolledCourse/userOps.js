@@ -265,7 +265,7 @@ export const enrollInCourse = async (req,res) => {
       const { currentLevel, cumulativeModules } = calculateLevelSize(modules)
 
         const level = {
-            currentLevel, 
+            currentLevel , 
             cumulativeModules
         };
 

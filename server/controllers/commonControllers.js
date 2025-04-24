@@ -231,7 +231,7 @@ export const loadCourseDetails = async (req,res) => {
             category : course.category,
             tutor : course.tutor,
             price : course.price,
-            discount : course.discount,
+            discount : course.discount, 
             totalEnrollment : course.totalEnrollment,
             thumbnail : course.thumbnail,
             requirements : course.requirements,
