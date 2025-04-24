@@ -102,7 +102,6 @@ const CourseLearningPage = () => {
         toast.success('Progress tracker updated',{ description : 'New modules or lessons added' })
       }
     } catch (error) {
-      toast.error("Failed to update progress tracker");
       console.log(error)
     }finally {
       setIsUpdatingProgress(false)

@@ -22,7 +22,7 @@ export const bestSellingCourse = async (req,res) => {
           if (fromDate && toDate) {
             matchStage.createdAt = {
               $gte: new Date(fromDate),
-              $lte: new Date(toDate),
+              $lte: new Date(toDate), 
             };
           }
 
@@ -140,8 +140,8 @@ export const bestSellingCategory = async (req,res) => {
     }
 
 }
-
-// dashboardDetails
+ 
+// dashboardDetails  
 
 export const dashboardDetails = async (req,res) => {
     

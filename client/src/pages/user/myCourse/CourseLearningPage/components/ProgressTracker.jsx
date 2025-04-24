@@ -11,7 +11,7 @@ const ProgressTracker = ({ progress }) => {
     if (level === 4) return "You're in the final stretch! Keep going strong! 💪";
     if (level === 3) return "Halfway there! You're making excellent progress! 🚀";
     if (level === 2) return "Great start! You're well on your way to mastery! 🌟";
-    return "Welcome to the course! Your learning journey begins here! 🎓";
+    return "Your learning journey begins here! 🎓";
   };
 
   const svgRef = useRef(null);
@@ -41,8 +41,11 @@ const ProgressTracker = ({ progress }) => {
                 {progress?.currentLevel === 0 ? 'Zero' : currentLevel?.name} Level</h3>
               {progress?.currentLevel !== 0 && <p className="text-gray-600 dark:text-gray-400">
                 {currentLevel?.description}</p>}
-              <p className="text-gray-600 dark:text-gray-400">
-                {getAchievementMessage(currentLevel?.level)}</p>
+              { progress?.currentLevel === 0 ? 
+               <p className="text-gray-600 dark:text-gray-400">
+                {'Welcome to the course !'}</p>
+               :<p className="text-gray-600 dark:text-gray-400">
+                {getAchievementMessage(currentLevel?.level)}</p>}
             </div>
           </div>
         </CardContent>

@@ -3,7 +3,7 @@ import DateRangeSelector from "./DateRangeSelector";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 
-const CoursesFilter = ({ onApplyFilter }) => {
+const CoursesFilter = ({ onApplyFilter, courseRefetch }) => {
   const [dateRange, setDateRange] = useState({
     fromDate: '',
     toDate: '',

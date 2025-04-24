@@ -1,6 +1,5 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import TopSellersCarousel from "./TopSellersCarousel.jsx"
-import { Card } from "@/components/ui/card"
 import { useBestSellingCoursesQuery,useBestSellingCategoriesQuery } from '@/services/adminApi/adminAnalyticsApi.js'
 
 export default function TopAnalytics() {
@@ -14,12 +13,13 @@ export default function TopAnalytics() {
   const { data : courses } = useBestSellingCoursesQuery({...courseFilter})
   const { data : categories } = useBestSellingCategoriesQuery({...categoryFilter})
 
+
   return (
     <div className="container mx-auto px-4 py-8">
 
       <div className="space-y-10">
         <div className="p-6">
-          <TopSellersCarousel title="Top Selling Courses" items={courses?.data || []} type="product" onApplyFilter={setCourseFilter}/>
+          <TopSellersCarousel title="Top Selling Courses" items={courses?.data || []} type="product" onApplyFilter={setCourseFilter} />
         </div>
 
         <div className="p-6">

@@ -6,14 +6,17 @@ const adminDashboardApi = apiSlice.injectEndpoints({
     endpoints : (builder) => ({
 
         bestSellingCourses : builder.query({
-            query : ({ fromDate, toDate })=>({
+            query : ({ fromDate, toDate })=>{
+              console.log('Query sent to backend:', fromDate, toDate) // log this
+              return {
                 url : `admin/dashboard/best-selling-course`,
                 method : 'GET',
                 params : {
                     fromDate,
                     toDate
                 }
-            }),
+              }
+            },
             providesTags : ['Admin']
         }),
         bestSellingCategories : builder.query({

@@ -338,7 +338,7 @@ export const loadEnrolledCourses = async (req,res) => {
             return acc;
           }, {});
 
-        const totalCourse = await Course.countDocuments(filterQuery);
+          const totalCourse = await Course.countDocuments({ _id: { $in: user.enrolledCourses }, ...filterQuery });
 
         if(enrollments.length === 0) 
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND)
