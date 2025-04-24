@@ -4,6 +4,7 @@ import ResponseHandler from "../../utils/responseHandler.js";
 import HttpStatus from "../../utils/statusCodes.js";
 import { STRING_CONSTANTS } from "../../utils/stringConstants.js";
 import { saveNotification ,sendNotification } from '../../utils/LiveNotification.js'
+import Tutor from "../../model/tutor.js";
 
 // view all courses
 
@@ -177,6 +178,8 @@ export const approveOrRejectCourse = async (req,res) => {
                 reason,
                 isPublished : true
             })
+
+            await Tutor.findByIdAndUpdate(tutorId, { $inc : { courseCount : 1 } });
 
              const newNotification = await saveNotification(tutorId, 'Tutor', 'course_approved',
                 `Congrats your ${course.title} course has been verified and published,${reason}`

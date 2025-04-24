@@ -225,16 +225,9 @@ export const deleteCourse = async (req,res) => {
         
         await Tutor.findByIdAndUpdate(tutorId, { $inc : { $courseCount : -1 } })
         
-        const isEnrolled = await EnrolledCourse.findOne({ courseId })
+        await Course.findByIdAndUpdate(courseId, { $set : { isArchive : true , isPublished : false } })
 
-        if(isEnrolled){
-            await Course.findByIdAndUpdate(courseId, { $set : { isArchive : true , isPublished : false } })
-            return ResponseHandler.success(res, STRING_CONSTANTS.DELETION_SUCCESS,HttpStatus.OK)
-        }
-
-        await Course.findByIdAndDelete(courseId)
-
-        return ResponseHandler.success(res,STRING_CONSTANTS.DELETION_SUCCESS, HttpStatus.OK)
+        return ResponseHandler.success(res, STRING_CONSTANTS.DELETION_SUCCESS,HttpStatus.OK)
 
     } catch (error) {
         console.log(STRING_CONSTANTS.DELETION_ERROR, error);

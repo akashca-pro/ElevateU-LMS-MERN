@@ -232,11 +232,12 @@ export const enrollInCourse = async (req,res) => {
             }
         })
 
-        course.totalEnrollment += 1;
-
-        await course.save()
+        await Course.findByIdAndUpdate(courseId, { $inc : { totalEnrollment : 1 } })
         
-        await Tutor.findByIdAndUpdate(tutorId, { $inc : { students : 1 } })
+        await Tutor.findByIdAndUpdate(
+            tutorId,
+            { $addToSet: { students: userId } }
+        );
 
         // add enrolled course to user schema
         const user = await User.findByIdAndUpdate(userId,{ $addToSet : { enrolledCourses : courseId } ,

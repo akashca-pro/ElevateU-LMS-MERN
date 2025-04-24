@@ -109,10 +109,7 @@ const tutorSchema = mongoose.Schema({
     rating : {
         type : Number
     },
-    students : {
-        type : Number,
-        default : 0
-    },
+    students : [{ type : String }],
     courseCount : {
         type : Number,
         default : 0
