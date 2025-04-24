@@ -19,7 +19,8 @@ const FeaturedBanner = () => {
   }
 
   return (
-    <div className="bg-gradient-to-b from-[#1E1B4B] to-[#312E81] py-24 relative overflow-hidden">
+    <>
+    { courses?.data && courses?.data?.length > 0 &&  <div className="bg-gradient-to-b from-[#1E1B4B] to-[#312E81] py-24 relative overflow-hidden">
 
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
@@ -117,7 +118,7 @@ const FeaturedBanner = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </div>}</>
   )
 }
 

@@ -117,6 +117,6 @@ router.get('/transactions',verifyAccessToken('admin'),loadTransactionList)
 router.get('/dashboard',verifyAccessToken('admin'),dashboardDetails)
 router.get('/dashboard/best-selling-course',verifyAccessToken('admin'),bestSellingCourse)
 router.get('/dashboard/best-selling-category',verifyAccessToken('admin'),bestSellingCategory)
-router.get('/dashboard/revenue-chart-data',revenueChartAnalysis)
+router.get('/dashboard/revenue-chart-data',verifyAccessToken('admin'),revenueChartAnalysis)
 
 export default router

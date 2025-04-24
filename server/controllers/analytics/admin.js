@@ -67,6 +67,7 @@ export const bestSellingCourse = async (req,res) => {
                   'price': '$courses.price',
                   'isFree': '$courses.isFree',
                   'level': '$courses.level',
+                  'isArchive' : '$courses.isArchive',
             
                   // Tutor specific fields 
                   'tutorName': '$tutor.firstName',
@@ -75,11 +76,13 @@ export const bestSellingCourse = async (req,res) => {
                 }
               }
          ])
-
+         
          if(!courses || courses.length === 0)
             return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NO_CONTENT);
+         
 
-         return ResponseHandler.success(res, STRING_CONSTANTS.LOAD_BEST_SELLING_COURSE_SUCCESS, HttpStatus.OK, courses)
+          return ResponseHandler.success(res, STRING_CONSTANTS.LOAD_BEST_SELLING_COURSE_SUCCESS, HttpStatus.OK,
+          courses.filter(c=>!c.isArchive))
 
     } catch (error) {
         console.log(STRING_CONSTANTS.SERVER,error);

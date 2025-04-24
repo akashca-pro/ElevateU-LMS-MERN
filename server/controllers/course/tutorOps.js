@@ -60,7 +60,7 @@ export const loadCourses = async (req,res) => {
         const {search, filter} = req.query
 
         let sort = { createdAt: -1 }; // Default sorting (Newest first)
-        let filterQuery = {tutor : tutorId}; 
+        let filterQuery = {tutor : tutorId, isArchive : false}; 
 
         if (filter === "oldest") {
             sort = { createdAt: 1 }; // Oldest first

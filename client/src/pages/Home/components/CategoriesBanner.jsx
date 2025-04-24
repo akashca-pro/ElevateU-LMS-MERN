@@ -37,8 +37,8 @@ const CategoriesBanner = () => {
     return <CategoryCard item={item} index={index} />
   }
 
-  return (
-    <div className="py-16 bg-gradient-to-b from-white to-gray-50">
+  return (<>
+   { categories?.data && categories?.data?.length > 0 &&  <div className="py-16 bg-gradient-to-b from-white to-gray-50">
       <Card className="rounded-xl border-none shadow-lg max-w-7xl mx-auto bg-white/80 backdrop-blur-sm">
         <CardContent className="space-y-8 py-10 px-6">
           <div className="flex justify-center">
@@ -114,7 +114,7 @@ const CategoriesBanner = () => {
           </motion.div>
         </CardContent>
       </Card>
-    </div>
+    </div>}</>
   )
 }
 
