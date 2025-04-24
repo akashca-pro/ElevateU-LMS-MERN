@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import {  } from '@/services/adminApi/adminCourseApi.js'
 
-import { useAdminLoadCoursesQuery, useAdminAllowOrSuspendCourseMutation } from '@/services/adminApi/adminCourseApi.js'
-import { useNavigate } from 'react-router-dom'
+import { useAdminLoadCoursesQuery, useAdminAllowOrSuspendCourseMutation,
+  useAdminDeleteCourseMutation } from '@/services/adminApi/adminCourseApi.js'
 import { format } from 'date-fns'
 import LoadingSpinner from '@/components/FallbackUI/LoadingSpinner'
 import { AlertDialogDelete } from '@/components/AlertDialog'
@@ -18,7 +18,6 @@ const Index = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [filteredQuery,setFilteredQuery] = useState('latest')
     const limit = 7;
-    const navigate = useNavigate()
     const {data : course, isLoading , error ,refetch} = useAdminLoadCoursesQuery({
     page : currentPage,
     search : searchQuery,
@@ -96,6 +95,7 @@ const Index = () => {
                     <FormModal useAction={useAdminUpdateCouponMutation} existValues={data?.coupons[index]} refetch={refetch}/> 
                 </TableCell> */}
                 <TableCell>
+                <div className='grid grid-cols-2 gap-2'>
                 {course.status === 'pending' ? 'Awaiting approval' 
                 : course.status === 'rejected' 
                 ? 'Course Rejected' 
@@ -103,10 +103,18 @@ const Index = () => {
                 onSuccess={refetch}
                 id={{courseId : course?._id , tutorId : course?.tutor._id}}
                 btnName={`${course?.isSuspended ? 'Go Live' : 'Suspend'}`} 
-                btnClass={`${course?.isSuspended ? 'bg-green-600' : 'bg-red-600' }
-                 text-white px-3 py-1 rounded text-sm hover:${course?.isSuspended ? 'bg-green-700' : 'bg-red-700' }`}
+                btnClass={`${course?.isSuspended ? 'bg-green-600' : 'bg-yellow-500' }
+                 text-white px-3 py-1 rounded text-sm hover:${course?.isSuspended ? 'bg-green-700' : 'bg-yellow-700' }`}
                 deleteApi={useAdminAllowOrSuspendCourseMutation}
                 />  }
+                <AlertDialogDelete
+                onSuccess={refetch}
+                id={course?._id}
+                btnName={`Delete`} 
+                btnClass={'bg-red-600 hover:bg-red-700'}
+                deleteApi={useAdminDeleteCourseMutation}
+                /> 
+                </div>
                 </TableCell>
                 </TableRow>
                ))}

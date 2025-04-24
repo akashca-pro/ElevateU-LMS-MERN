@@ -215,13 +215,12 @@ export const deleteCourse = async (req,res) => {
     
     try {
         const course_Id = req.params.id
-        const {tutorId} = req.body
 
-        const course = await Course.findOne({_id : course_Id , tutor : tutorId})
+        const course = await Course.findById(course_Id)
         if(!course)  
             return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
         
-        await course.findOneAndDelete({_id : course_Id , tutor : tutorId})
+        await Course.findByIdAndDelete(course_Id)
 
         return ResponseHandler.success(res,STRING_CONSTANTS.DELETION_SUCCESS, HttpStatus.OK)
 
