@@ -1,7 +1,7 @@
 import {useAdminVerificationRequestQuery, useAdminApproveOrRequestMutation} from '@/services/adminApi/adminTutorApi'
 import { useAdminLoadPendingRequestQuery, useAdminApproveOrRejectCourseMutation } from '@/services/adminApi/adminCourseApi.js'
 import CoursePublishRequests from "./CoursePublishRequests";
-import TutorVerificationRequest from "./tutorVerificationRequest";
+import TutorVerificationRequest from "./TutorVerificationRequest";
 import WithdrawRequests from './WithdrawRequests';
 
 
