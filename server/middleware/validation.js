@@ -56,74 +56,91 @@ const roleValidations = {
             body('expertise').notEmpty().withMessage('Expertise is required'),
             body('experience').notEmpty().withMessage('Experience is required'),
         ],
-        course : [
-        body('courseDetails.title')
-        .trim()
-        .isLength({ min : 5 })
-        .withMessage('Course title is required and atleast 5 characters'),
-
-        body('courseDetails.description')
-        .trim()
-        .isLength({ min : 10 })
-        .withMessage('Course description is required of atleast 10 characters'),
-
-        body('courseDetails.category')
-        .notEmpty()
-        .withMessage('Course category is required'),
-
-        body('courseDetails.isFree')
-        .isBoolean()
-        .withMessage('isFree must be a boolean'),
-
-        body('courseDetails.whatYouLearn')
-        .isArray({ min : 1 })
-        .withMessage('What you learn (description) required at least one'),
-
-        body('courseDetails.price')
-        .custom((value,{ req })=>{
-            if(!req.body.courseDetails.isFree && (typeof value !== 'number' || value <= 0 )){
-                throw new Error('Price is required and must be greater than 0 if course is not free')
-            }
-            return true
-        }),
-
-        body('courseDetails.thumbnail')
-        .notEmpty()
-        .withMessage('Course thumbnail is required'),
-
-        body('courseDetails.modules')
-        .isArray({ min : 1 })
-        .withMessage('Atleast one module is required'),
-
-        body('courseDetails.modules.*.title')
-        .trim()
-        .isLength({ min : 5 })
-        .withMessage('Module title is required with atleast 5 character'),
-
-        body('courseDetails.modules.*.lessons')
-        .isArray({ min : 1 })
-        .withMessage('Atleast one lesson is required'),
-
-        body('courseDetails.modules.*.lessons.*.title')
-        .trim()
-        .isLength({ min : 3 })
-        .withMessage('Lesson title is required with atleast 3 character'),
-
-        body('courseDetails.modules.*.lessons.*.videoUrl')
-        .trim()
-        .notEmpty()
-        .withMessage('Video is required of each lesson'),
-
-        body('courseDetails.modules.*.lessons.*.duration')
-        .notEmpty().withMessage('Duration is required')
-        .isNumeric().withMessage('Duration must be a number')
-        .custom((value) => {
-          if (Number(value) <= 0) {
-            throw new Error('Duration must be greater than zero');
-          }
-          return true;
-        })
-        ]
+        course: [
+            body('courseDetails.title')
+              .optional()
+              .trim()
+              .isLength({ min: 5 })
+              .withMessage('Course title must be at least 5 characters'),
+          
+            body('courseDetails.description')
+              .optional()
+              .trim()
+              .isLength({ min: 10 })
+              .withMessage('Course description must be at least 10 characters'),
+          
+            body('courseDetails.category')
+              .optional()
+              .notEmpty()
+              .withMessage('Course category is required'),
+          
+            body('courseDetails.isFree')
+              .optional()
+              .isBoolean()
+              .withMessage('isFree must be a boolean'),
+          
+            body('courseDetails.whatYouLearn')
+              .optional()
+              .isArray({ min: 1 })
+              .withMessage('At least one item in "what you learn" is required'),
+          
+            body('courseDetails.price')
+              .optional()
+              .custom((value, { req }) => {
+                if (
+                  req.body.courseDetails?.isFree === false &&
+                  (typeof value !== 'number' || value <= 0)
+                ) {
+                  throw new Error('Price must be greater than 0 if course is not free');
+                }
+                return true;
+              }),
+          
+            body('courseDetails.thumbnail')
+              .optional()
+              .notEmpty()
+              .withMessage('Course thumbnail is required'),
+          
+            body('courseDetails.modules')
+              .optional()
+              .isArray({ min: 1 })
+              .withMessage('At least one module is required'),
+          
+            body('courseDetails.modules.*.title')
+              .optional()
+              .trim()
+              .isLength({ min: 5 })
+              .withMessage('Module title must be at least 5 characters'),
+          
+            body('courseDetails.modules.*.lessons')
+              .optional()
+              .isArray({ min: 1 })
+              .withMessage('Each module must have at least one lesson'),
+          
+            body('courseDetails.modules.*.lessons.*.title')
+              .optional()
+              .trim()
+              .isLength({ min: 3 })
+              .withMessage('Lesson title must be at least 3 characters'),
+          
+            body('courseDetails.modules.*.lessons.*.videoUrl')
+              .optional()
+              .trim()
+              .notEmpty()
+              .withMessage('Each lesson must have a video URL'),
+          
+            body('courseDetails.modules.*.lessons.*.duration')
+              .optional()
+              .notEmpty().withMessage('Duration is required')
+              .isNumeric().withMessage('Duration must be a number')
+              .custom((value) => {
+                if (Number(value) <= 0) {
+                  throw new Error('Duration must be greater than zero');
+                }
+                return true;
+              })
+          ]
+          
 
     },
     admin : {

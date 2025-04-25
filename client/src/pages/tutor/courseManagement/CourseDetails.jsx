@@ -47,6 +47,7 @@ const CourseDetails = () => {
     refetchOnMountOrArgChange : true
   })
   const { data : categoryDetails } = useLoadCategoriesQuery()
+  console.log(courseDetails)
 
   useEffect(() => {
     if (courseDetails?.data) {

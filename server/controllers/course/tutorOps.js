@@ -23,8 +23,27 @@ export const createCourse = async (req,res) => {
             return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT)
 
         if(tutorCheck.draftCount >= 3 && draft)
-            return ResponseHandler.error(res, STRING_CONSTANTS.DRAFT_LIMIT, HttpStatus.FORBIDDEN);
+            return ResponseHandler.error(res, STRING_CONSTANTS.DRAFT_LIMIT, HttpStatus.TOO_MANY_REQUESTS);
         
+        const incompleteModule = formData.modules.some(module => {
+            // If module title is missing, it's incomplete
+            if (!module.title.trim()) return true;
+          
+            // If no lessons present, it's incomplete
+            if (!Array.isArray(module.lessons) || module.lessons.length === 0) return true;
+          
+            // If any lesson is missing title or videoUrl, it's incomplete
+            const hasInvalidLesson = module.lessons.some(lesson => 
+              !lesson.title?.trim() || !lesson.videoUrl?.trim()
+            );
+          
+            return hasInvalidLesson;
+          });
+    
+          if(incompleteModule)
+            return ResponseHandler.error(res, 'Atleast one module is required,modules should be completed',HttpStatus.BAD_REQUEST)
+
+
         await Tutor.findByIdAndUpdate(
             tutorId,
             { $inc: { courseCount: 1 } },
@@ -225,9 +244,16 @@ export const deleteCourse = async (req,res) => {
         
         await Tutor.findByIdAndUpdate(tutorId, { $inc : { $courseCount : -1 } })
         
-        await Course.findByIdAndUpdate(courseId, { $set : { isArchive : true , isPublished : false } })
+        const isCourseEnrolled = await EnrolledCourse.findOne({ courseId })
+        
+        if(isCourseEnrolled){
+            await Course.findByIdAndUpdate(courseId, { $set : { isArchive : true , isPublished : false } })
+            return ResponseHandler.success(res, STRING_CONSTANTS.DELETION_SUCCESS,HttpStatus.OK)
+        }
 
-        return ResponseHandler.success(res, STRING_CONSTANTS.DELETION_SUCCESS,HttpStatus.OK)
+        await Course.findByIdAndDelete(courseId);
+
+        return ResponseHandler.success(res, STRING_CONSTANTS.DELETION_SUCCESS,HttpStatus.OK);
 
     } catch (error) {
         console.log(STRING_CONSTANTS.DELETION_ERROR, error);
