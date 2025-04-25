@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import CertificateCard from "./certificate-card"
+import CertificateCard from "./Certificate-card"
 
 const CertificateGrid = ({ certificates, onOpenCertificate }) => {
   const containerVariants = {

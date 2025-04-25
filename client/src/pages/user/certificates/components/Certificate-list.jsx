@@ -2,7 +2,7 @@ import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { formatDistanceToNow } from "date-fns"
-import CertificateActions from "./certificate-actions"
+import CertificateActions from "./Certificate-actions"
 import { formatMinutesToHours } from "@/utils/formatHourIntoMinutes"
 
 const CertificateList = ({ certificates, onOpenCertificate }) => {

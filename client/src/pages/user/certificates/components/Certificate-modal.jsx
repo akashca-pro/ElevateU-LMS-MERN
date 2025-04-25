@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { format } from "date-fns"
 import { X, Award, Calendar, Clock, BookOpen, User } from "lucide-react"
-import CertificateActions from "./certificate-actions"
+import CertificateActions from "./Certificate-actions"
 import { formatMinutesToHours } from '@/utils/formatHourIntoMinutes.js'
 
 const CertificateModal = ({ certificate, isOpen, onClose }) => {
