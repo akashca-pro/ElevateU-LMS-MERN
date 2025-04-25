@@ -31,7 +31,7 @@ app.use(passport.initialize())
 
 app.use(cors({
     credentials : true,
-    origin : process.env.CLIENT_URL
+    origin : [process.env.CLIENT_URL,process.env.CLIENT_URL_2]
 }))
 
 app.use(express.json());
