@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { PlusCircle } from "lucide-react"
-import { CourseCreationModal } from "./course-creation-modal"
+import { CourseCreationModal } from "./Course-creation-modal"
 
 export function CreateCourseButton() {
   const [isOpen, setIsOpen] = useState(false)
