@@ -6,13 +6,13 @@ import { STRING_CONSTANTS } from "../../utils/stringConstants.js"
 export const loadCertificates = async (req,res) => {
     
     try {
-        
+        const userId = req.user.id
         const page = parseInt(req.query.page) || 1
         const limit = 6
         const skip = (page-1) * limit
         const {searchQuery} = req.query
 
-        let filterQuery = {};
+        let filterQuery = { 'user.id' : userId };
         
         if(searchQuery){
             const regex = new RegExp(searchQuery,'i');

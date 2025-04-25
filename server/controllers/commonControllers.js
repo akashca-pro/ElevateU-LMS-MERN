@@ -43,6 +43,9 @@ export const updateEmail = (role) =>{
             if(!user)
                 return ResponseHandler.error(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.NOT_FOUND);
     
+            if(user.googleID)
+                return ResponseHandler.error(res,STRING_CONSTANTS.GOOGLE_AUTH_EMAIL_ISSUE, HttpStatus.BAD_REQUEST)
+
             const emailExist = await db.findOne({email})
             if(emailExist)
                 return ResponseHandler.error(res, STRING_CONSTANTS.EXIST, HttpStatus.CONFLICT);
@@ -457,7 +460,10 @@ export const updatePassword = (role) => async (req,res) => {
         const { currPass, newPass } = req.body;
 
         const user = await db.findById(userId)
-        .select('_id password tempPassword email firstName ');
+        .select('_id password tempPassword email firstName googleID ');
+
+        if(user.googleID)
+            return ResponseHandler.error(res,STRING_CONSTANTS.GOOGLE_AUTH_PASSWORD_ISSUE, HttpStatus.BAD_REQUEST)
 
         if(!await bcrypt.compare(currPass, user.password))
             return ResponseHandler.error(res, STRING_CONSTANTS.INVALID_PASSWORD, HttpStatus.BAD_REQUEST);

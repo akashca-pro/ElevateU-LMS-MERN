@@ -88,7 +88,7 @@ export const loadWalletDetails = (role) => async (req,res) => {
 
         if(role === 'Tutor'){
             
-            acctno = user?.bankDetails.accountNumber.slice(-4)
+            acctno = user?.bankDetails?.accountNumber?.slice(-4)
         }
 
         const walletDetails = role !== 'User' ? {

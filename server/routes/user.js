@@ -9,8 +9,7 @@ import {loadProfile,updateProfile
 
 import {addToCart, enrollInCourse, getCartDetails, loadEnrolledCourses} from '../controllers/enrolledCourse/userOps.js'
 
-import {refreshAccessToken, verifyAccessToken,verifyRefreshToken} from '../utils/verifyToken.js'
-import {otpLimiter} from '../middleware/rateLimiting.js';
+import {verifyAccessToken,} from '../utils/verifyToken.js'
 import { validateForm } from '../middleware/validation.js'
 
 import { updateEmail, verifyEmail , isBlock, updatePassword, verifyOtpForPasswordChange, resendOtpForPasswordChange, softDeleteUser} from '../controllers/commonControllers.js';
@@ -33,7 +32,6 @@ router.post('/login',validateForm('user','login'),loginUser)
 router.post('/forgot-password',forgotPassword)
 router.post('/reset-password',verifyResetLink)
 router.delete('/logout',logoutUser)
-router.patch('/refresh-token',verifyRefreshToken('User'),refreshAccessToken)
 
 router.get('/google',passport.authenticate("google-user",{ scope: ["profile", "email"] }))
 

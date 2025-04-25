@@ -23,7 +23,8 @@ passport.use(
                         googleID : profile.id,
                         firstName: profile.name.givenName,
                         email: profile.emails[0].value,
-                        isVerified :true
+                        isVerified :true,
+                        isActive : true
                     });
                 }
 
@@ -57,7 +58,8 @@ passport.use(
               googleID: profile.id,
               firstName: profile.name.givenName,
               email: profile.emails[0].value,
-              isVerified :true
+              isVerified :true,
+              isActive : true
             });
           }
   

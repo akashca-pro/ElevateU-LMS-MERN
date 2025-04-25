@@ -54,8 +54,6 @@ export const registerUser = async (req,res) => {
         // Set access token as cookie (24 hour)
         sendToken(res, process.env.USER_ACCESS_TOKEN_NAME,accessToken, 1 * 24 * 60 * 60 * 1000);
 
-        await saveRefreshToken(req,res,'User')
-    
         return ResponseHandler.success(res, STRING_CONSTANTS.REGISTRATION_SUCCESS, HttpStatus.OK,userData);
 
     } catch (error) {
@@ -105,7 +103,8 @@ export const loginUser = async (req,res) => {
             DATABASE_FIELDS.LAST_NAME,
             DATABASE_FIELDS.PROFILE_IMAGE,
             DATABASE_FIELDS.BIO,
-            DATABASE_FIELDS.DOB
+            DATABASE_FIELDS.DOB,
+            DATABASE_FIELDS.GOOGLE_ID
         ].join(' '))
 
         return ResponseHandler.success(res, STRING_CONSTANTS.LOGIN_SUCCESS, HttpStatus.OK, data)

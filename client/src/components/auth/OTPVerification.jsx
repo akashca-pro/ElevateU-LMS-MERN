@@ -10,7 +10,7 @@ const OTPVerification = ({ role, useSignup, useAuthActions }) => {
   const [verifyOtp,{isLoading1}] = useVerifyOtpMutation();
   const [signup,{isLoading2}] = useSignup();
   const formData = location.state;
-  const { otp, inputs, timer, handleChange, handleKeyDown, handleResend: reset } = useOTP(6,300);
+  const { otp, inputs, timer, handleChange, handleKeyDown, handleResend: reset } = useOTP(6,30);
 
   const isOtpValid = otp.includes("");
 

@@ -7,7 +7,9 @@ const commonValidations = {
         body('password').isLength({ min : 6 })
         .matches(/^(?=.*[0-9])(?=.*[!@#$%^&*])/, "g")
         .withMessage('Password must include at least one number and one special character'),
-        body('firstName').isLength({ min : 3 }),
+        body('firstName').isLength({ min : 3 })
+        .matches(/^[A-Za-z\s]+$/)
+        .withMessage('First name should not contain numbers or special characters'),
         ],
         
         login : [
@@ -18,7 +20,9 @@ const commonValidations = {
         ],
 
         profile : [
-        body('lastName').isLength({ min : 3 }).withMessage('Last name required atleast 3 characters'),
+        body('lastName').isLength({ min : 3 })
+        .matches(/^[A-Za-z\s]+$/)
+        .withMessage('Last name should not contain numbers or special characters'),
         ]
 }
 

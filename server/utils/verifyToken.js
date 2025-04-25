@@ -32,11 +32,11 @@ const getRoleModel = (role) => roleModals[role.toLowerCase()];
 export const verifyAccessToken = (role) => async(req, res, next) => {
     try {
     const tokenName = TOKEN_NAMES[role];
-
+    
     if (!tokenName) {
         return ResponseHandler.error(res, STRING_CONSTANTS.TOKEN_ISSUE_ERROR,HttpStatus.NOT_FOUND);  
     }
-
+    
     const token = req.cookies[tokenName];
     if (!token) {
         return ResponseHandler.error(res, STRING_CONSTANTS.UNAUTHORIZED, HttpStatus.UNAUTHORIZED)

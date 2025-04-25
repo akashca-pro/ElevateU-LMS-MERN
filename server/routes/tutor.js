@@ -7,7 +7,7 @@ import {registerTutor, loginTutor, forgotPassword, verifyResetLink, logoutTutor 
 import {loadProfile,updateProfile,requestVerification
 } from '../controllers/tutor/tutorOps.js'
 
-import {refreshAccessToken, verifyAccessToken, verifyRefreshToken} from '../utils/verifyToken.js'
+import { verifyAccessToken} from '../utils/verifyToken.js'
 import {otpLimiter} from '../middleware/rateLimiting.js';
 import { validateForm } from '../middleware/validation.js'
 
@@ -31,7 +31,6 @@ router.post('/login',validateForm('tutor','login'),loginTutor)
 router.post('/forgot-password',otpLimiter,forgotPassword)
 router.post('/reset-password',verifyResetLink)
 router.delete('/logout',logoutTutor)
-router.patch('/refresh-token',verifyRefreshToken('Tutor'),refreshAccessToken)
 
 router.get('/google',passport.authenticate('google-tutor',{ scope: ["profile", "email"] }))
 

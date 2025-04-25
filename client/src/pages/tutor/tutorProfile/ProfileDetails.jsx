@@ -124,7 +124,10 @@ const ProfileDetails = () => {
       toast.success('Profile updated successfully', { id: toastId });
     } catch (error) {
       console.log(error);
-      toast.error('Update failed. Please try again later.', { id: toastId });
+      error?.data?.errors?.forEach(m=>{
+        toast.dismiss(toastId)
+        toast.error(m?.msg || 'Updation failed');
+      })
     } finally {
       if (closeDialog) closeDialog();
     }

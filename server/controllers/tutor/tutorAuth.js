@@ -43,8 +43,6 @@ export const registerTutor = async (req,res) => {
         // Set access token as cookie (24 hour)
         sendToken(res, process.env.TUTOR_ACCESS_TOKEN_NAME, accessToken, 1 * 24 * 60 * 60 * 1000)
     
-         await saveRefreshToken(req,res,'Tutor')
-    
         const data = await Tutor.findOne({email})
         .select([
             DATABASE_FIELDS.ID,
@@ -98,7 +96,6 @@ export const loginTutor = async (req,res) => {
     
         req.Tutor = tutor._id
         
-        await saveRefreshToken(req,res,'Tutor')
     
         const data = await Tutor.findOne({email})
         .select([
@@ -274,7 +271,7 @@ export const isTutorVerified = async (req,res) => {
             return ResponseHandler.success(res, STRING_CONSTANTS.DATA_NOT_FOUND, HttpStatus.OK)
 
         if(!tutor.isAdminVerified)
-            return ResponseHandler.error(res, STRING_CONSTANTS.NOT_ALLOWED, HttpStatus.FORBIDDEN)
+            return ResponseHandler.error(res, STRING_CONSTANTS.NOT_ALLOWED, HttpStatus.LOCKED)
 
         return ResponseHandler.success(res, STRING_CONSTANTS.ALLOWED, HttpStatus.OK)
 

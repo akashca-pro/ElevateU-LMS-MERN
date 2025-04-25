@@ -96,13 +96,13 @@ export default function TransactionTable({ transactions, onViewDetails, setCurre
                     <div className="flex -space-x-2 overflow-hidden">
                       {transaction?.users.slice(0, 3).map((user, index) => (
                         <Avatar key={index} className="h-8 w-8 border-2 border-background">
-                          <AvatarImage src={user?.profileImage} alt={user.name} />
+                          <AvatarImage src={user?.profileImage} alt={user?.name} />
                           <AvatarFallback>{user?.firstName.charAt(0)}</AvatarFallback>
                         </Avatar>
                       ))}
                       {transaction.users.length > 3 && (
                         <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-medium">
-                          +{transaction.users.length - 3}
+                          +{transaction?.users.length - 3}
                         </div>
                       )}
                     </div>

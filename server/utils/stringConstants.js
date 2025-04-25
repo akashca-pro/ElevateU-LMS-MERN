@@ -98,7 +98,9 @@ export const STRING_CONSTANTS = Object.freeze({
     LOAD_CHART_DATA_FAILED : 'Load Chart data failed',
     LOAD_CERTIFICATES_SUCCESS : 'Load certificates success',
     LOAD_CERTIFICATES_FAILED : 'Load certificates failed',
-    MONTH_IS_REQURED : 'Month is required'
+    MONTH_IS_REQURED : 'Month is required',
+    GOOGLE_AUTH_EMAIL_ISSUE : 'Google auth users cannot change Email',
+    GOOGLE_AUTH_PASSWORD_ISSUE : 'Google auth users cannot change Password'
 })
 
 export const DATABASE_FIELDS = {
@@ -125,6 +127,6 @@ export const DATABASE_FIELDS = {
     TITLE : 'title',
     CATEGORY : 'category',
     ICON : 'icon',
-    DESCRIPTION : 'description'
-
+    DESCRIPTION : 'description',
+    GOOGLE_ID : 'googleID'
 }

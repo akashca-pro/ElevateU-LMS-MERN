@@ -60,7 +60,7 @@ const CertificateCard = ({ certificate, onOpenCertificate }) => {
           </div>
 
           <div className="mt-4 flex justify-end">
-            <CertificateActions certificate={certificate} onView={() => onOpenCertificate(certificate)} />
+            <CertificateActions onView={() => onOpenCertificate(certificate)} />
           </div>
         </CardContent>
       </Card>

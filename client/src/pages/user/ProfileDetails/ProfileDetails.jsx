@@ -78,8 +78,10 @@ const ProfileDetails = () => {
       await userUpdateProfile(payload).unwrap();
       toast.success('Profile updated successfully', { id: toastId });
     } catch (error) {
-      console.log(error);
-      toast.error('Update failed. Please try again later.');
+      error?.data?.errors?.forEach(m=>{
+        toast.dismiss(toastId)
+        toast.error(m?.msg || 'Updation failed');
+      })
     } finally {
       if (closeDialog) closeDialog();
     }

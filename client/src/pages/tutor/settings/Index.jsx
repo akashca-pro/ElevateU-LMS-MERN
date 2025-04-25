@@ -18,6 +18,7 @@ import { useTutorUpdateEmailMutation, useTutorVerifyEmailMutation,
   useTutorDeactivateAccountMutation
  } from 
 '@/services/TutorApi/tutorProfileApi.js'
+import WorkInProgress from "@/components/FallbackUI/WorkInProgress"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -137,7 +138,9 @@ export default function Index() {
                   <CardDescription>Customize the appearance of the application.</CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <WorkInProgress title={'Work in progress'}>
                   <ThemeToggle />
+                  </WorkInProgress>
                 </CardContent>
               </Card>
             </TabsContent>
