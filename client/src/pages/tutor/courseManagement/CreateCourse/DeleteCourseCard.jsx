@@ -47,7 +47,7 @@ const DeleteCourseCard = ({ courseTitle, onDelete }) => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="confirm-title">Type the course title to confirm deletion:</Label>
+          <Label htmlFor="confirm-title">Type the course title to confirm deletion :</Label>
           <Input
             id="confirm-title"
             type="text"
@@ -64,7 +64,7 @@ const DeleteCourseCard = ({ courseTitle, onDelete }) => {
           disabled={confirmTitle.toLowerCase() !== courseTitle.toLowerCase()}
           className="w-full"
         >
-          I understand, delete this course permanently
+          I understand, delete this course
         </Button>
       </CardFooter>
     </Card>

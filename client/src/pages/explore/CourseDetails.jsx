@@ -456,7 +456,7 @@ const CourseDetails = () => {
                         </motion.div>
                         <motion.div whileHover={{ scale: 1.05 }} className="flex items-center">
                           <Users className="h-4 w-4 mr-1" />
-                          <span>{course?.tutor.students.toLocaleString()} Students</span>
+                          <span>{course?.tutor.students.length} Students</span>
                         </motion.div>
                       </div>
                       <p className="text-muted-foreground">{course?.tutor.bio}</p>

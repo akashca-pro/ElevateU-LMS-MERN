@@ -14,6 +14,7 @@ useUserResendOtpForPasswordChangeMutation,
 useUserDeactivateAccountMutation
  } from 
 '@/services/userApi/userProfileApi.js'
+import WorkInProgress from "@/components/FallbackUI/WorkInProgress"
 
 
 const containerVariants = {
@@ -112,7 +113,9 @@ export default function Index() {
                   <CardDescription>Customize the appearance of the application.</CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <WorkInProgress title={'Work in progress'} >
                   <ThemeToggle />
+                  </WorkInProgress>
                 </CardContent>
               </Card>
             </TabsContent>

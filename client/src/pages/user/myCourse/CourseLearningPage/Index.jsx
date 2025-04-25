@@ -285,13 +285,13 @@ const CourseLearningPage = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="progress" className="text-sm md:text-base">
-              Progress Tracker
+              Progress 
             </TabsTrigger>
             <TabsTrigger value="tutor" className="text-sm md:text-base">
-              Tutor Details
+              Tutor 
             </TabsTrigger>
             <TabsTrigger value="attachments" className="text-sm md:text-base">
-              Attachments & Resources
+              Attachments
             </TabsTrigger>
           </TabsList>
 

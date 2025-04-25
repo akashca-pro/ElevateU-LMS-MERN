@@ -43,11 +43,6 @@ const HeroBanner = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
           >
-            <input
-              type="text"
-              placeholder="What do you want to learn today?"
-              className="w-full px-6 py-4 pr-12 rounded-full border border-gray-200 shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
-            />
             <div
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
             >

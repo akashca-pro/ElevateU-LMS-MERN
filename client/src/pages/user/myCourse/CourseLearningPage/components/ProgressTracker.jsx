@@ -25,7 +25,6 @@ const ProgressTracker = ({ progress }) => {
   ];
   const currentLevel = levels[currentLevelIndex];
   const nextLevel = levels[currentLevelIndex + 1];
-  const progressPercentage = progress?.courseProgress || 0;
 
   return (
     <div className="space-y-8">
@@ -51,9 +50,9 @@ const ProgressTracker = ({ progress }) => {
         </CardContent>
       </Card>
 
-      {/* S-Curve Progress Path */}
+      {/* S-Curve Progress Path */} {/* Desktop S-Curve View */}
       {(progress?.totalModules >= 5 && progress?.currentLevel !== 0) && (
-        <div className="relative">
+        <div className="relative hidden sm:block">
           <div className="w-full overflow-hidden">
             <svg ref={svgRef} width="100%" height="100%" viewBox="0 0 1000 200" preserveAspectRatio="none">
               <path
@@ -135,6 +134,107 @@ const ProgressTracker = ({ progress }) => {
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: 1, type: "spring" }}
                         className="absolute -top-12 bg-white rounded-full border-4 border-blue-500 shadow-lg p-1"
+                      >
+                        <Star className="h-5 w-5 text-blue-500 fill-blue-500" />
+                      </motion.div>
+                    )}
+                  </motion.div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+            {/* Row-wise Progress Path for Mobile */}
+      {(progress?.totalModules >= 5 && progress?.currentLevel !== 0) && (
+        <div className="relative block sm:hidden">
+          <div className="w-full h-[100px] overflow-hidden">
+            <svg ref={svgRef} className="w-full h-full" viewBox="0 0 1000 100" preserveAspectRatio="none">
+              {/* Base Line */}
+              <line
+                x1="0"
+                y1="50"
+                x2="1000"
+                y2="50"
+                stroke="#e5e7eb"
+                strokeWidth="10"
+                strokeLinecap="round"
+              />
+              {/* Progress Line */}
+              <motion.line
+                x1="0"
+                y1="50"
+                x2={(levels[currentLevelIndex].threshold * 10)}
+                y2="50"
+                stroke="url(#progressGradient)"
+                strokeWidth="10"
+                strokeLinecap="round"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 1.5, ease: "easeInOut" }}
+              />
+              <defs>
+                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#3b82f6" />
+                  <stop offset="100%" stopColor="#8b5cf6" />
+                </linearGradient>
+              </defs>
+            </svg>
+
+            {/* Level Markers */}
+            {levels.map((level, index) => {
+              const isCompleted = index < currentLevelIndex;
+              const isCurrent = index === currentLevelIndex;
+
+              return (
+                <div
+                  key={index}
+                  className="absolute transform -translate-x-1/2"
+                  style={{
+                    left: `${level.threshold}%`,
+                    top: "50%",
+                  }}
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.5 + index * 0.1, duration: 0.5, type: "spring" }}
+                    className="flex flex-col items-center"
+                  >
+                    <div
+                      className={`rounded-full p-2 ${
+                        isCompleted ? "bg-green-500 text-white" :
+                        isCurrent ? "bg-blue-500 text-white" :
+                        "bg-gray-200 text-gray-500"
+                      }`}
+                    >
+                      {isCompleted ? (
+                        <CheckCircle className="h-6 w-6" />
+                      ) : isCurrent ? (
+                        <Star className="h-6 w-6" />
+                      ) : (
+                        <span className="h-6 w-6 flex items-center justify-center font-bold">
+                          {index + 1}
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-1 text-center">
+                      <p className={`text-xs font-medium ${
+                        isCompleted ? "text-green-600" :
+                        isCurrent ? "text-blue-600" :
+                        "text-gray-500"
+                      }`}>
+                        {level.name}
+                      </p>
+                      <p className="text-[10px] text-gray-400">Level {level.level}</p>
+                    </div>
+                    {isCurrent && (
+                      <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 1, type: "spring" }}
+                        className="absolute -top-10 bg-white rounded-full border-4 border-blue-500 shadow-lg p-1"
                       >
                         <Star className="h-5 w-5 text-blue-500 fill-blue-500" />
                       </motion.div>
