@@ -43,23 +43,8 @@ const HeroBanner = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
           >
-            <div
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
-            >
-              <Search className="h-6 w-6 text-purple-500" />
-            </div>
           </motion.div>
 
-          {/* Floating badges */}
-          <motion.div
-            className="absolute -bottom-4 left-12 bg-white p-3 rounded-xl shadow-lg"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
-            style={{ zIndex: 20 }}
-          >
-      
-          </motion.div>
         </motion.div>
 
         <motion.div
