@@ -1,3 +1,4 @@
+// server
 import './cron/deleteReadedMessages.js'
 import http from 'http'
 import express from 'express'
