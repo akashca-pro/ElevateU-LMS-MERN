@@ -93,6 +93,7 @@ export function CourseCreationModal({ isOpen, onClose }) {
 
   const handleCancel = () =>{
     reset(defaultValues);
+    setStep(1);
     setShowConfirmModal(false);
     onClose()
   }
@@ -107,6 +108,7 @@ export function CourseCreationModal({ isOpen, onClose }) {
       console.log("Form submitted:", data)
       await createCourse({formData : data , draft : false}).unwrap()
       reset(defaultValues);
+      setStep(1);
       toast.success("Course created successfully! Awaiting approval.",{id : toastId})
       onClose()
     } catch (error) {
@@ -141,6 +143,7 @@ export function CourseCreationModal({ isOpen, onClose }) {
       await createCourse({formData : data, draft : true }).unwrap()
       toast.success('Data saved as draft',{id : toastId})
       reset(defaultValues);
+      setStep(1);
       setShowConfirmModal(false);
       onClose();
     } catch (error) {
