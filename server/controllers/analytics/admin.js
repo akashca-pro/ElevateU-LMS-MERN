@@ -157,7 +157,7 @@ export const dashboardDetails = async (req,res) => {
         ResponseHandler.success(res,STRING_CONSTANTS.LOAD_DASHBOARD_DETAILS_SUCCESS,HttpStatus.OK,{
             totalStudents,
             totalTutors,
-            totalEarnings,
+            totalEarnings : totalEarnings.toFixed(2),
             totalCourses
         })
 
