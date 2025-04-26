@@ -103,7 +103,7 @@ export const STRING_CONSTANTS = Object.freeze({
     GOOGLE_AUTH_PASSWORD_ISSUE : 'Google auth users cannot change Password'
 })
 
-export const DATABASE_FIELDS = {
+export const DATABASE_FIELDS = Object.freeze({
     ID:'_id',
     NAME : 'name',
     FIRST_NAME : 'firstName',
@@ -129,4 +129,4 @@ export const DATABASE_FIELDS = {
     ICON : 'icon',
     DESCRIPTION : 'description',
     GOOGLE_ID : 'googleID'
-}
+})

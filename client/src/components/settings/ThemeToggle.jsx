@@ -26,7 +26,7 @@ export default function ThemeToggle() {
       setIsDarkMode(systemPrefersDark)
 
       if (systemPrefersDark) {
-        document.documentElement.classList.add("dark")
+        document.documentElement.classList.add("light")
       }
     }
   }, [])
