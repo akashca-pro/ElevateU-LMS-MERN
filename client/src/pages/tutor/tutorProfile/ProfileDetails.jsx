@@ -43,6 +43,15 @@ const ProfileDetails = () => {
     }    
   };
 
+  const handleAddTag = (e) =>{
+    e.preventDefault();
+    if(input.trim() === '') return 
+    const updatedExpertise = [...expertise, input.trim()];
+    setExpertise(updatedExpertise);
+    setFormData((prev) => ({ ...prev, expertise: updatedExpertise }));
+    setInput('');
+  }
+
   // Function to remove tag in expertise
   const handleRemoveTag = (e) => {
     e.preventDefault();
@@ -296,6 +305,12 @@ const ProfileDetails = () => {
                     onKeyDown={addExpertise}
                     className="w-full md:w-2/3 border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500"
                   />
+                  <Button
+                  onClick={handleAddTag}
+                  className='flex items-center gap-2 px-3 py-2'
+                  >
+                    Add
+                  </Button>
                   <Button 
                     onClick={handleRemoveTag} 
                     className="flex items-center gap-2 px-3 py-2 border bg-gray-50 border-gray-300 rounded-md text-sm text-gray-700 hover:bg-red-600 hover:text-white"

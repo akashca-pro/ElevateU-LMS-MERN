@@ -156,7 +156,7 @@ export function CourseCreationModal({ isOpen, onClose }) {
   return (
     <>
     <Dialog open={isOpen} onOpenChange={handleModalClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto scrollbar-hide">
         <DialogTitle></DialogTitle>
         <div className="py-2">
           <StepIndicator currentStep={step} totalSteps={totalSteps} />

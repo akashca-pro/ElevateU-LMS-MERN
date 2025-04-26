@@ -172,15 +172,13 @@ const CourseDetails = () => {
   }
 
   const handleLessonChange = (moduleIndex, lessonIndex, field, value) => {
-    
-    if(field === 'title' && lockedLessons.has(`${moduleIndex}-${lessonIndex}`)) return 
-    if(field === 'videoUrl' && lockedLessons.has(`${moduleIndex}-${lessonIndex}`)) return 
-    if(field === 'duration' && lockedLessons.has(`${moduleIndex}-${lessonIndex}`)) return 
-
-    const courseCopy = JSON.parse(JSON.stringify(course))
+    const isLocked = lockedLessons.has(`${moduleIndex}-${lessonIndex}`);
+    if (isLocked && ["title", "videoUrl", "duration"].includes(field)) return false;
+  
+    const courseCopy = JSON.parse(JSON.stringify(course));
     courseCopy.modules[moduleIndex].lessons[lessonIndex][field] = value;
     setCourse(courseCopy);
-    setIsDataChanged(true)
+    setIsDataChanged(true);
   }
 
   const handleLessonAttachment = (moduleIndex, lessonIndex, updatedAttachments ) =>{
@@ -629,7 +627,10 @@ const CourseDetails = () => {
             </CardHeader>
             <CardContent>
             <p className="text-blue-500 text-sm font-semibold opacity-80">
-            NB : At least one module is required, and each module must have at least one lesson.
+            NB : Module should be completed, and each module must have at least one lesson. 
+            Already uploaded modules cannot be changed, because that affects enrolled users.
+            Additional modules are counted as add on course for already enrolled users
+
                 </p>
               <Accordion type="single" collapsible className="w-full">
                 {course?.modules.map((module, moduleIndex) => (
@@ -684,7 +685,7 @@ const CourseDetails = () => {
                             value={lesson.videoUrl}
                             onChange={(videoUrl)=> handleLessonChange(moduleIndex, lessonIndex, "videoUrl", videoUrl)}
                             onRemove={()=> handleLessonChange(moduleIndex, lessonIndex, "videoUrl", "")}
-                            disabled={!isEditing ? true : false}
+                            disabled={!isEditing ? true : false || lockedLessons.has(`${moduleIndex}-${lessonIndex}`)}
                             />
                             <p className="text-blue-500 text-sm font-semibold opacity-80">
                           Required
