@@ -143,6 +143,7 @@ export function FileUpload({
           <span>Add Files</span>
           <Input 
             type="file" 
+             accept=".pdf,.doc,.docx,.ppt,.pptx,.html,.txt,.md,.zip"
             className="hidden" 
             onChange={handleAdd} 
             disabled={isUploading || disabled} 
