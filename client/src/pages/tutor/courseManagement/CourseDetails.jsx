@@ -173,7 +173,7 @@ const CourseDetails = () => {
 
   const handleLessonChange = (moduleIndex, lessonIndex, field, value) => {
     const isLocked = lockedLessons.has(`${moduleIndex}-${lessonIndex}`);
-    if (isLocked && ["title", "videoUrl", "duration"].includes(field)) return false;
+    if (isLocked && ["title", "videoUrl"].includes(field)) return false;
   
     const courseCopy = JSON.parse(JSON.stringify(course));
     courseCopy.modules[moduleIndex].lessons[lessonIndex][field] = value;
